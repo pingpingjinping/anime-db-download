@@ -19,6 +19,12 @@ from bs4 import BeautifulSoup
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SNAPSHOT = ROOT / "snapshot" / "anime.db.gz"
 SOURCES = {"AniList", "ReAnime", "Onnada", "Anissia"}
+ANILIST_URL = "https://graphql.anilist.co"
+ANILIST_LOOKBACK_SECONDS = 30 * 24 * 60 * 60
+ANILIST_OVERLAP_SECONDS = 24 * 60 * 60
+ANILIST_PAGE_SIZE = 50
+ANILIST_MAX_PAGES = 100
+ANILIST_DELAY_SECONDS = 5.0  # Deliberately gentle: at most 12 requests/minute.
 FIELDS = ("year", "year_basis", "source_year_raw", "title_ko", "title_native",
           "title_romaji", "title_english", "format", "status", "genres")
 
@@ -116,7 +122,7 @@ def normalize(source, row):
                   titles.get("romaji"), titles.get("english"), row.get("format"),
                   row.get("status"), ",".join(row.get("genres") or []))
         cross = {"anilist_ids": [source_id], "mal_ids": [str(row["idMal"])] if row.get("idMal") else []}
-        metadata = {k: row.get(k) for k in ("idMal", "startDate", "endDate", "season", "seasonYear", "episodes", "averageScore", "popularity")}
+        metadata = {k: row.get(k) for k in ("idMal", "startDate", "endDate", "season", "seasonYear", "episodes", "averageScore", "popularity", "updatedAt")}
     if not source_id or source_id == "0":
         raise ValueError(f"Missing {source} ID")
     return source_id, fields, cross, metadata
@@ -132,8 +138,61 @@ def incoming_rows(source, path):
                     yield json.loads(line)
 
 
-def online_rows(source, known):
-    if source == "Anissia":
+def anilist_rows(since, known):
+    query = """
+    query ($page: Int!, $perPage: Int!) {
+      Page(page: $page, perPage: $perPage) {
+        pageInfo { hasNextPage }
+        media(type: ANIME, countryOfOrigin: JP,
+          format_in: [TV, TV_SHORT, MOVIE, OVA, ONA],
+          sort: [UPDATED_AT_DESC]) {
+          id idMal updatedAt
+          title { romaji english native }
+          format status
+          startDate { year month day } endDate { year month day }
+          season seasonYear episodes genres averageScore popularity
+        }
+      }
+    }
+    """
+    page = 1
+    saw_old = False
+    while page <= ANILIST_MAX_PAGES:
+        response = requests.post(ANILIST_URL,
+            json={"query": query, "variables": {"page": page, "perPage": ANILIST_PAGE_SIZE}},
+            headers={"Content-Type": "application/json", "Accept": "application/json",
+                     "User-Agent": "anime-db-download/1.0"}, timeout=30)
+        if response.status_code == 429:
+            retry_after = int(response.headers.get("Retry-After", "60"))
+            time.sleep(max(1, retry_after))
+            continue
+        response.raise_for_status()
+        payload = response.json()
+        if payload.get("errors"):
+            raise ValueError(f"AniList GraphQL error: {payload['errors']}")
+        page_data = payload.get("data", {}).get("Page")
+        if not isinstance(page_data, dict) or not isinstance(page_data.get("media"), list):
+            raise ValueError(f"Unexpected AniList response; refusing incomplete update: {payload}")
+        for row in page_data["media"]:
+            updated = int(row.get("updatedAt") or 0)
+            if updated < since:
+                saw_old = True
+                break
+            if str(row.get("id") or "") not in known:
+                yield row
+        if saw_old or not page_data.get("pageInfo", {}).get("hasNextPage"):
+            return
+        page += 1
+        time.sleep(ANILIST_DELAY_SECONDS)
+    raise ValueError(f"AniList update exceeded {ANILIST_MAX_PAGES} pages; refusing partial snapshot")
+
+
+def online_rows(source, known, anilist_since=None):
+    if source == "AniList":
+        if anilist_since is None:
+            anilist_since = int(time.time()) - ANILIST_LOOKBACK_SECONDS
+        yield from anilist_rows(anilist_since, known)
+    elif source == "Anissia":
         first = fetch_json("https://api.anissia.net/anime/list/0?q=")
         data = first.get("data") or {}
         pages = int(data.get("totalPages") or 0)
@@ -232,7 +291,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--snapshot", type=Path, default=DEFAULT_SNAPSHOT,
                         help="Path to the existing gzip-compressed SQLite snapshot")
-    parser.add_argument("--online", action="store_true", help="Check recent Anissia and ReAnime catalog pages")
+    parser.add_argument("--online", action="store_true", help="Check recent Anissia, ReAnime, Onnada and AniList updates")
     parser.add_argument("--input", action="append", default=[], metavar="SOURCE=PATH",
                         help="Provide a CSV/JSONL snapshot for AniList, ReAnime or Onnada")
     args = parser.parse_args()
@@ -248,10 +307,11 @@ def main():
             observed_at TEXT NOT NULL, PRIMARY KEY(source, source_record_id, reason))""")
         db.execute("BEGIN")
         counts = {}
+        state_changed = False
         try:
             tasks = []
             if args.online:
-                tasks.extend((source, None) for source in ("Anissia", "ReAnime", "Onnada"))
+                tasks.extend((source, None) for source in ("AniList", "Anissia", "ReAnime", "Onnada"))
             for item in args.input:
                 source, sep, filename = item.partition("=")
                 if not sep or source not in SOURCES or not Path(filename).is_file():
@@ -259,7 +319,16 @@ def main():
                 tasks.append((source, Path(filename)))
             for source, filename in tasks:
                 known = {str(r[0]) for r in db.execute("SELECT source_record_id FROM entries WHERE source=?", (source,))}
-                rows = online_rows(source, known) if filename is None else incoming_rows(source, filename)
+                now = int(time.time())
+                if source == "AniList" and filename is None:
+                    saved = db.execute("SELECT value FROM metadata WHERE key='anilist_updated_at_watermark'").fetchone()
+                    watermark = int(saved[0]) if saved else now - ANILIST_LOOKBACK_SECONDS
+                    # Re-read the previous day's boundary so same-second updates or moving result pages are not lost.
+                    anilist_since = max(0, watermark - ANILIST_OVERLAP_SECONDS)
+                else:
+                    watermark = None
+                    anilist_since = None
+                rows = online_rows(source, known, anilist_since) if filename is None else incoming_rows(source, filename)
                 seen = set()
                 added = modified = scanned = 0
                 for row in rows:
@@ -307,6 +376,10 @@ def main():
                                    (source, source_id, reason, dt.date.today().isoformat()))
                 if not scanned and filename is not None:
                     raise ValueError(f"{source} yielded no records; refusing incomplete update")
+                if source == "AniList" and filename is None:
+                    if watermark != now:
+                        db.execute("INSERT OR REPLACE INTO metadata VALUES ('anilist_updated_at_watermark', ?)", (str(now),))
+                        state_changed = True
                 counts[source] = {"scanned": scanned, "added": added, "modified": modified}
             db.execute("DELETE FROM year_summary")
             db.execute("""INSERT INTO year_summary(year,source,record_count)
@@ -317,7 +390,7 @@ def main():
             db.commit()
             assert db.execute("PRAGMA quick_check").fetchone()[0] == "ok"
             db.close()
-            if any(v["added"] or v["modified"] for v in counts.values()):
+            if state_changed or any(v["added"] or v["modified"] for v in counts.values()):
                 pack_snapshot(db_path, args.snapshot)
             print(json.dumps(counts, ensure_ascii=False, indent=2))
         except Exception:
