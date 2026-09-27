@@ -52,7 +52,7 @@ jobs:
                   shutil.copyfileobj(src, dst)
           (root / "anime-db-entry.txt").write_text(entry, encoding="utf-8")
           PY
-      - name: Update recent AniList, Anissia, ReAnime and Onnada records
+      - name: Update recent AniList, Anissia, ReAnime, Onnada and AniAll records
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
