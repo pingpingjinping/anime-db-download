@@ -322,7 +322,7 @@ def main():
                 now = int(time.time())
                 if source == "AniList" and filename is None:
                     saved = db.execute("SELECT value FROM metadata WHERE key='anilist_updated_at_watermark'").fetchone()
-                    watermark = int(saved[0]) if saved else now - ANILIST_LOOKBACK_SECONDS
+                    watermark = int(saved[0]) if saved else now - ANILIST_LOOKBACK_SECONDS + ANILIST_OVERLAP_SECONDS
                     # Re-read the previous day's boundary so same-second updates or moving result pages are not lost.
                     anilist_since = max(0, watermark - ANILIST_OVERLAP_SECONDS)
                 else:
