@@ -11,6 +11,10 @@ AniList, ReAnime, Onnada, Anissia 네 출처의 애니메이션 DB를 비공개 
 - ReAnime: 연도 내림차순 API에서 신규 항목을 확인합니다.
 - Onnada: 목록 페이지와 신규 상세 페이지를 1.2초 간격으로 확인합니다.
 
+
+
+초기 DB ZIP은 Release `db-v1`에 올라가 있습니다. 기준 DB를 수동 갱신하려면 **Actions → Monthly anime DB refresh → Run workflow**를 실행합니다.
+
 기존 출처 간 검토 연결과 결정은 보존합니다. 새 작품과 제목·연도·형식이 바뀐 항목은 `monthly_review`에 기록하고, 새 매칭을 자동 확정하지 않습니다. DB가 바뀌면 같은 `db-v1` Release의 ZIP 자산을 갱신합니다.
 
 ## AniAll 별도 매칭
