@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
-      - name: Install Onnada parser dependencies
+      - name: Install HTML parser dependencies
         run: python3 -m pip install requests beautifulsoup4
       - name: Download and unpack current Release snapshot
         env:
