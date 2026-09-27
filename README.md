@@ -1,6 +1,6 @@
 # anime-db-download
 
-4개 출처(AniList, Onnada, Anissia, ReAnime)의 애니메이션 제목 매칭 DB를 비공개 GitHub Release에 보관하고, 신규 항목만 월별로 추가합니다.
+AniList, Onnada, Anissia, ReAnime, AniAll 5개 출처의 애니메이션·자막 블로그 자료 DB를 비공개 GitHub Release에 보관하고, 신규 항목만 월별로 추가합니다.
 
 ## 월별 갱신
 
