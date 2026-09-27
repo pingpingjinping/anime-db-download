@@ -25,7 +25,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release download latest --repo "$GITHUB_REPOSITORY" --pattern anime.db.gz --dir "$RUNNER_TEMP"
-      - name: Update Anissia, ReAnime and new Onnada IDs
+      - name: Update recent AniList, Anissia, ReAnime and Onnada records
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
