@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
-      - name: Install Onnada parser dependencies
+      - name: Install HTML parser dependencies
         run: python3 -m pip install requests beautifulsoup4
       - name: Download and unpack current Release snapshot
         env:
@@ -52,7 +52,7 @@ jobs:
                   shutil.copyfileobj(src, dst)
           (root / "anime-db-entry.txt").write_text(entry, encoding="utf-8")
           PY
-      - name: Update recent AniList, Anissia, ReAnime and Onnada records
+      - name: Update recent AniList, Anissia, ReAnime, Onnada and AniAll records
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
