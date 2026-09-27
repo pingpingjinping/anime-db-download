@@ -21,10 +21,37 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install Onnada parser dependencies
         run: python3 -m pip install requests beautifulsoup4
-      - name: Download current Release snapshot
+      - name: Download and unpack current Release snapshot
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release download latest --repo "$GITHUB_REPOSITORY" --pattern anime.db.gz --dir "$RUNNER_TEMP"
+        run: |
+          gh release download db-v1 --repo "$GITHUB_REPOSITORY" \
+            --pattern anime_four_sources_multilingual_prepared.zip --dir "$RUNNER_TEMP"
+          python3 - <<'PY'
+          import gzip, io, shutil, zipfile
+          from pathlib import Path
+
+          root = Path("${{ runner.temp }}")
+          archive = root / "anime_four_sources_multilingual_prepared.zip"
+          candidates = []
+          with zipfile.ZipFile(archive) as zf:
+              candidates = [name for name in zf.namelist()
+                            if not name.endswith("/") and name.lower().endswith((".db", ".db.gz"))]
+              if len(candidates) != 1:
+                  raise SystemExit(f"Expected one SQLite DB in Release ZIP, found: {candidates}")
+              entry = candidates[0]
+              content = zf.read(entry)
+
+          raw_db = root / "anime.db"
+          source = gzip.GzipFile(fileobj=io.BytesIO(content)) if content.startswith(b"\\x1f\\x8b") else io.BytesIO(content)
+          with source, raw_db.open("wb") as out:
+              shutil.copyfileobj(source, out)
+          packed = root / "anime.db.gz"
+          with raw_db.open("rb") as src, packed.open("wb") as raw_out:
+              with gzip.GzipFile(fileobj=raw_out, mode="wb", compresslevel=6, mtime=0) as dst:
+                  shutil.copyfileobj(src, dst)
+          (root / "anime-db-entry.txt").write_text(entry, encoding="utf-8")
+          PY
       - name: Update recent AniList, Anissia, ReAnime and Onnada records
         env:
           GH_TOKEN: ${{ github.token }}
@@ -35,5 +62,19 @@ jobs:
           if [ "$before" = "$after" ]; then
             echo "No new or changed source records."
           else
-            gh release upload latest "$RUNNER_TEMP/anime.db.gz#anime.db.gz" --repo "$GITHUB_REPOSITORY" --clobber
+            DB_ZIP_ENTRY="$(cat "$RUNNER_TEMP/anime-db-entry.txt")" python3 - <<'PY'
+          import gzip, os, zipfile
+          from pathlib import Path
+
+          root = Path(os.environ["RUNNER_TEMP"])
+          entry = os.environ["DB_ZIP_ENTRY"]
+          raw_db = root / "anime.db"
+          with gzip.open(root / "anime.db.gz", "rb") as src, raw_db.open("wb") as dst:
+              while chunk := src.read(1024 * 1024):
+                  dst.write(chunk)
+          archive = root / "anime_four_sources_multilingual_prepared_updated.zip"
+          with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
+              zf.write(raw_db, arcname=entry)
+          PY
+            gh release upload db-v1 "$RUNNER_TEMP/anime_four_sources_multilingual_prepared_updated.zip#anime_four_sources_multilingual_prepared.zip" --repo "$GITHUB_REPOSITORY" --clobber
           fi
