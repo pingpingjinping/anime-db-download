@@ -1,0 +1,39 @@
+name: Monthly anime DB refresh
+
+on:
+  schedule:
+    # 1st of each month, 10:17 KST (01:17 UTC)
+    - cron: '17 1 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: anime-db-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Onnada parser dependencies
+        run: python3 -m pip install requests beautifulsoup4
+      - name: Download current Release snapshot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download latest --repo "$GITHUB_REPOSITORY" --pattern anime.db.gz --dir "$RUNNER_TEMP"
+      - name: Update Anissia, ReAnime and new Onnada IDs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          before="$(sha256sum "$RUNNER_TEMP/anime.db.gz" | cut -d ' ' -f 1)"
+          python3 scripts/update_db.py --snapshot "$RUNNER_TEMP/anime.db.gz" --online
+          after="$(sha256sum "$RUNNER_TEMP/anime.db.gz" | cut -d ' ' -f 1)"
+          if [ "$before" = "$after" ]; then
+            echo "No new or changed source records."
+          else
+            gh release upload latest "$RUNNER_TEMP/anime.db.gz#anime.db.gz" --repo "$GITHUB_REPOSITORY" --clobber
+          fi
