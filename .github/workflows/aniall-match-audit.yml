@@ -46,7 +46,7 @@ jobs:
       - name: Fetch streaming-project audit branch
         shell: bash
         env:
-          STREAMING_REF: ${{ inputs.streaming_ref || 'feat/aniall-subtitle-audit' }}
+          STREAMING_REF: ${{ inputs.streaming_ref || 'main' }}
         run: |
           set -euo pipefail
           git clone --depth 1 --branch "$STREAMING_REF" \
