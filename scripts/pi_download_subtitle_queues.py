@@ -8,6 +8,7 @@ Failed items remain in local retry state and are retried on later runs.
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import hashlib
 import hmac
 import json
@@ -22,6 +23,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 from urllib.parse import parse_qs, quote, unquote, urljoin, urlparse
+from zoneinfo import ZoneInfo
 
 import requests
 from bs4 import BeautifulSoup
@@ -33,6 +35,9 @@ QUEUE_NAME = "subtitle-queue.json"
 DEFAULT_TARGET = Path("/home/pi/streaming-project/subtitle-data")
 STATE_FILE = Path.home() / ".local/state/anime-db-download/subtitle-queue-state.json"
 FAIL_LOG = Path.home() / ".local/state/anime-db-download/subtitle-download-failed.jsonl"
+RETIRED_LOG = Path.home() / ".local/state/anime-db-download/subtitle-download-retired.jsonl"
+KST = ZoneInfo("Asia/Seoul")
+RETRY_MONTHS = 3
 ALLOWED_EXTENSIONS = {".zip", ".7z", ".rar", ".smi", ".ass", ".ssa", ".vtt"}
 MAX_DOWNLOAD_BYTES = 100 * 1024 * 1024
 UA = (
@@ -160,6 +165,45 @@ def save_state(path: Path, state: dict) -> None:
     tmp = path.with_suffix(".tmp")
     tmp.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     tmp.replace(path)
+
+
+def current_month_key() -> str:
+    return dt.datetime.now(KST).strftime("%Y-%m")
+
+
+def month_distance(first_month: str, current_month: str) -> int:
+    try:
+        first_year, first_mon = (int(part) for part in first_month.split("-", 1))
+        current_year, current_mon = (int(part) for part in current_month.split("-", 1))
+    except (TypeError, ValueError):
+        return 0
+    return (current_year * 12 + current_mon) - (first_year * 12 + first_mon)
+
+
+def first_failed_month(retry: dict) -> str:
+    value = str(retry.get("first_failed_month") or "").strip()
+    if re.fullmatch(r"\d{4}-\d{2}", value):
+        return value
+    # Migration fallback for any pre-policy retry state.
+    last_attempt = str(retry.get("last_attempt") or "")
+    match = re.match(r"(\d{4}-\d{2})", last_attempt)
+    return match.group(1) if match else current_month_key()
+
+
+def append_retired(item_id: str, retry: dict, reason: str) -> None:
+    RETIRED_LOG.parent.mkdir(parents=True, exist_ok=True)
+    item = retry.get("item") or {}
+    row = {
+        "id": item_id,
+        "source": item.get("source"),
+        "source_url": item.get("source_url"),
+        "first_failed_month": first_failed_month(retry),
+        "last_error": retry.get("last_error"),
+        "retired_at": dt.datetime.now(KST).isoformat(timespec="seconds"),
+        "reason": reason,
+    }
+    with RETIRED_LOG.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(row, ensure_ascii=False) + "\n")
 
 
 def append_failure(item: dict, error: Exception | str) -> None:
@@ -428,10 +472,12 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
         print(f"[+] {item_id}: {len(files)} file(s)")
         return True
     except Exception as exc:
+        previous = state["retry"].get(item_id) or {}
         state["retry"][item_id] = {
             "item": item,
+            "first_failed_month": first_failed_month(previous),
             "last_error": str(exc),
-            "last_attempt": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+            "last_attempt": dt.datetime.now(KST).isoformat(timespec="seconds"),
         }
         save_state(state_path, state)
         append_failure(item, exc)
@@ -466,8 +512,24 @@ def main() -> None:
     session = requests.Session()
     attempted: set[str] = set()
 
-    # Retry old failures first. This is independent from GitHub's discovery watermark.
+    # Retry old failures first. Keep a failed URL active for three calendar
+    # months including the month it first failed. Starting in the fourth
+    # calendar month, retire it instead of opening the page again.
+    current_month = current_month_key()
+    retired_count = 0
     for item_id, retry in list(state["retry"].items()):
+        first_month = first_failed_month(retry)
+        if month_distance(first_month, current_month) >= RETRY_MONTHS:
+            append_retired(
+                item_id,
+                retry,
+                f"failed for {RETRY_MONTHS} calendar months; removed from retry on month 4",
+            )
+            state["retry"].pop(item_id, None)
+            save_state(args.state, state)
+            retired_count += 1
+            print(f"[x] {item_id}: retired after 3 failed calendar months")
+            continue
         item = retry.get("item") or {}
         attempted.add(item_id)
         process_item(session, state, args.state, item, args.target)
@@ -499,6 +561,7 @@ def main() -> None:
         "success": len(state["success"]),
         "retry": len(state["retry"]),
         "processed_releases": len(state["processed_releases"]),
+        "retired_this_run": retired_count,
     }, ensure_ascii=False, indent=2))
 
 
