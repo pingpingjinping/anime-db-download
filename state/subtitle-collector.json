@@ -8,6 +8,7 @@
   },
   "retry": {
     "aniall": {},
-    "anissia": {}
+    "anissia": {},
+    "anissia_api": {}
   }
 }
