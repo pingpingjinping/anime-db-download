@@ -134,6 +134,28 @@ def request(session: requests.Session, url: str, *, referer: str | None = None,
     return response
 
 
+def clean_attachment_name(value: str) -> str:
+    name = (value or "").strip()
+    # Tistory/AniAll link text commonly appends a human-readable size after
+    # the real filename, e.g. "subtitle.zip 0.27MB".
+    name = re.sub(
+        r"\s+\d+(?:\.\d+)?\s*(?:B|KB|MB|GB|KIB|MIB|GIB)\s*$",
+        "",
+        name,
+        flags=re.I,
+    ).strip()
+    # requests/http headers may expose UTF-8 filename bytes as latin-1.
+    # This mirrors the proven GUI downloader behavior while leaving already
+    # valid Korean/Unicode names untouched.
+    try:
+        repaired = name.encode("ISO-8859-1").decode("UTF-8")
+        if repaired:
+            name = repaired
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        pass
+    return name
+
+
 def filename_from_response(response: requests.Response, fallback_url: str, suggested: str = "") -> str:
     disposition = response.headers.get("Content-Disposition", "")
     match = re.search(r"filename\*=UTF-8''([^;]+)", disposition, flags=re.I)
@@ -146,7 +168,7 @@ def filename_from_response(response: requests.Response, fallback_url: str, sugge
         parsed = urlparse(fallback_url)
         query = parse_qs(parsed.query)
         name = (query.get("knm") or [""])[0] or Path(unquote(parsed.path)).name
-    name = safe_name(name, 180)
+    name = safe_name(clean_attachment_name(name), 180)
     if Path(name).suffix.lower() not in ALLOWED_EXTENSIONS:
         content_type = response.headers.get("Content-Type", "").split(";", 1)[0].strip()
         guessed = mimetypes.guess_extension(content_type) or ""
@@ -273,16 +295,20 @@ def download_from_source_page(session: requests.Session, source_url: str, destin
         raise RuntimeError("No downloadable subtitle attachment found")
 
     downloaded: list[Path] = []
+    downloaded_paths: set[Path] = set()
     errors: list[str] = []
     for candidate in candidates:
         try:
-            downloaded.append(download_file(
+            path = download_file(
                 session,
                 candidate["url"],
                 destination_dir,
                 referer=page_url,
                 suggested_name=candidate.get("filename", ""),
-            ))
+            )
+            if path not in downloaded_paths:
+                downloaded_paths.add(path)
+                downloaded.append(path)
         except Exception as exc:
             errors.append(f"{candidate['url']}: {exc}")
     if not downloaded:
@@ -292,13 +318,19 @@ def download_from_source_page(session: requests.Session, source_url: str, destin
 
 def record_files(manifest: list[dict], payload_root: Path, files: list[Path], **metadata):
     entries = []
+    seen: set[tuple[str, str]] = set()
     for path in files:
         relative = path.relative_to(payload_root).as_posix()
+        digest = sha256_file(path)
+        fingerprint = (relative, digest)
+        if fingerprint in seen:
+            continue
+        seen.add(fingerprint)
         item = {
             **metadata,
             "path": relative,
             "size": path.stat().st_size,
-            "sha256": sha256_file(path),
+            "sha256": digest,
         }
         manifest.append(item)
         entries.append({"path": relative, "sha256": item["sha256"], "size": item["size"]})
@@ -384,13 +416,17 @@ def collect_aniall(session: requests.Session, state: dict, payload_root: Path,
             if not candidates:
                 raise RuntimeError("No AniAll attachment found")
             files = []
+            seen_files: set[Path] = set()
             errors = []
             for item in candidates:
                 try:
-                    files.append(download_file(
+                    path = download_file(
                         session, item["url"], destination,
                         referer=response.url, suggested_name=item.get("filename", "")
-                    ))
+                    )
+                    if path not in seen_files:
+                        seen_files.add(path)
+                        files.append(path)
                 except Exception as exc:
                     errors.append(str(exc))
             if not files:
