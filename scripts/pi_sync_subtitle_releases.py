@@ -18,7 +18,7 @@ from pathlib import Path
 
 REPO = "pingpingjinping/anime-db-download"
 RELEASES_API = f"https://api.github.com/repos/{REPO}/releases"
-TAG_RE = re.compile(r"^subs-\d{4}-\d{2}-\d{2}-\d+$")
+TAG_RE = re.compile(r"^subs-\d{4}-\d{2}-\d{2}-\d+(?:-\d+)?$")
 ARCHIVE_NAME = "subtitle-delta.tar.gz"
 MANIFEST_NAME = "manifest.json"
 FAILED_NAME = "failed.jsonl"
