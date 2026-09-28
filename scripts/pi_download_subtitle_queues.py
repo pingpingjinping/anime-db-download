@@ -492,21 +492,256 @@ def unique_downloads(session: requests.Session, candidates: list[dict], destinat
     return files
 
 
-def download_source_page(session: requests.Session, source_url: str, destination: Path) -> list[Path]:
+def unique_paths(paths: list[Path]) -> list[Path]:
+    out: list[Path] = []
+    seen: set[Path] = set()
+    for path in paths:
+        if path not in seen:
+            seen.add(path)
+            out.append(path)
+    return out
+
+
+def anchor_downloads(session: requests.Session, anchors, destination: Path, referer: str) -> list[Path]:
+    """Mirror the GUI behavior: inspect every link in the content container.
+
+    Google Drive links use the Drive handler. Other links are opened just far
+    enough to inspect the response filename; unsupported files are skipped.
+    """
+    files: list[Path] = []
+    errors: list[str] = []
+    for anchor in anchors:
+        href = anchor.get("href") if hasattr(anchor, "get") else None
+        if not href:
+            continue
+        link = urljoin(referer, unescape(str(href)).replace("&amp;", "&"))
+        if "googleusercontent" in link.lower():
+            continue
+        suggested = ""
+        if hasattr(anchor, "get"):
+            suggested = anchor.get("download") or " ".join(anchor.stripped_strings)
+
+        try:
+            if google_drive_file_id(link):
+                files.append(download_google_drive(session, link, destination, suggested))
+                continue
+
+            response = request(session, link, referer=referer, stream=True)
+            try:
+                candidate_name = filename_from_response(response, response.url or link, suggested)
+                if Path(candidate_name).suffix.lower() not in ALLOWED_EXTENSIONS:
+                    continue
+                files.append(
+                    save_response_file(
+                        response,
+                        destination,
+                        fallback_url=response.url or link,
+                        suggested_name=suggested,
+                    )
+                )
+            finally:
+                response.close()
+        except Exception as exc:
+            errors.append(f"{link}: {exc}")
+
+    files = unique_paths(files)
+    if not files and errors:
+        raise RuntimeError("All GUI-style attachment downloads failed: " + " | ".join(errors[:5]))
+    return files
+
+
+def download_naver_gui(session: requests.Session, source_url: str, destination: Path) -> list[Path]:
+    response = request(session, source_url)
+    page_url = response.url
+    html_text = response.text
+
+    # Follow the same mainFrame flow used by the GUI downloader.
+    for _ in range(3):
+        if "PostView.naver" in page_url or "PostList.naver" in page_url:
+            break
+        soup = BeautifulSoup(html_text, "html.parser")
+        frame = soup.find("iframe", id="mainFrame") or soup.find("iframe", attrs={"name": "mainFrame"})
+        if not frame or not frame.get("src"):
+            break
+        page_url = urljoin("https://blog.naver.com", frame.get("src"))
+        response = request(session, page_url, referer=source_url)
+        html_text = response.text
+
+    candidates = attachment_candidates(page_url, html_text)
+    if candidates:
+        files = unique_downloads(session, candidates, destination, page_url)
+        if files:
+            return files
+
+    soup = BeautifulSoup(html_text, "html.parser")
+    container = soup.find("div", class_="se-main-container") or soup
+    files = anchor_downloads(session, container.find_all("a", href=True), destination, page_url)
+    if not files:
+        raise RuntimeError("Naver attached file not found")
+    return files
+
+
+def download_blogspot_gui(session: requests.Session, source_url: str, destination: Path) -> list[Path]:
+    response = request(session, source_url)
+    soup = BeautifulSoup(response.text, "html.parser")
+    container = soup.find("div", class_="post-body")
+    if container is None:
+        raise RuntimeError("Blogspot post-body not found")
+    files = anchor_downloads(session, container.find_all("a", href=True), destination, response.url)
+    if not files:
+        raise RuntimeError("Blogspot subtitle attachment not found")
+    return files
+
+
+def tistory_attachment_candidates(page_url: str, html_text: str) -> list[dict]:
+    out: list[dict] = []
+    seen: set[str] = set()
+
+    for match in re.finditer(
+        r'href=[\'\"](\S+?/attachment/.*?)[\'\"]\s*.*?/>\s*(.*?)</',
+        html_text,
+        flags=re.I | re.S,
+    ):
+        url = urljoin(page_url, unescape(match.group(1)).replace("&amp;", "&"))
+        name = clean_attachment_name(BeautifulSoup(match.group(2), "html.parser").get_text(" ", strip=True))
+        if url not in seen:
+            seen.add(url)
+            out.append({"url": url, "filename": name})
+
+    return out
+
+
+def download_tistory_gui(session: requests.Session, source_url: str, destination: Path) -> list[Path]:
+    response = request(session, source_url)
+    page_url = response.url
+    html_text = response.text
+
+    candidates = tistory_attachment_candidates(page_url, html_text)
+    if candidates:
+        return unique_downloads(session, candidates, destination, page_url)
+
+    soup = BeautifulSoup(html_text, "html.parser")
+    container = (
+        soup.find("div", class_="tt_article_useless_p_margin contents_style")
+        or soup.find("div", class_="contents_style")
+        or soup
+    )
+    files = anchor_downloads(session, container.find_all("a", href=True), destination, page_url)
+    if not files:
+        raise RuntimeError("Tistory subtitle attachment not found")
+    return files
+
+
+def extract_csrf_token(html_text: str) -> str | None:
+    soup = BeautifulSoup(html_text, "html.parser")
+    meta = soup.find("meta", attrs={"name": "csrf-token"})
+    return meta.get("content") if meta else None
+
+
+def download_erulabo_gui(session: requests.Session, source_url: str, destination: Path,
+                         html_text: str) -> list[Path]:
+    """Port the GUI's erulabo CSRF/token flow.
+
+    The original GUI marks this path as deprecated because Turnstile can still
+    block it. We nevertheless try the same flow before leaving it for retry.
+    """
+    soup = BeautifulSoup(html_text, "html.parser")
+    buttons = soup.find_all("button", attrs={"data-file-url": True})
+    if not buttons:
+        raise RuntimeError("Erulabo data-file-url not found")
+
+    csrf = extract_csrf_token(html_text)
+    if not csrf:
+        raise RuntimeError("Erulabo CSRF token not found")
+
+    files: list[Path] = []
+    errors: list[str] = []
+    for button in buttons:
+        file_path = str(button.get("data-file-url") or "")
+        if not file_path:
+            continue
+        token_base = urljoin("https://erulabo.com", file_path)
+        try:
+            token_resp = session.post(
+                token_base.rstrip("/") + "/token",
+                json={},
+                headers={
+                    "User-Agent": UA,
+                    "Accept": "*/*",
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": csrf,
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Referer": source_url,
+                    "Origin": "https://erulabo.com",
+                },
+                timeout=(15, 35),
+            )
+            token_resp.raise_for_status()
+            download_url = str(token_resp.json().get("download_url") or "")
+            if not download_url:
+                raise RuntimeError("Erulabo token response has no download_url")
+
+            redirect = session.get(
+                download_url,
+                headers={"User-Agent": UA, "Referer": source_url},
+                allow_redirects=False,
+                timeout=(15, 35),
+            )
+            if redirect.status_code in (301, 302, 303, 307, 308):
+                final_url = redirect.headers.get("Location") or download_url
+            else:
+                final_url = download_url
+            files.append(download_file(session, final_url, destination, referer=source_url))
+        except Exception as exc:
+            errors.append(str(exc))
+
+    files = unique_paths(files)
+    if not files:
+        raise RuntimeError("Erulabo GUI-style download failed: " + " | ".join(errors[:3]))
+    return files
+
+
+def download_website_gui(session: requests.Session, source_url: str, destination: Path) -> list[Path]:
+    response = request(session, source_url)
+    page_url = response.url
+    html_text = response.text
+
+    if "erulabo.com" in (urlparse(page_url).hostname or "").lower():
+        return download_erulabo_gui(session, page_url, destination, html_text)
+
+    soup = BeautifulSoup(html_text, "html.parser")
+    container = soup.find("div") or soup
+    files = anchor_downloads(session, container.find_all("a", href=True), destination, page_url)
+    if files:
+        return files
+
+    # Keep the current broad parser as a fallback for sites the GUI does not
+    # know explicitly.
+    candidates = attachment_candidates(page_url, html_text)
+    if candidates:
+        return unique_downloads(session, candidates, destination, page_url)
+    raise RuntimeError("General website subtitle attachment not found")
+
+
+def download_source_page(session: requests.Session, source_url: str, destination: Path,
+                         handler: str | None = None) -> list[Path]:
     if not source_url:
         raise RuntimeError("Subtitle source URL is empty")
+
     parsed = urlparse(source_url)
-    if Path(unquote(parsed.path)).suffix.lower() in ALLOWED_EXTENSIONS or google_drive_download_url(source_url):
+    if Path(unquote(parsed.path)).suffix.lower() in ALLOWED_EXTENSIONS or google_drive_file_id(source_url):
         return [download_file(session, source_url, destination)]
 
-    response = request(session, source_url)
-    page_url, html_text = naver_frame_html(session, response.url, response.text)
-    candidates = attachment_candidates(page_url, html_text)
-    if not candidates:
-        if "erulabo.com" in (urlparse(page_url).hostname or ""):
-            raise RuntimeError("Erulabo attachment requires site-side verification/manual handling")
-        raise RuntimeError("No downloadable subtitle attachment found")
-    return unique_downloads(session, candidates, destination, page_url)
+    route = handler or classify_source_url(source_url)
+    if route == "empty":
+        raise RuntimeError("Subtitle source URL is empty")
+    if route == "naver":
+        return download_naver_gui(session, source_url, destination)
+    if route == "blogspot":
+        return download_blogspot_gui(session, source_url, destination)
+    if route == "tistory":
+        return download_tistory_gui(session, source_url, destination)
+    return download_website_gui(session, source_url, destination)
 
 
 def download_aniall(session: requests.Session, item: dict, target: Path) -> list[Path]:
@@ -531,7 +766,12 @@ def download_anissia(session: requests.Session, item: dict, target: Path) -> lis
         / safe_name(f"{item.get('episode') or '0'}화")
         / safe_name(item.get("creator") or "unknown")
     )
-    return download_source_page(session, item.get("source_url") or "", destination)
+    return download_source_page(
+        session,
+        item.get("source_url") or "",
+        destination,
+        item.get("handler") or classify_source_url(item.get("source_url") or ""),
+    )
 
 
 def process_item(session: requests.Session, state: dict, state_path: Path,
