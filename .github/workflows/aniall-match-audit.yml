@@ -14,11 +14,11 @@ on:
       streaming_ref:
         description: "streaming-project branch/tag/commit to test"
         required: true
-        default: "feat/aniall-subtitle-audit"
+        default: "main"
         type: string
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   audit:
@@ -66,6 +66,35 @@ jobs:
             db/anime_four_sources_multilingual_prepared.db \
             --delay 1.2 \
             --out-dir aniall-audit | tee aniall-audit.log
+
+      - name: Validate crawl and export safe matches
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          log = Path('aniall-audit.log').read_text()
+          match = re.search(r'crawled posts\s*:\s*([\d,]+)\s*/ expected\s*([\d,]+)', log)
+          if not match or int(match[1].replace(',', '')) != int(match[2].replace(',', '')):
+              raise SystemExit('AniAll crawl incomplete; refusing to publish automatic mappings.')
+          PY
+          python streaming-project/scripts/export-aniall-auto-matches.py \
+            aniall-audit/aniall_match_report.json \
+            streaming-project/data/aniall-reviewed-matches.json \
+            aniall-audit/aniall-auto-matches.json
+
+      - name: Publish monthly AniAll mappings
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="aniall-matches-$(date -u +%Y-%m)-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          gh release create "$tag" aniall-audit/aniall-auto-matches.json \
+            --repo "$GITHUB_REPOSITORY" --title "$tag" \
+            --notes 'Exact new AniAll posts after complete audit. Full review report remains in workflow artifact.' \
+            --latest=false
 
       - name: Add results to summary
         if: always()

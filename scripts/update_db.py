@@ -15,6 +15,7 @@ from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
+from match_new_sources import prepare_tables, refresh_auto_matches
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SNAPSHOT = ROOT / "snapshot" / "anime.db.gz"
@@ -304,6 +305,7 @@ def main():
         db.execute("""CREATE TABLE IF NOT EXISTS monthly_review (
             source TEXT NOT NULL, source_record_id TEXT NOT NULL, reason TEXT NOT NULL,
             observed_at TEXT NOT NULL, PRIMARY KEY(source, source_record_id, reason))""")
+        prepare_tables(db)
         db.execute("BEGIN")
         counts = {}
         state_changed = False
@@ -378,6 +380,9 @@ def main():
                         reason = "new_work" if not previous else "identity_fields_changed"
                         db.execute("INSERT OR IGNORE INTO monthly_review VALUES (?,?,?,?)",
                                    (source, source_id, reason, dt.date.today().isoformat()))
+                    if not previous and source in ("ReAnime", "Anissia"):
+                        db.execute("INSERT OR IGNORE INTO monthly_match_pending VALUES (?,?)",
+                                   (source, source_id))
                 if not scanned and filename is not None:
                     raise ValueError(f"{source} yielded no records; refusing incomplete update")
                 if source == "AniList" and filename is None:
@@ -385,6 +390,8 @@ def main():
                         db.execute("INSERT OR REPLACE INTO metadata VALUES ('anilist_updated_at_watermark', ?)", (str(now),))
                         state_changed = True
                 counts[source] = {"scanned": scanned, "added": added, "modified": modified}
+            matching = refresh_auto_matches(db)
+            state_changed = state_changed or matching["changed"]
             db.execute("DELETE FROM year_summary")
             db.execute("""INSERT INTO year_summary(year,source,record_count)
               SELECT year,source,count(*) FROM entries GROUP BY year,source""")
@@ -400,7 +407,7 @@ def main():
             db.close()
             if state_changed or any(v["added"] or v["modified"] for v in counts.values()):
                 pack_snapshot(db_path, args.snapshot)
-            print(json.dumps(counts, ensure_ascii=False, indent=2))
+            print(json.dumps({"sources": counts, "new_work_matching": matching}, ensure_ascii=False, indent=2))
         except Exception:
             db.rollback()
             db.close()

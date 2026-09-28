@@ -23,11 +23,15 @@ if ! "$PI_PYTHON" -c 'import requests, bs4' >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "=== [1/2] Anime DB Release ==="
+echo "=== [1/3] Anime DB Release ==="
 /usr/bin/python3 "$STREAMING_REPO/scripts/update-anime-db-release.py"
 
 echo
-echo "=== [2/2] Download queued subtitles from Pi/home IP ==="
+echo "=== [2/3] Import new AniAll matches ==="
+/usr/bin/python3 "$ARCHIVE_REPO/scripts/pi_import_aniall_matches.py"
+
+echo
+echo "=== [3/3] Download queued subtitles from Pi/home IP ==="
 if command -v ionice >/dev/null 2>&1; then
   nice -n 15 ionice -c3 "$PI_PYTHON" "$ARCHIVE_REPO/scripts/pi_download_subtitle_queues.py" \
     --target "$STREAMING_REPO/subtitle-data"
