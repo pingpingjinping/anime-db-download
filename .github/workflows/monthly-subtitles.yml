@@ -1,0 +1,157 @@
+name: Monthly subtitle archive
+
+on:
+  schedule:
+    # After the monthly DB refresh and AniAll audit: 14:17 KST (05:17 UTC)
+    - cron: '17 5 1 * *'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/collect_subtitles.py'
+      - 'scripts/pi_sync_subtitle_releases.py'
+      - 'scripts/pi_monthly_sync.sh'
+      - 'state/subtitle-collector.json'
+      - 'ops/systemd/anime-monthly-sync.*'
+      - '.github/workflows/monthly-subtitles.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: monthly-subtitle-archive
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate scripts
+        shell: bash
+        run: |
+          python -m py_compile scripts/collect_subtitles.py scripts/pi_sync_subtitle_releases.py
+          bash -n scripts/pi_monthly_sync.sh
+
+  collect:
+    if: github.event_name != 'pull_request'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Require main branch
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF_NAME" != "main" ]]; then
+            echo "Run subtitle collection from the main branch." >&2
+            exit 1
+          fi
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install collector dependencies
+        run: python -m pip install requests beautifulsoup4
+
+      - name: Collect subtitle delta
+        shell: bash
+        run: |
+          python scripts/collect_subtitles.py \
+            --state state/subtitle-collector.json \
+            --out "$RUNNER_TEMP/subtitle-run"
+
+      - name: Read collection summary
+        id: summary
+        shell: bash
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          from pathlib import Path
+          summary = json.loads((Path(os.environ["RUNNER_TEMP"]) / "subtitle-run" / "summary.json").read_text())
+          downloads = int(summary.get("download_count", 0))
+          failures = int(summary.get("failure_count", 0))
+          print(f"downloads={downloads}")
+          print(f"failures={failures}")
+          print(f"should_release={str(downloads > 0 or failures > 0).lower()}")
+          PY
+
+      - name: Package subtitle delta
+        if: steps.summary.outputs.should_release == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar -C "$RUNNER_TEMP/subtitle-run/payload" -czf "$RUNNER_TEMP/subtitle-delta.tar.gz" .
+          cp "$RUNNER_TEMP/subtitle-run/manifest.json" "$RUNNER_TEMP/manifest.json"
+          cp "$RUNNER_TEMP/subtitle-run/failed.jsonl" "$RUNNER_TEMP/failed.jsonl"
+          cp state/subtitle-collector.json "$RUNNER_TEMP/subtitle-state.json"
+
+      - name: Publish immutable subtitle delta Release
+        if: steps.summary.outputs.should_release == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DOWNLOADS: ${{ steps.summary.outputs.downloads }}
+          FAILURES: ${{ steps.summary.outputs.failures }}
+        run: |
+          set -euo pipefail
+          day="$(TZ=Asia/Seoul date +%Y-%m-%d)"
+          tag="subs-${day}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          notes="$RUNNER_TEMP/subtitle-release-notes.txt"
+          {
+            echo "Monthly subtitle delta"
+            echo
+            echo "- bootstrap cutoff: 2026-09-25 23:59:59 KST"
+            echo "- downloaded files: ${DOWNLOADS}"
+            echo "- failures this run: ${FAILURES}"
+            echo "- run: ${GITHUB_RUN_ID}/${GITHUB_RUN_ATTEMPT}"
+          } > "$notes"
+          gh release create "$tag" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Subtitle delta ${day}" \
+            --notes-file "$notes"
+          gh release upload "$tag" \
+            "$RUNNER_TEMP/subtitle-delta.tar.gz" \
+            "$RUNNER_TEMP/manifest.json" \
+            "$RUNNER_TEMP/failed.jsonl" \
+            "$RUNNER_TEMP/subtitle-state.json" \
+            --repo "$GITHUB_REPOSITORY"
+
+      - name: Commit collector state
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state/subtitle-collector.json
+          if git diff --cached --quiet; then
+            echo "Collector state did not change."
+            exit 0
+          fi
+          git commit -m "chore: update subtitle collector state [skip ci]"
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Add run summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## Monthly subtitle archive"
+            echo
+            echo "- downloaded files: ${{ steps.summary.outputs.downloads || 'n/a' }}"
+            echo "- failures: ${{ steps.summary.outputs.failures || 'n/a' }}"
+            if [[ -f "$RUNNER_TEMP/subtitle-run/summary.json" ]]; then
+              echo
+              echo '```json'
+              cat "$RUNNER_TEMP/subtitle-run/summary.json"
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
