@@ -30,7 +30,7 @@ KST = ZoneInfo("Asia/Seoul")
 UTC = dt.timezone.utc
 UA = "Mozilla/5.0 (compatible; anime-db-download subtitle collector/1.0)"
 ANIALL_BASE = "https://aniall.tistory.com"
-ANIALL_CATEGORY = ANiall_CATEGORY = ANIALL_BASE + "/category/" + quote("자막자료실")
+ANIALL_CATEGORY = ANIALL_BASE + "/category/" + quote("자막자료실")
 ANISSIA_LIST = "https://api.anissia.net/anime/list/{page}?q="
 ANISSIA_CAPTION = "https://api.anissia.net/anime/caption/animeNo/{anime_no}"
 ALLOWED_EXTENSIONS = {".zip", ".7z", ".rar", ".smi", ".ass", ".ssa", ".vtt"}
@@ -359,7 +359,7 @@ def collect_aniall(session: requests.Session, state: dict, payload_root: Path,
     retry = state["retry"]["aniall"]
     attempted: set[str] = set()
 
-    def process(post: dict) -> dt.datetime | None:
+    def process(post: dict, minimum_date: dt.datetime | None = None) -> dt.datetime | None:
         post_id = str(post["post_id"])
         if post_id in attempted or post_id in success:
             return parse_datetime((success.get(post_id) or {}).get("published_at"))
@@ -369,6 +369,8 @@ def collect_aniall(session: requests.Session, state: dict, payload_root: Path,
             published = aniall_published_at(response.text)
             if not published:
                 raise RuntimeError("Could not determine AniAll post date")
+            if minimum_date is not None and published < minimum_date:
+                return published
             title = post.get("title") or BeautifulSoup(response.text, "html.parser").title.get_text(" ", strip=True)
             destination = payload_root / "aniall_subtitles" / safe_name(title)
             candidates = attachment_candidates(response.url, response.text)
@@ -437,7 +439,7 @@ def collect_aniall(session: requests.Session, state: dict, payload_root: Path,
 
         page_dates: list[dt.datetime] = []
         for post in posts:
-            published = process(post)
+            published = process(post, scan_floor)
             if published:
                 page_dates.append(published)
             elif post["post_id"] in success:
