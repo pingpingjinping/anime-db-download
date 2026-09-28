@@ -58,12 +58,44 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Load last AniAll post ID
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          previous_tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases?per_page=30" \
+            --jq '[.[] | select(.tag_name | startswith("aniall-matches-"))] | sort_by(.created_at) | last | .tag_name // ""')"
+          if [ -n "$previous_tag" ]; then
+            mkdir -p previous
+            if ! gh release download "$previous_tag" --repo "$GITHUB_REPOSITORY" \
+              --pattern aniall-crawl-state.json --dir previous; then
+              echo 'Earlier AniAll release has no crawl baseline; using reviewed post IDs.'
+            fi
+          fi
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          previous = Path('previous/aniall-crawl-state.json')
+          if previous.exists():
+              baseline = int(json.loads(previous.read_text())['latest_post_id'])
+          else:
+              reviewed = json.loads(Path('streaming-project/data/aniall-reviewed-matches.json').read_text())
+              baseline = max((int(row['postId']) for row in reviewed
+                              if str(row.get('postId', '')).isdigit()), default=0)
+          if baseline <= 0:
+              raise SystemExit('No AniAll baseline available; refusing full archive crawl.')
+          Path('aniall-since-post-id.txt').write_text(str(baseline))
+          print(f'AniAll incremental baseline: post ID {baseline}')
+          PY
+
       - name: Run aniall match audit
         shell: bash
         run: |
           set -o pipefail
           python streaming-project/scripts/audit-aniall-subtitles.py \
             db/anime_four_sources_multilingual_prepared.db \
+            --since-post-id "$(cat aniall-since-post-id.txt)" \
             --delay 1.2 \
             --out-dir aniall-audit | tee aniall-audit.log
 
@@ -75,9 +107,8 @@ jobs:
           import re
           from pathlib import Path
           log = Path('aniall-audit.log').read_text()
-          match = re.search(r'crawled posts\s*:\s*([\d,]+)\s*/ expected\s*([\d,]+)', log)
-          if not match or int(match[1].replace(',', '')) != int(match[2].replace(',', '')):
-              raise SystemExit('AniAll crawl incomplete; refusing to publish automatic mappings.')
+          if 'baseline reached : yes' not in log:
+              raise SystemExit('AniAll baseline not reached; refusing to publish mappings.')
           PY
           python streaming-project/scripts/export-aniall-auto-matches.py \
             aniall-audit/aniall_match_report.json \
@@ -91,9 +122,12 @@ jobs:
         run: |
           set -euo pipefail
           tag="aniall-matches-$(date -u +%Y-%m)-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          gh release create "$tag" aniall-audit/aniall-auto-matches.json \
+          gh release create "$tag" \
+            aniall-audit/aniall-auto-matches.json \
+            aniall-audit/aniall-candidates.json \
+            aniall-audit/aniall-crawl-state.json \
             --repo "$GITHUB_REPOSITORY" --title "$tag" \
-            --notes 'Exact new AniAll posts after complete audit. Full review report remains in workflow artifact.' \
+            --notes 'New AniAll posts compared with refreshed DB; exact matches published. Review candidates remain in workflow artifact.' \
             --latest=false
 
       - name: Add results to summary
