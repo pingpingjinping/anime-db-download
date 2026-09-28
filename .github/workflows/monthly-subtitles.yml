@@ -114,8 +114,15 @@ jobs:
             --notes-file "$notes"
           gh release upload "$tag" \
             "$RUNNER_TEMP/subtitle-discovery/subtitle-queue.json" \
-            "$RUNNER_TEMP/subtitle-discovery/discovery-failed.jsonl" \
             --repo "$GITHUB_REPOSITORY"
+
+          if [[ -s "$RUNNER_TEMP/subtitle-discovery/discovery-failed.jsonl" ]]; then
+            gh release upload "$tag" \
+              "$RUNNER_TEMP/subtitle-discovery/discovery-failed.jsonl" \
+              --repo "$GITHUB_REPOSITORY"
+          else
+            echo "No discovery failures; skipping empty discovery-failed.jsonl upload."
+          fi
 
       - name: Commit discovery state
         shell: bash
