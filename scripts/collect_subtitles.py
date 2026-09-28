@@ -96,6 +96,7 @@ def load_state(path: Path) -> dict:
         state.setdefault(group, {})
         state[group].setdefault("aniall", {})
         state[group].setdefault("anissia", {})
+    state["retry"].setdefault("anissia_api", {})
     cutoff = parse_datetime(state.get("bootstrap_cutoff_kst"))
     watermark = parse_datetime(state.get("watermark_kst"))
     if not cutoff or not watermark:
@@ -535,6 +536,9 @@ def collect_anissia(session: requests.Session, state: dict, payload_root: Path,
                      manifest: list[dict], failures: list[dict], scan_floor: dt.datetime,
                      delay: float):
     attempted: set[str] = set()
+    retry_api = state["retry"]["anissia_api"]
+    bootstrap_cutoff = parse_datetime(state["bootstrap_cutoff_kst"])
+    assert bootstrap_cutoff
 
     # Retry failures from older runs before the normal scan.
     for key, item in list(state["retry"]["anissia"].items()):
@@ -576,9 +580,10 @@ def collect_anissia(session: requests.Session, state: dict, payload_root: Path,
                 captions = anissia_payload(request(session, ANISSIA_CAPTION.format(anime_no=anime_no)))
                 if not isinstance(captions, list):
                     raise RuntimeError("Unexpected Anissia caption response")
+                minimum_date = bootstrap_cutoff if anime_no in retry_api else scan_floor
                 for caption in captions:
                     updated = parse_datetime(str(caption.get("updDt") or ""))
-                    if not updated or updated < scan_floor:
+                    if not updated or updated < minimum_date:
                         continue
                     key = caption_key(anime_no, caption)
                     if key in attempted or key in state["success"]["anissia"]:
@@ -588,14 +593,22 @@ def collect_anissia(session: requests.Session, state: dict, payload_root: Path,
                         session, state, payload_root, manifest, failures,
                         anime_no, anime_title, caption,
                     )
+                retry_api.pop(anime_no, None)
             except Exception as exc:
-                # Failure to read one anime's caption list must be visible and retryable
-                # on the next full scan, but it must not abort the other thousands of works.
-                append_failure(
+                # If one anime's caption API fails, force that work to be rescanned
+                # from the bootstrap cutoff on the next run so the moving watermark
+                # cannot hide a missed subtitle.
+                failure = append_failure(
                     failures, "anissia_api", f"anime:{anime_no}", exc,
                     anime_no=anime_no, anime_title=anime_title,
                     source_url=ANISSIA_CAPTION.format(anime_no=anime_no),
                 )
+                retry_api[anime_no] = {
+                    "anime_no": anime_no,
+                    "anime_title": anime_title,
+                    "last_error": failure["error"],
+                    "last_attempt": failure["attempted_at"],
+                }
             if delay:
                 time.sleep(delay)
             if anime_count % 100 == 0:
@@ -663,6 +676,7 @@ def main():
         "failure_count": len(failures),
         "retry_aniall": len(state["retry"]["aniall"]),
         "retry_anissia": len(state["retry"]["anissia"]),
+        "retry_anissia_api": len(state["retry"]["anissia_api"]),
     })
 
     print(json.dumps({
@@ -670,6 +684,7 @@ def main():
         "failure_count": len(failures),
         "retry_aniall": len(state["retry"]["aniall"]),
         "retry_anissia": len(state["retry"]["anissia"]),
+        "retry_anissia_api": len(state["retry"]["anissia_api"]),
     }, ensure_ascii=False, indent=2))
 
 
