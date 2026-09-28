@@ -81,6 +81,7 @@ Pi는 매월 2일 10:45 KST에 다음 순서로 동작합니다.
 3. queue에 들어 있는 소수의 자막 페이지에만 실제 접속
 4. 첨부 ZIP/ASS/SMI 등을 `~/streaming-project/subtitle-data`에 저장
 5. 실패 항목은 Pi 로컬 retry state에 남기고 다음 실행에서 먼저 재시도
+6. 같은 URL/항목이 3개월 동안 계속 실패하면 4개월차부터 active retry에서 제거
 
 즉 Anissia 수천 작품 API 확인은 GitHub가 하고, Pi는 **신규 후보 몇 건의 실제 페이지/파일 다운로드만** 담당합니다. subtitle 다운로드 프로세스는 `nice -n 15` + `ionice -c3`로 낮은 우선순위로 실행됩니다.
 
@@ -117,6 +118,6 @@ sudo systemctl start anime-monthly-sync.service
 journalctl -u anime-monthly-sync.service -n 200 --no-pager
 ```
 
-Pi 다운로드 state는 `~/.local/state/anime-db-download/subtitle-queue-state.json`, 실패 이력은 `~/.local/state/anime-db-download/subtitle-download-failed.jsonl`에 저장됩니다. Pi가 한 달 이상 꺼져 있어도 미처리 queue Release를 오래된 순서부터 모두 소비합니다.
+Pi 다운로드 state는 `~/.local/state/anime-db-download/subtitle-queue-state.json`, 실패 이력은 `~/.local/state/anime-db-download/subtitle-download-failed.jsonl`에 저장됩니다. 실패 기간은 실행 횟수가 아니라 **달력 월 기준**으로 계산합니다. 예를 들어 9월에 처음 실패한 항목은 9·10·11월까지 재시도하고 12월(4개월차)부터 retry에서 제거합니다. 제거된 ID는 재처리 방지를 위해 state의 `retired`에 남고, 상세 이력은 `~/.local/state/anime-db-download/subtitle-download-retired.jsonl`에 기록됩니다. 같은 달에 수동 실행을 여러 번 해도 실패 개월 수는 늘어나지 않습니다. Pi가 한 달 이상 꺼져 있어도 미처리 queue Release를 오래된 순서부터 모두 소비합니다.
 
 첫 전환 테스트는 머지 후 **Actions → Monthly subtitle discovery → Run workflow**를 한 번 실행해 2026-09-26 이후 queue를 새로 만든 다음, Pi에서 `anime-monthly-sync.service`를 수동 실행하면 됩니다.
