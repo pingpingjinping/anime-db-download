@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import hashlib
+from html import unescape
 import hmac
 import json
 import mimetypes
@@ -252,16 +253,58 @@ def request(session: requests.Session, url: str, *, referer: str | None = None,
     raise RuntimeError(f"Failed to fetch {url}: {last_error}")
 
 
-def google_drive_download_url(url: str) -> str | None:
-    parsed = urlparse(url)
+def classify_source_url(url: str) -> str:
+    """Route URLs the same way as GUI-for-SMI-Auto-Downloader."""
+    value = unquote(url or "").strip().lower()
+    if not value:
+        return "empty"
+    if "naver" in value:
+        return "naver"
+    if "blogspot" in value:
+        return "blogspot"
+    if "tistory" in value:
+        return "tistory"
+    return "website"
+
+
+def google_drive_file_id(url: str) -> str | None:
+    parsed = urlparse(unescape(url or ""))
     host = (parsed.hostname or "").lower()
     if host not in {"drive.google.com", "docs.google.com", "drive.usercontent.google.com"}:
         return None
     match = re.search(r"/file/d/([^/]+)", parsed.path)
-    file_id = match.group(1) if match else (parse_qs(parsed.query).get("id") or [""])[0]
-    if not file_id:
-        return None
-    return f"https://drive.usercontent.google.com/download?id={quote(file_id)}&export=download&confirm=t"
+    if match:
+        return match.group(1)
+    values = parse_qs(parsed.query).get("id") or []
+    return values[0] if values else None
+
+
+def google_drive_download_url(url: str) -> str | None:
+    file_id = google_drive_file_id(url)
+    return f"https://drive.google.com/uc?id={quote(file_id)}" if file_id else None
+
+
+def google_drive_confirmation_url(html_text: str) -> str:
+    match = re.search(r'href="(/uc\?export=download[^"]+)', html_text)
+    if match:
+        return urljoin("https://docs.google.com", unescape(match.group(1)))
+
+    soup = BeautifulSoup(html_text, "html.parser")
+    form = soup.select_one("#download-form")
+    if form and form.get("action"):
+        action = unescape(form["action"])
+        parsed = urlparse(action)
+        params = parse_qs(parsed.query)
+        for hidden in form.find_all("input", attrs={"type": "hidden"}):
+            if hidden.get("name"):
+                params[hidden["name"]] = [hidden.get("value", "")]
+        query = urllib.parse.urlencode(params, doseq=True)
+        return urllib.parse.urlunparse(parsed._replace(query=query))
+
+    match = re.search(r'"downloadUrl":"([^"]+)', html_text)
+    if match:
+        return match.group(1).replace(r"\u003d", "=").replace(r"\u0026", "&").replace(r"\/", "/")
+    raise RuntimeError("Google Drive confirmation URL not found")
 
 
 def filename_from_response(response: requests.Response, fallback_url: str, suggested: str = "") -> str:
@@ -285,35 +328,82 @@ def filename_from_response(response: requests.Response, fallback_url: str, sugge
     return name
 
 
+def save_response_file(response: requests.Response, destination_dir: Path, *,
+                       fallback_url: str, suggested_name: str = "") -> Path:
+    name = filename_from_response(response, fallback_url, suggested_name)
+    if Path(name).suffix.lower() not in ALLOWED_EXTENSIONS:
+        raise RuntimeError(f"Unsupported attachment type: {name}")
+    destination_dir.mkdir(parents=True, exist_ok=True)
+    destination = destination_dir / name
+    temporary = destination.with_suffix(destination.suffix + ".part")
+    total = 0
+    try:
+        with temporary.open("wb") as output:
+            for chunk in response.iter_content(256 * 1024):
+                if not chunk:
+                    continue
+                total += len(chunk)
+                if total > MAX_DOWNLOAD_BYTES:
+                    raise RuntimeError("Attachment exceeded size limit")
+                output.write(chunk)
+        if total == 0:
+            raise RuntimeError("Downloaded attachment was empty")
+        temporary.replace(destination)
+        return destination
+    except Exception:
+        temporary.unlink(missing_ok=True)
+        raise
+
+
+def download_google_drive(session: requests.Session, url: str, destination_dir: Path,
+                          suggested_name: str = "") -> Path:
+    file_id = google_drive_file_id(url)
+    if not file_id:
+        raise RuntimeError(f"Google Drive file id not found: {url}")
+
+    current = f"https://drive.google.com/uc?id={quote(file_id)}"
+    for _ in range(4):
+        response = request(session, current, stream=True)
+        content_type = response.headers.get("Content-Type", "").lower()
+        if "Content-Disposition" in response.headers and "text/html" not in content_type:
+            try:
+                return save_response_file(
+                    response, destination_dir,
+                    fallback_url=current,
+                    suggested_name=suggested_name,
+                )
+            finally:
+                response.close()
+
+        if "text/html" not in content_type:
+            try:
+                return save_response_file(
+                    response, destination_dir,
+                    fallback_url=current,
+                    suggested_name=suggested_name,
+                )
+            finally:
+                response.close()
+
+        html_text = response.text
+        response.close()
+        current = google_drive_confirmation_url(html_text)
+
+    raise RuntimeError("Google Drive confirmation loop exceeded")
+
+
 def download_file(session: requests.Session, url: str, destination_dir: Path, *,
                   referer: str | None = None, suggested_name: str = "") -> Path:
-    target_url = google_drive_download_url(url) or url
-    with request(session, target_url, referer=referer, stream=True) as response:
-        if "text/html" in response.headers.get("Content-Type", "").lower() and google_drive_download_url(url):
-            raise RuntimeError("Google Drive returned HTML instead of a subtitle file")
-        name = filename_from_response(response, target_url, suggested_name)
-        if Path(name).suffix.lower() not in ALLOWED_EXTENSIONS:
-            raise RuntimeError(f"Unsupported attachment type: {name}")
-        destination_dir.mkdir(parents=True, exist_ok=True)
-        destination = destination_dir / name
-        temporary = destination.with_suffix(destination.suffix + ".part")
-        total = 0
-        try:
-            with temporary.open("wb") as output:
-                for chunk in response.iter_content(256 * 1024):
-                    if not chunk:
-                        continue
-                    total += len(chunk)
-                    if total > MAX_DOWNLOAD_BYTES:
-                        raise RuntimeError("Attachment exceeded size limit")
-                    output.write(chunk)
-            if total == 0:
-                raise RuntimeError("Downloaded attachment was empty")
-            temporary.replace(destination)
-            return destination
-        except Exception:
-            temporary.unlink(missing_ok=True)
-            raise
+    if google_drive_file_id(url):
+        return download_google_drive(session, url, destination_dir, suggested_name)
+
+    with request(session, url, referer=referer, stream=True) as response:
+        return save_response_file(
+            response,
+            destination_dir,
+            fallback_url=response.url or url,
+            suggested_name=suggested_name,
+        )
 
 
 def naver_frame_html(session: requests.Session, page_url: str, html_text: str) -> tuple[str, str]:
