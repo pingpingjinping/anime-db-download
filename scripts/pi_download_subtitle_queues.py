@@ -150,13 +150,14 @@ def queue_asset(release: dict) -> dict:
 
 def load_state(path: Path) -> dict:
     if not path.exists():
-        return {"version": 1, "processed_releases": [], "success": {}, "retry": {}}
+        return {"version": 1, "processed_releases": [], "success": {}, "retry": {}, "retired": {}}
     state = json.loads(path.read_text(encoding="utf-8"))
     if state.get("version") != 1:
         raise RuntimeError(f"Unsupported Pi subtitle state: {path}")
     state.setdefault("processed_releases", [])
     state.setdefault("success", {})
     state.setdefault("retry", {})
+    state.setdefault("retired", {})
     return state
 
 
@@ -451,6 +452,9 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
     if item_id in state["success"]:
         state["retry"].pop(item_id, None)
         return True
+    if item_id in state["retired"]:
+        state["retry"].pop(item_id, None)
+        return False
 
     try:
         source = item.get("source")
@@ -526,6 +530,11 @@ def main() -> None:
                 f"failed for {RETRY_MONTHS} calendar months; removed from retry on month 4",
             )
             state["retry"].pop(item_id, None)
+            state["retired"][item_id] = {
+                "first_failed_month": first_month,
+                "retired_month": current_month,
+                "source": (retry.get("item") or {}).get("source"),
+            }
             save_state(args.state, state)
             retired_count += 1
             print(f"[x] {item_id}: retired after 3 failed calendar months")
@@ -561,6 +570,7 @@ def main() -> None:
         "success": len(state["success"]),
         "retry": len(state["retry"]),
         "processed_releases": len(state["processed_releases"]),
+        "retired": len(state["retired"]),
         "retired_this_run": retired_count,
     }, ensure_ascii=False, indent=2))
 
