@@ -1,0 +1,10 @@
+[Unit]
+Description=Apply monthly anime DB and subtitle archive on the 2nd
+
+[Timer]
+OnCalendar=*-*-02 10:45:00 Asia/Seoul
+Persistent=true
+Unit=anime-monthly-sync.service
+
+[Install]
+WantedBy=timers.target
