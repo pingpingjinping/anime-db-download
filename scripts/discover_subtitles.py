@@ -161,6 +161,20 @@ def aniall_published_at(html_text: str) -> dt.datetime | None:
     return None
 
 
+def classify_source_url(url: str) -> str:
+    """Match the GUI downloader's URL routing without opening the page."""
+    value = unquote(url or "").strip().lower()
+    if not value:
+        return "empty"
+    if "naver" in value:
+        return "naver"
+    if "blogspot" in value:
+        return "blogspot"
+    if "tistory" in value:
+        return "tistory"
+    return "website"
+
+
 def caption_key(anime_no: str, caption: dict) -> str:
     raw = "\n".join([
         anime_no,
@@ -214,6 +228,7 @@ def discover_aniall(session: requests.Session, state: dict, queue: list[dict],
                 "title": post["title"],
                 "published_at": iso_kst(published),
                 "source_url": post["post_url"],
+                "handler": "tistory",
             }
             queue.append(item)
             discovered[post_id] = {
@@ -288,6 +303,7 @@ def discover_anissia(session: requests.Session, state: dict, queue: list[dict],
                         "updated_at": iso_kst(updated),
                         "source_url": unquote(str(caption.get("website") or "")).strip(),
                     }
+                    item["handler"] = classify_source_url(item["source_url"])
                     queue.append(item)
                     discovered[key] = item
                     print(f"[+] queue Anissia {anime_no} {item['episode']}화 {item['creator']}")
