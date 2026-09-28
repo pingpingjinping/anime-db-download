@@ -38,58 +38,72 @@ docker compose ps
 
 Pi importer는 고정 행 수가 아닌 네 출처가 모두 있는지 확인하므로 월별 DB 증가분을 받아들입니다. 기존 스트리밍 링크와 기준 DB의 검토 연결은 importer가 다시 계산하거나 덮어쓰지 않습니다. AniAll 매칭 후보는 이 기준 DB 파일에 병합하지 않습니다.
 
-## 월별 자막 아카이브
+## 월별 자막 발견 + Pi 다운로드
 
-GitHub Actions의 **Monthly subtitle archive** workflow가 매월 1일 14:17 KST에 실행됩니다. 실제 자막 다운로드는 GitHub runner가 담당하고 Pi는 완성된 Release만 내려받습니다.
+자막은 **GitHub에서 실제 파일을 받지 않습니다.** 역할을 둘로 나눕니다.
 
-초기 기준 시각은 **2026-09-25 23:59:59 KST**입니다. 이 시각 이전 자료는 이미 수동으로 확보했다고 가정하며, 첫 실행부터 2026-09-26 이후 자료만 자동 수집합니다. 초기 PC 수집본과 일부 중복될 수 있지만 기준일 이후 누락을 피하는 쪽을 우선합니다.
+- GitHub Actions: 신규 자막 후보만 발견해서 queue Release 생성
+- Pi: queue에 들어 있는 URL만 실제로 열어서 자막 파일 다운로드
 
-- AniAll: 자막자료실의 새 게시글을 확인하고 첨부 자막을 저장합니다.
-- Anissia: 전체 작품의 자막 API를 확인해 새 자막 링크를 내려받습니다. 오래된 작품에 새 자막이 붙는 경우도 확인하기 위해 작품 목록 전체를 순회합니다.
-- 성공한 항목만 `state/subtitle-collector.json`에 완료 처리합니다.
-- 다운로드 실패나 캡차/Cloudflare/빈 링크는 retry 상태와 `failed.jsonl`에 남겨 다음 실행에서 다시 시도합니다.
-- 특정 Anissia 작품의 자막 API 조회 자체가 실패하면 그 작품은 다음 실행에서 최초 기준일 이후를 다시 확인합니다.
-- 월별 결과는 `subs-YYYY-MM-DD-<run id>-<attempt>` 형식의 **immutable private Release**로 남깁니다.
+초기 기준 시각은 **2026-09-25 23:59:59 KST**입니다. 이 시각 이전 자료는 이미 수동으로 확보했다고 가정합니다. 첫 discovery는 2026-09-26 이후 항목을 다시 queue에 넣으므로, 첫 PC 수집본과 일부 중복될 수 있지만 누락 방지를 우선합니다.
 
-Release에는 다음 파일이 들어갑니다.
+### GitHub discovery
 
-```text
-subtitle-delta.tar.gz
-manifest.json
-failed.jsonl
-subtitle-state.json
+**Monthly subtitle discovery** workflow는 매월 1일 14:17 KST에 실행됩니다.
+
+- AniAll: 자막자료실 목록과 게시글 메타데이터만 확인합니다. 첨부파일은 다운로드하지 않습니다.
+- Anissia: 전체 작품의 caption API만 확인합니다. caption의 `website` 페이지에는 접속하지 않습니다.
+- 새 항목은 `subtitle-queue.json`으로 묶습니다.
+- Anissia API 자체가 실패한 작품은 다음 실행에서 최초 기준일 이후를 다시 확인합니다.
+- discovery state는 `state/subtitle-discovery.json`에 저장합니다.
+- queue Release tag는 `subs-queue-YYYY-MM-DD-<run id>-<attempt>` 형식입니다.
+
+queue 예시:
+
+```json
+{
+  "id": "anissia:...",
+  "source": "anissia",
+  "anime_no": "3495",
+  "anime_title": "정반대의 너와 나 2기",
+  "episode": "12",
+  "creator": "스모모",
+  "source_url": "https://sumomomo.tistory.com/492"
+}
 ```
 
-압축 파일 내부는 아래처럼 Pi의 `subtitle-data`에 바로 합칠 수 있는 구조입니다.
+### Pi 다운로드
 
-```text
-aniall_subtitles/
-  작품명/
-    subtitle.zip
+Pi는 매월 2일 10:45 KST에 다음 순서로 동작합니다.
 
-anissia_subtitles/
-  AnimeNo__작품명/
-    12화/
-      제작자/
-        subtitle.zip
-```
+1. 기존 `db-v1` Release를 받아 애니 DB import
+2. 아직 처리하지 않은 `subs-queue-*` Release를 순서대로 받음
+3. queue에 들어 있는 소수의 자막 페이지에만 실제 접속
+4. 첨부 ZIP/ASS/SMI 등을 `~/streaming-project/subtitle-data`에 저장
+5. 실패 항목은 Pi 로컬 retry state에 남기고 다음 실행에서 먼저 재시도
+6. 같은 URL/항목이 3개월 동안 계속 실패하면 4개월차부터 active retry에서 제거
 
-첫 수집은 머지 후 **Actions → Monthly subtitle archive → Run workflow**에서 `main` 브랜치로 수동 실행하면 됩니다.
+즉 Anissia 수천 작품 API 확인은 GitHub가 하고, Pi는 **신규 후보 몇 건의 실제 페이지/파일 다운로드만** 담당합니다. subtitle 다운로드 프로세스는 `nice -n 15` + `ionice -c3`로 낮은 우선순위로 실행됩니다.
 
-### Pi 자동 반영
+기존 DB updater에서 쓰는 `/home/pi/.config/streaming-project/anime-db.env`의 `ANIME_DB_GITHUB_TOKEN`을 그대로 사용합니다.
 
-Pi는 자막 사이트를 직접 크롤링하지 않습니다. 매월 2일 10:45 KST에 최신 DB를 먼저 적용한 뒤, 아직 적용하지 않은 `subs-*` Release를 오래된 순서부터 모두 내려받아 `~/streaming-project/subtitle-data`에 합칩니다. Pi가 한 달 이상 꺼져 있어도 빠진 Release를 순서대로 적용합니다.
-
-기존 DB updater에서 사용하는 `/home/pi/.config/streaming-project/anime-db.env`의 `ANIME_DB_GITHUB_TOKEN`을 그대로 사용합니다.
+Pi 준비:
 
 ```bash
 cd ~
 git clone git@github.com:pingpingjinping/anime-db-download.git
+cd ~/anime-db-download
+
+sudo apt update
+sudo apt install -y python3-venv
+
+python3 -m venv ~/.local/share/anime-db-download/venv
+~/.local/share/anime-db-download/venv/bin/pip install -r ~/anime-db-download/requirements-pi-subtitles.txt
 
 sudo cp ~/anime-db-download/ops/systemd/anime-monthly-sync.service /etc/systemd/system/
 sudo cp ~/anime-db-download/ops/systemd/anime-monthly-sync.timer /etc/systemd/system/
 
-# 기존 DB 전용 timer는 통합 timer와 중복되므로 비활성화
+# 기존 DB 전용 timer와 중복 실행되지 않게 비활성화
 sudo systemctl disable --now streaming-anime-db-update.timer 2>/dev/null || true
 
 sudo systemctl daemon-reload
@@ -104,4 +118,6 @@ sudo systemctl start anime-monthly-sync.service
 journalctl -u anime-monthly-sync.service -n 200 --no-pager
 ```
 
-Pi 적용 기록은 `~/.local/state/anime-db-download/subtitle-releases.json`에 저장됩니다. 실패 목록과 각 Release manifest는 각각 `~/streaming-project/subtitle-data/failed/`, `~/streaming-project/subtitle-data/manifests/`에 보존됩니다.
+Pi 다운로드 state는 `~/.local/state/anime-db-download/subtitle-queue-state.json`, 실패 이력은 `~/.local/state/anime-db-download/subtitle-download-failed.jsonl`에 저장됩니다. 실패 기간은 실행 횟수가 아니라 **달력 월 기준**으로 계산합니다. 예를 들어 9월에 처음 실패한 항목은 9·10·11월까지 재시도하고 12월(4개월차)부터 retry에서 제거합니다. 제거된 ID는 재처리 방지를 위해 state의 `retired`에 남고, 상세 이력은 `~/.local/state/anime-db-download/subtitle-download-retired.jsonl`에 기록됩니다. 같은 달에 수동 실행을 여러 번 해도 실패 개월 수는 늘어나지 않습니다. Pi가 한 달 이상 꺼져 있어도 미처리 queue Release를 오래된 순서부터 모두 소비합니다.
+
+첫 전환 테스트는 머지 후 **Actions → Monthly subtitle discovery → Run workflow**를 한 번 실행해 2026-09-26 이후 queue를 새로 만든 다음, Pi에서 `anime-monthly-sync.service`를 수동 실행하면 됩니다.
