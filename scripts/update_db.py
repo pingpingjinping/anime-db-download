@@ -18,17 +18,13 @@ from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SNAPSHOT = ROOT / "snapshot" / "anime.db.gz"
-SOURCES = {"AniList", "ReAnime", "Onnada", "Anissia", "AniAll"}
+SOURCES = {"AniList", "ReAnime", "Onnada", "Anissia"}
 ANILIST_URL = "https://graphql.anilist.co"
 ANILIST_LOOKBACK_SECONDS = 30 * 24 * 60 * 60
 ANILIST_OVERLAP_SECONDS = 24 * 60 * 60
 ANILIST_PAGE_SIZE = 50
 ANILIST_MAX_PAGES = 100
 ANILIST_DELAY_SECONDS = 5.0  # Deliberately gentle: at most 12 requests/minute.
-ANIALL_BASE = "https://aniall.tistory.com"
-ANIALL_CATEGORY_URL = ANIALL_BASE + "/category/자막자료실"
-ANIALL_PAGE_DELAY_SECONDS = 1.2
-ANIALL_MAX_PAGES = 500
 FIELDS = ("year", "year_basis", "source_year_raw", "title_ko", "title_native",
           "title_romaji", "title_english", "format", "status", "genres")
 
@@ -117,15 +113,6 @@ def normalize(source, row):
                   row.get("title_native"), row.get("title_romaji"), "", "", "review", "")
         cross = {"anilist_ids": [], "reanime_ids": []}
         metadata = {k: v for k, v in row.items() if k not in ("title_ko", "title_native", "title_romaji")}
-    elif source == "AniAll":
-        source_id = str(row.get("post_id") or row.get("id") or "")
-        post_title = str(row.get("title") or row.get("post_title") or "").strip()
-        post_url = str(row.get("post_url") or (f"{ANIALL_BASE}/{source_id}" if source_id else ""))
-        original = str(row.get("post_year") or "")
-        fields = (year(original), "subtitle_post_title", original, post_title,
-                  "", "", "", row.get("format"), "review", "")
-        cross = {"anilist_ids": [], "reanime_ids": [], "onnada_ids": []}
-        metadata = {**row, "post_title": post_title, "post_url": post_url}
     else:
         source_id = str(row["id"])
         titles = row.get("title") or {}
@@ -298,93 +285,14 @@ def online_rows(source, known, anilist_since=None):
                    "category": category, "season_info": season_info,
                    "episodes": meta.get("총화수", ""), "detail_url": detail_base + str(anime_id)}
             time.sleep(1.2)
-    elif source == "AniAll":
-        first = fetch_aniall_html(ANIALL_CATEGORY_URL)
-        expected, pages = aniall_expected_count_and_pages(first)
-        if not expected or not pages:
-            raise ValueError("AniAll category count could not be read; refusing incomplete update")
-        if pages > ANIALL_MAX_PAGES:
-            raise ValueError(f"AniAll reports {pages} pages; limit is {ANIALL_MAX_PAGES}")
-        unchanged_pages = 0
-        scanned_ids = set()
-        for page in range(1, pages + 1):
-            body = first if page == 1 else fetch_aniall_html(f"{ANIALL_CATEGORY_URL}?page={page}")
-            rows = extract_aniall_page_posts(body)
-            if not rows or (page < pages and len(rows) < 10):
-                raise ValueError(f"AniAll page {page} was incomplete; refusing update")
-            page_ids = {str(row["post_id"]) for row in rows}
-            scanned_ids.update(page_ids)
-            yield from rows
-            unchanged_pages = unchanged_pages + 1 if page_ids.issubset(known) else 0
-            # Two pages of known IDs provide overlap while keeping monthly
-            # checks near the newest posts. An empty DB gets one full bootstrap.
-            if known and unchanged_pages >= 2:
-                return
-            if page < pages:
-                time.sleep(ANIALL_PAGE_DELAY_SECONDS)
-        if not known and len(scanned_ids) != expected:
-            raise ValueError(f"Incomplete AniAll bootstrap: found {len(scanned_ids)} posts, expected {expected}")
-
-
-def fetch_aniall_html(url):
-    for attempt in range(5):
-        try:
-            response = requests.get(url, headers={
-                "User-Agent": "Mozilla/5.0 (compatible; anime-db-download/1.0)",
-                "Referer": ANIALL_BASE + "/",
-                "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.7",
-            }, timeout=(15, 35))
-            if response.status_code == 429:
-                wait = int(response.headers.get("Retry-After", "60"))
-                time.sleep(min(wait, 300))
-                continue
-            response.raise_for_status()
-            return response.text
-        except requests.RequestException:
-            if attempt == 4:
-                raise
-            time.sleep(2 ** attempt)
-    raise RuntimeError(f"Unable to fetch AniAll page {url}")
-
-
-def aniall_expected_count_and_pages(page_html):
-    text = BeautifulSoup(page_html, "html.parser").get_text(" ", strip=True)
-    match = (re.search(r"['\u2019]?자막자료실['\u2019]?\s*에\s*해당되는\s*글\s*([\d,]+)건", text)
-             or re.search(r"자막자료실[^\d]{0,80}([\d,]+)건", text))
-    if not match:
-        return None, None
-    count = int(match.group(1).replace(",", ""))
-    return count, (count + 9) // 10
-
-
-def extract_aniall_page_posts(page_html, limit=10):
-    soup = BeautifulSoup(page_html, "html.parser")
-    posts, seen = [], set()
-    for anchor in soup.select("a[href]"):
-        parsed = urlparse(urljoin(ANIALL_BASE, anchor.get("href", "")))
-        if parsed.netloc.lower() != urlparse(ANIALL_BASE).netloc:
-            continue
-        match = re.fullmatch(r"/(\d+)/?", parsed.path)
-        if not match:
-            continue
-        post_id = match.group(1)
-        title = anchor.get_text(" ", strip=True)
-        if post_id in seen or not title or title.isdigit():
-            continue
-        seen.add(post_id)
-        posts.append({"post_id": post_id, "post_url": f"{ANIALL_BASE}/{post_id}", "title": title})
-        if len(posts) >= limit:
-            break
-    return posts
-
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--snapshot", type=Path, default=DEFAULT_SNAPSHOT,
                         help="Path to the existing gzip-compressed SQLite snapshot")
-    parser.add_argument("--online", action="store_true", help="Check recent AniList, Anissia, ReAnime, Onnada and AniAll updates")
+    parser.add_argument("--online", action="store_true", help="Check recent AniList, Anissia, ReAnime and Onnada updates")
     parser.add_argument("--input", action="append", default=[], metavar="SOURCE=PATH",
-                        help="Provide a CSV/JSONL snapshot for AniList, ReAnime, Onnada or AniAll")
+                        help="Provide a CSV/JSONL snapshot for AniList, ReAnime, Onnada or Anissia")
     args = parser.parse_args()
     if not args.online and not args.input:
         parser.error("Specify --online and/or at least one --input")
@@ -400,9 +308,14 @@ def main():
         counts = {}
         state_changed = False
         try:
+            # This release is the canonical four-source catalog. Remove any
+            # legacy AniAll rows if a prior workflow run had stored them here.
+            removed_aniall = db.execute("DELETE FROM entries WHERE source='AniAll'").rowcount
+            removed_aniall_reviews = db.execute("DELETE FROM monthly_review WHERE source='AniAll'").rowcount
+            state_changed = bool(removed_aniall or removed_aniall_reviews)
             tasks = []
             if args.online:
-                tasks.extend((source, None) for source in ("AniList", "Anissia", "ReAnime", "Onnada", "AniAll"))
+                tasks.extend((source, None) for source in ("AniList", "Anissia", "ReAnime", "Onnada"))
             for item in args.input:
                 source, sep, filename = item.partition("=")
                 if not sep or source not in SOURCES or not Path(filename).is_file():

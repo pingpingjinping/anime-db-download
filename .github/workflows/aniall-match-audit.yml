@@ -1,6 +1,9 @@
 name: Aniall Match Audit
 
 on:
+  schedule:
+    # Run after the four-source DB refresh on the 1st at 12:17 KST.
+    - cron: '17 3 1 * *'
   workflow_dispatch:
     inputs:
       db_tag:
@@ -20,14 +23,14 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
       - name: Download DB release asset
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-          DB_TAG: ${{ inputs.db_tag }}
+          DB_TAG: ${{ inputs.db_tag || 'db-v1' }}
         run: |
           set -euo pipefail
           mkdir -p db
@@ -43,7 +46,7 @@ jobs:
       - name: Fetch streaming-project audit branch
         shell: bash
         env:
-          STREAMING_REF: ${{ inputs.streaming_ref }}
+          STREAMING_REF: ${{ inputs.streaming_ref || 'main' }}
         run: |
           set -euo pipefail
           git clone --depth 1 --branch "$STREAMING_REF" \
@@ -61,7 +64,7 @@ jobs:
           set -o pipefail
           python streaming-project/scripts/audit-aniall-subtitles.py \
             db/anime_four_sources_multilingual_prepared.db \
-            --delay 0.12 \
+            --delay 1.2 \
             --out-dir aniall-audit | tee aniall-audit.log
 
       - name: Add results to summary
@@ -87,9 +90,9 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: aniall-match-audit-${{ inputs.db_tag }}
+          name: aniall-match-audit-${{ inputs.db_tag || 'db-v1' }}-${{ github.run_id }}
           path: |
             aniall-audit.log
             aniall-audit/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 90
