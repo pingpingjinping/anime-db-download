@@ -29,6 +29,15 @@ from zoneinfo import ZoneInfo
 import requests
 from bs4 import BeautifulSoup
 
+from subtitle_queue_metadata import (
+    build_download_metadata,
+    classify_failure,
+    classify_waiting_reason,
+    history_title_matches as strict_history_title_matches,
+    normalize_work_identity,
+    reason_counts,
+)
+
 REPO = "pingpingjinping/anime-db-download"
 RELEASES_API = f"https://api.github.com/repos/{REPO}/releases"
 ANISSIA_ANIME_INFO = "https://api.anissia.net/anime/animeNo/{anime_no}"
@@ -43,7 +52,7 @@ RETRY_MONTHS = 3
 BACKFILL_BASELINE_DATE = dt.date(2026, 9, 28)
 HISTORY_SEARCH_MAX_PAGES = 4
 HISTORY_SEARCH_MAX_RESULTS = 60
-ALLOWED_EXTENSIONS = {".zip", ".7z", ".rar", ".smi", ".ass", ".ssa", ".vtt"}
+ALLOWED_EXTENSIONS = {".zip", ".7z", ".rar", ".smi", ".srt", ".ass", ".ssa", ".vtt"}
 MAX_DOWNLOAD_BYTES = 100 * 1024 * 1024
 UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -251,6 +260,7 @@ def move_to_waiting_url(state: dict, item_id: str, item: dict) -> None:
         "item": item,
         "first_seen": previous.get("first_seen") or now,
         "last_seen": now,
+        "reason": classify_waiting_reason(item),
     }
     state["retry"].pop(item_id, None)
 
@@ -275,6 +285,7 @@ def append_retired(item_id: str, retry: dict, reason: str) -> None:
         "source_url": item.get("source_url"),
         "first_failed_month": first_failed_month(retry),
         "last_error": retry.get("last_error"),
+        "last_reason": retry.get("reason"),
         "retired_at": dt.datetime.now(KST).isoformat(timespec="seconds"),
         "reason": reason,
     }
@@ -282,12 +293,13 @@ def append_retired(item_id: str, retry: dict, reason: str) -> None:
         handle.write(json.dumps(row, ensure_ascii=False) + "\n")
 
 
-def append_failure(item: dict, error: Exception | str) -> None:
+def append_failure(item: dict, error: Exception | str, reason: str) -> None:
     FAIL_LOG.parent.mkdir(parents=True, exist_ok=True)
     row = {
         "id": item.get("id"),
         "source": item.get("source"),
         "source_url": item.get("source_url"),
+        "reason": reason,
         "error": str(error),
         "attempted_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
     }
@@ -382,28 +394,11 @@ def extract_episode_from_title(text: str) -> float | None:
 
 
 def normalize_history_title(value: str) -> str:
-    value = unquote(str(value or "")).lower()
-    value = re.sub(
-        r"\s*(?:\d+\s*기|\d+(?:st|nd|rd|th)\s*season|season\s*\d+)\s*$",
-        "",
-        value,
-        flags=re.I,
-    )
-    return re.sub(r"[^0-9a-z가-힣ぁ-んァ-ヶ一-龯]+", "", value)
+    return normalize_work_identity(value)
 
 
 def history_title_matches(result_title: str, anime_title: str) -> bool:
-    result = normalize_history_title(result_title)
-    wanted = normalize_history_title(anime_title)
-    if not result or not wanted:
-        return False
-    if wanted in result or result in wanted:
-        return True
-    if len(wanted) >= 8:
-        core = wanted[:max(8, int(len(wanted) * 0.7))]
-        return core in result
-    return False
-
+    return strict_history_title_matches(result_title, anime_title)
 
 def history_candidate(url: str, title: str, anime_title: str,
                       latest_episode: float | None) -> dict | None:
@@ -1274,10 +1269,15 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
                 # Leaving backfill_done unset lets a future run try again.
                 print(f"[-] backfill search {item_id}: {backfill_exc}")
 
+        metadata = build_download_metadata(item, files, target)
         state["success"][item_id] = {
             "source": source,
             "source_url": item.get("source_url"),
+            "item": item,
             "files": [str(path.relative_to(target)) for path in files],
+            "file_metadata": metadata["files"],
+            "coverage": metadata["coverage"],
+            "verification": metadata["verification"],
             "completed_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         }
         state["retry"].pop(item_id, None)
@@ -1287,15 +1287,17 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
         return True
     except Exception as exc:
         previous = state["retry"].get(item_id) or {}
+        reason = classify_failure(exc)
         state["retry"][item_id] = {
             "item": item,
             "first_failed_month": first_failed_month(previous),
+            "reason": reason,
             "last_error": str(exc),
             "last_attempt": dt.datetime.now(KST).isoformat(timespec="seconds"),
         }
         save_state(state_path, state)
-        append_failure(item, exc)
-        print(f"[-] {item_id}: {exc}")
+        append_failure(item, exc, reason)
+        print(f"[-] {item_id} [{reason}]: {exc}")
         return False
 
 
@@ -1317,7 +1319,9 @@ def main() -> None:
 
     if args.dry_run:
         print(f"Local retry items: {len(state['retry'])}")
+        print(f"Retry reasons: {reason_counts(state['retry'])}")
         print(f"Waiting for URL: {len(state['waiting_url'])}")
+        print(f"Waiting reasons: {reason_counts(state['waiting_url'])}")
         print(f"Backfill completed: {len(state['backfill_done'])}")
         print(f"Pending queue Releases: {len(pending)}")
         for release in pending:
@@ -1330,7 +1334,9 @@ def main() -> None:
         print(f"[=] Migrated {moved_waiting} empty-URL retry item(s) to waiting_url")
 
     print(f"Local retry items: {len(state['retry'])}")
+    print(f"Retry reasons: {reason_counts(state['retry'])}")
     print(f"Waiting for URL: {len(state['waiting_url'])}")
+    print(f"Waiting reasons: {reason_counts(state['waiting_url'])}")
     print(f"Backfill completed: {len(state['backfill_done'])}")
     print(f"Pending queue Releases: {len(pending)}")
 
@@ -1356,6 +1362,7 @@ def main() -> None:
                 "first_failed_month": first_month,
                 "retired_month": current_month,
                 "source": (retry.get("item") or {}).get("source"),
+                "last_reason": retry.get("reason"),
             }
             save_state(args.state, state)
             retired_count += 1
@@ -1391,7 +1398,9 @@ def main() -> None:
     print(json.dumps({
         "success": len(state["success"]),
         "retry": len(state["retry"]),
+        "retry_reasons": reason_counts(state["retry"]),
         "waiting_url": len(state["waiting_url"]),
+        "waiting_reasons": reason_counts(state["waiting_url"]),
         "backfill_done": len(state["backfill_done"]),
         "processed_releases": len(state["processed_releases"]),
         "retired": len(state["retired"]),
