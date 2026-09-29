@@ -120,4 +120,14 @@ journalctl -u anime-monthly-sync.service -n 200 --no-pager
 
 Pi 다운로드 state는 `~/.local/state/anime-db-download/subtitle-queue-state.json`, 실패 이력은 `~/.local/state/anime-db-download/subtitle-download-failed.jsonl`에 저장됩니다. 실패 기간은 실행 횟수가 아니라 **달력 월 기준**으로 계산합니다. 예를 들어 9월에 처음 실패한 항목은 9·10·11월까지 재시도하고 12월(4개월차)부터 retry에서 제거합니다. 제거된 ID는 재처리 방지를 위해 state의 `retired`에 남고, 상세 이력은 `~/.local/state/anime-db-download/subtitle-download-retired.jsonl`에 기록됩니다. 같은 달에 수동 실행을 여러 번 해도 실패 개월 수는 늘어나지 않습니다. Pi가 한 달 이상 꺼져 있어도 미처리 queue Release를 오래된 순서부터 모두 소비합니다.
 
+다운로드 state에는 진단 메타데이터도 함께 기록합니다.
+
+- `waiting_url.reason`: 회차가 아직 없거나 0인 빈 URL은 `future_or_unreleased`, 회차는 있는데 URL만 비어 있으면 `no_url_yet`로 분리합니다. 이 항목은 retry/retire 개월 수에 포함하지 않습니다.
+- `retry.reason`: DNS, SSL, timeout, HTTP 상태, parser, broken link 등을 분류해 마지막 오류와 함께 저장합니다. 실패 JSONL에도 같은 reason이 기록됩니다.
+- `success.verification` / `success.coverage`: 다운로드 파일명과 ZIP 내부 자막 파일명을 보수적으로 읽어 요청 회차 확인 여부, 발견 회차·범위·시즌을 기록합니다. 번호 체계가 다르면 offset을 추측하지 않고 `unverified`로 남깁니다.
+- 자동 history backfill은 작품 제목을 부분 문자열로 맞추지 않고, 회차/시즌 표기만 제거한 전체 작품 identity가 같을 때만 이전 회차를 받습니다. 부제가 다른 후속작은 자동으로 섞지 않습니다.
+- 직접 자막 파일 형식으로 `.srt`도 허용합니다.
+
+이 메타데이터는 다운로드를 막거나 플레이어 회차를 자동 배치하기 위한 것이 아니라, 잘못 받은 자료를 나중에 안전하게 검토하기 위한 근거입니다.
+
 첫 전환 테스트는 머지 후 **Actions → Monthly subtitle discovery → Run workflow**를 한 번 실행해 2026-09-26 이후 queue를 새로 만든 다음, Pi에서 `anime-monthly-sync.service`를 수동 실행하면 됩니다.
