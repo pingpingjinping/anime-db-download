@@ -916,6 +916,14 @@ def main() -> None:
     releases = list_queue_releases(token)
     pending = [release for release in releases if release["tag_name"] not in processed]
 
+    if args.dry_run:
+        print(f"Local retry items: {len(state['retry'])}")
+        print(f"Waiting for URL: {len(state['waiting_url'])}")
+        print(f"Pending queue Releases: {len(pending)}")
+        for release in pending:
+            print(f"  - {release['tag_name']}")
+        return
+
     moved_waiting = migrate_empty_url_retries(state)
     if moved_waiting:
         save_state(args.state, state)
@@ -924,10 +932,6 @@ def main() -> None:
     print(f"Local retry items: {len(state['retry'])}")
     print(f"Waiting for URL: {len(state['waiting_url'])}")
     print(f"Pending queue Releases: {len(pending)}")
-    if args.dry_run:
-        for release in pending:
-            print(f"  - {release['tag_name']}")
-        return
 
     args.target.mkdir(parents=True, exist_ok=True)
     session = requests.Session()
