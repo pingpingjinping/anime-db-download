@@ -151,13 +151,14 @@ def queue_asset(release: dict) -> dict:
 
 def load_state(path: Path) -> dict:
     if not path.exists():
-        return {"version": 1, "processed_releases": [], "success": {}, "retry": {}, "retired": {}}
+        return {"version": 1, "processed_releases": [], "success": {}, "retry": {}, "waiting_url": {}, "retired": {}}
     state = json.loads(path.read_text(encoding="utf-8"))
     if state.get("version") != 1:
         raise RuntimeError(f"Unsupported Pi subtitle state: {path}")
     state.setdefault("processed_releases", [])
     state.setdefault("success", {})
     state.setdefault("retry", {})
+    state.setdefault("waiting_url", {})
     state.setdefault("retired", {})
     return state
 
@@ -190,6 +191,66 @@ def first_failed_month(retry: dict) -> str:
     last_attempt = str(retry.get("last_attempt") or "")
     match = re.match(r"(\d{4}-\d{2})", last_attempt)
     return match.group(1) if match else current_month_key()
+
+
+def source_url(item: dict) -> str:
+    return str(item.get("source_url") or "").strip()
+
+
+def waiting_identity(item: dict) -> tuple[str, ...]:
+    source = str(item.get("source") or "")
+    if source == "anissia":
+        return (
+            source,
+            str(item.get("anime_no") or ""),
+            str(item.get("episode") or ""),
+            str(item.get("creator") or ""),
+        )
+    if source == "aniall":
+        return (source, str(item.get("post_id") or ""))
+    return (source, str(item.get("id") or ""))
+
+
+def remove_matching_waiting(state: dict, item: dict) -> list[str]:
+    identity = waiting_identity(item)
+    removed: list[str] = []
+    for waiting_id, waiting in list(state["waiting_url"].items()):
+        waiting_item = waiting.get("item") or {}
+        if waiting_identity(waiting_item) != identity:
+            continue
+        state["waiting_url"].pop(waiting_id, None)
+        removed.append(waiting_id)
+    return removed
+
+
+def move_to_waiting_url(state: dict, item_id: str, item: dict) -> None:
+    now = dt.datetime.now(KST).isoformat(timespec="seconds")
+    previous = state["waiting_url"].get(item_id) or {}
+
+    # The discovery item id includes the source URL. If a blank-URL record is
+    # emitted again with other metadata changes, keep only the newest waiting
+    # record for the same Anissia work/episode/creator identity.
+    for waiting_id in remove_matching_waiting(state, item):
+        if waiting_id == item_id:
+            continue
+
+    state["waiting_url"][item_id] = {
+        "item": item,
+        "first_seen": previous.get("first_seen") or now,
+        "last_seen": now,
+    }
+    state["retry"].pop(item_id, None)
+
+
+def migrate_empty_url_retries(state: dict) -> int:
+    moved = 0
+    for item_id, retry in list(state["retry"].items()):
+        item = retry.get("item") or {}
+        if source_url(item):
+            continue
+        move_to_waiting_url(state, item_id, item)
+        moved += 1
+    return moved
 
 
 def append_retired(item_id: str, retry: dict, reason: str) -> None:
@@ -781,7 +842,26 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
         return False
     if item_id in state["success"]:
         state["retry"].pop(item_id, None)
+        state["waiting_url"].pop(item_id, None)
         return True
+
+    # Missing source URLs are metadata-incomplete records, not download
+    # failures. Keep them out of the 3-month retry/retire lifecycle and wait
+    # for a later discovery Release to provide a real URL.
+    if not source_url(item):
+        move_to_waiting_url(state, item_id, item)
+        save_state(state_path, state)
+        print(f"[~] {item_id}: waiting for source URL")
+        return False
+
+    # A later Anissia discovery changes the item id when website/source_url is
+    # filled in. Remove the older blank-URL waiting record with the same stable
+    # work/episode/creator identity before downloading the new item.
+    removed_waiting = remove_matching_waiting(state, item)
+    if removed_waiting:
+        save_state(state_path, state)
+        print(f"[=] {item_id}: source URL appeared; cleared {len(removed_waiting)} waiting item(s)")
+
     if item_id in state["retired"]:
         state["retry"].pop(item_id, None)
         return False
@@ -802,6 +882,7 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
             "completed_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         }
         state["retry"].pop(item_id, None)
+        state["waiting_url"].pop(item_id, None)
         save_state(state_path, state)
         print(f"[+] {item_id}: {len(files)} file(s)")
         return True
@@ -835,12 +916,22 @@ def main() -> None:
     releases = list_queue_releases(token)
     pending = [release for release in releases if release["tag_name"] not in processed]
 
-    print(f"Local retry items: {len(state['retry'])}")
-    print(f"Pending queue Releases: {len(pending)}")
     if args.dry_run:
+        print(f"Local retry items: {len(state['retry'])}")
+        print(f"Waiting for URL: {len(state['waiting_url'])}")
+        print(f"Pending queue Releases: {len(pending)}")
         for release in pending:
             print(f"  - {release['tag_name']}")
         return
+
+    moved_waiting = migrate_empty_url_retries(state)
+    if moved_waiting:
+        save_state(args.state, state)
+        print(f"[=] Migrated {moved_waiting} empty-URL retry item(s) to waiting_url")
+
+    print(f"Local retry items: {len(state['retry'])}")
+    print(f"Waiting for URL: {len(state['waiting_url'])}")
+    print(f"Pending queue Releases: {len(pending)}")
 
     args.target.mkdir(parents=True, exist_ok=True)
     session = requests.Session()
@@ -899,6 +990,7 @@ def main() -> None:
     print(json.dumps({
         "success": len(state["success"]),
         "retry": len(state["retry"]),
+        "waiting_url": len(state["waiting_url"]),
         "processed_releases": len(state["processed_releases"]),
         "retired": len(state["retired"]),
         "retired_this_run": retired_count,
