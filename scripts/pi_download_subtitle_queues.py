@@ -31,6 +31,7 @@ from bs4 import BeautifulSoup
 
 REPO = "pingpingjinping/anime-db-download"
 RELEASES_API = f"https://api.github.com/repos/{REPO}/releases"
+ANISSIA_ANIME_INFO = "https://api.anissia.net/anime/animeNo/{anime_no}"
 TAG_RE = re.compile(r"^subs-queue-\d{4}-\d{2}-\d{2}-\d+(?:-\d+)?$")
 QUEUE_NAME = "subtitle-queue.json"
 DEFAULT_TARGET = Path("/home/pi/streaming-project/subtitle-data")
@@ -39,6 +40,7 @@ FAIL_LOG = Path.home() / ".local/state/anime-db-download/subtitle-download-faile
 RETIRED_LOG = Path.home() / ".local/state/anime-db-download/subtitle-download-retired.jsonl"
 KST = ZoneInfo("Asia/Seoul")
 RETRY_MONTHS = 3
+BACKFILL_BASELINE_DATE = dt.date(2026, 9, 28)
 HISTORY_SEARCH_MAX_PAGES = 4
 HISTORY_SEARCH_MAX_RESULTS = 60
 ALLOWED_EXTENSIONS = {".zip", ".7z", ".rar", ".smi", ".ass", ".ssa", ".vtt"}
@@ -574,6 +576,79 @@ def historical_destination(item: dict, target: Path, episode: str) -> Path:
     )
 
 
+def parse_item_date(value: str) -> dt.date | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        return dt.datetime.fromisoformat(text).astimezone(KST).date()
+    except ValueError:
+        pass
+    for fmt in ("%Y-%m-%d", "%Y-%m-%dT%H:%M:%S"):
+        try:
+            parsed = dt.datetime.strptime(text, fmt)
+            return parsed.date()
+        except ValueError:
+            continue
+    return None
+
+
+def mark_baseline_backfill_done(session: requests.Session, state: dict,
+                                state_path: Path, item: dict) -> bool:
+    """Treat works already covered by the PC backfill baseline as complete."""
+    key = backfill_identity(item)
+    if key in state["backfill_done"]:
+        return True
+
+    item_date = parse_item_date(str(item.get("updated_at") or ""))
+    reason = ""
+    start_date = None
+
+    if item_date is not None and item_date <= BACKFILL_BASELINE_DATE:
+        reason = "pc_backfill_baseline_item_date"
+    else:
+        anime_no = str(item.get("anime_no") or "")
+        if anime_no:
+            try:
+                response = request(
+                    session,
+                    ANISSIA_ANIME_INFO.format(anime_no=quote(anime_no)),
+                )
+                payload = response.json()
+                data = payload.get("data") if isinstance(payload, dict) else None
+                if isinstance(data, dict):
+                    start_date = parse_item_date(str(data.get("startDate") or ""))
+                    if start_date is not None and start_date <= BACKFILL_BASELINE_DATE:
+                        reason = "pc_backfill_baseline_anime_start_date"
+            except Exception as exc:
+                print(
+                    f"[-] backfill baseline check {anime_no} "
+                    f"{item.get('creator')}: {exc}"
+                )
+
+    if not reason:
+        return False
+
+    state["backfill_done"][key] = {
+        "anime_no": str(item.get("anime_no") or ""),
+        "anime_title": str(item.get("anime_title") or ""),
+        "creator": str(item.get("creator") or ""),
+        "source_host": (urlparse(source_url(item)).hostname or "").lower(),
+        "baseline_covered": True,
+        "baseline_date": BACKFILL_BASELINE_DATE.isoformat(),
+        "item_updated_at": str(item.get("updated_at") or ""),
+        "anime_start_date": start_date.isoformat() if start_date else "",
+        "reason": reason,
+        "completed_at": dt.datetime.now(KST).isoformat(timespec="seconds"),
+    }
+    save_state(state_path, state)
+    print(
+        f"[=] backfill baseline-covered {item.get('anime_no')} "
+        f"{item.get('creator')}: through {BACKFILL_BASELINE_DATE.isoformat()}"
+    )
+    return True
+
+
 def maybe_backfill_history(session: requests.Session, state: dict, state_path: Path,
                            item: dict, target: Path) -> None:
     if item.get("source") != "anissia":
@@ -588,6 +663,14 @@ def maybe_backfill_history(session: requests.Session, state: dict, state_path: P
 
     key = backfill_identity(item)
     if key in state["backfill_done"]:
+        return
+
+    # The PC backfill run covers all works already underway through the
+    # configured baseline. For items after that date, use the Anissia work
+    # start date so an ongoing series does not trigger a redundant archive
+    # crawl in October. Only works that started after the baseline remain
+    # eligible for one-time Pi backfill.
+    if mark_baseline_backfill_done(session, state, state_path, item):
         return
 
     # If discovery/search itself fails, do not mark this creator/work as done.
