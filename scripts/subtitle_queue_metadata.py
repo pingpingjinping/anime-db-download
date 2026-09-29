@@ -174,13 +174,13 @@ def read_episode_evidence(text: str, *, filename: bool = False) -> dict:
     # Remove explicit season ranges before looking for episode ranges so
     # "Season 1-4" is not recorded as episodes 1-4.
     working = re.sub(
-        r"(?:season|시즌)\\s*\\d{1,2}\\s*(?:-|~|–|—|to|에서)\\s*(?:(?:season|시즌)\\s*)?\\d{1,2}",
+        r"(?:season|시즌)\s*\d{1,2}\s*(?:-|~|–|—|to|에서)\s*(?:(?:season|시즌)\s*)?\d{1,2}",
         " ",
         raw,
         flags=re.I,
     )
     working = re.sub(
-        r"(?<!\\d)\\d{1,2}\\s*(?:-|~|–|—|에서)\\s*\\d{1,2}\\s*기",
+        r"(?<!\d)\d{1,2}\s*(?:-|~|–|—|에서)\s*\d{1,2}\s*기",
         " ",
         working,
     )
