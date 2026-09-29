@@ -39,6 +39,8 @@ FAIL_LOG = Path.home() / ".local/state/anime-db-download/subtitle-download-faile
 RETIRED_LOG = Path.home() / ".local/state/anime-db-download/subtitle-download-retired.jsonl"
 KST = ZoneInfo("Asia/Seoul")
 RETRY_MONTHS = 3
+HISTORY_SEARCH_MAX_PAGES = 4
+HISTORY_SEARCH_MAX_RESULTS = 60
 ALLOWED_EXTENSIONS = {".zip", ".7z", ".rar", ".smi", ".ass", ".ssa", ".vtt"}
 MAX_DOWNLOAD_BYTES = 100 * 1024 * 1024
 UA = (
@@ -151,7 +153,15 @@ def queue_asset(release: dict) -> dict:
 
 def load_state(path: Path) -> dict:
     if not path.exists():
-        return {"version": 1, "processed_releases": [], "success": {}, "retry": {}, "waiting_url": {}, "retired": {}}
+        return {
+            "version": 1,
+            "processed_releases": [],
+            "success": {},
+            "retry": {},
+            "waiting_url": {},
+            "retired": {},
+            "backfill_done": {},
+        }
     state = json.loads(path.read_text(encoding="utf-8"))
     if state.get("version") != 1:
         raise RuntimeError(f"Unsupported Pi subtitle state: {path}")
@@ -160,6 +170,7 @@ def load_state(path: Path) -> dict:
     state.setdefault("retry", {})
     state.setdefault("waiting_url", {})
     state.setdefault("retired", {})
+    state.setdefault("backfill_done", {})
     return state
 
 
@@ -326,6 +337,302 @@ def classify_source_url(url: str) -> str:
     if "tistory" in value:
         return "tistory"
     return "website"
+
+
+def backfill_identity(item: dict) -> str:
+    """Stable one-time key for one Anissia work + subtitle creator."""
+    raw = "\n".join([
+        "anissia",
+        str(item.get("anime_no") or ""),
+        str(item.get("creator") or ""),
+    ])
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def episode_number(value) -> float | None:
+    try:
+        return float(str(value).strip())
+    except (TypeError, ValueError):
+        return None
+
+
+def episode_label(value) -> str:
+    number = episode_number(value)
+    if number is None:
+        return str(value or "").strip()
+    if number.is_integer():
+        return str(int(number))
+    return ("%s" % number).rstrip("0").rstrip(".")
+
+
+def extract_episode_from_title(text: str) -> float | None:
+    text = str(text or "")
+    patterns = (
+        r"(?<!\d)(\d{1,3}(?:\.\d+)?)\s*(?:화|話|회)",
+        r"\b(?:ep|episode)\s*[.\-_:：#]?\s*0*(\d{1,3}(?:\.\d+)?)\b",
+        r"(?:제|第)\s*(\d{1,3}(?:\.\d+)?)\s*(?:화|話|회)",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, text, re.I)
+        if match:
+            return episode_number(match.group(1))
+    return None
+
+
+def normalize_history_title(value: str) -> str:
+    value = unquote(str(value or "")).lower()
+    value = re.sub(
+        r"\s*(?:\d+\s*기|\d+(?:st|nd|rd|th)\s*season|season\s*\d+)\s*$",
+        "",
+        value,
+        flags=re.I,
+    )
+    return re.sub(r"[^0-9a-z가-힣ぁ-んァ-ヶ一-龯]+", "", value)
+
+
+def history_title_matches(result_title: str, anime_title: str) -> bool:
+    result = normalize_history_title(result_title)
+    wanted = normalize_history_title(anime_title)
+    if not result or not wanted:
+        return False
+    if wanted in result or result in wanted:
+        return True
+    if len(wanted) >= 8:
+        core = wanted[:max(8, int(len(wanted) * 0.7))]
+        return core in result
+    return False
+
+
+def history_candidate(url: str, title: str, anime_title: str,
+                      latest_episode: float | None) -> dict | None:
+    episode = extract_episode_from_title(title)
+    if episode is None or episode <= 0:
+        return None
+    if latest_episode is not None and episode >= latest_episode:
+        return None
+    if not history_title_matches(title, anime_title):
+        return None
+    return {
+        "url": url,
+        "title": title,
+        "episode": episode_label(episode),
+    }
+
+
+def add_history_candidate(out: list[dict], seen: set[str], url: str, title: str,
+                          anime_title: str, latest_episode: float | None) -> None:
+    if not url or url in seen or len(out) >= HISTORY_SEARCH_MAX_RESULTS:
+        return
+    candidate = history_candidate(url, title, anime_title, latest_episode)
+    if candidate is None:
+        return
+    seen.add(url)
+    out.append(candidate)
+
+
+def search_tistory_history(session: requests.Session, source_url: str, anime_title: str,
+                            latest_episode: float | None) -> list[dict]:
+    parsed = urlparse(source_url)
+    host = (parsed.hostname or "").lower()
+    if not host:
+        return []
+
+    out: list[dict] = []
+    seen: set[str] = set()
+    query = quote(anime_title, safe="")
+    for page in range(1, HISTORY_SEARCH_MAX_PAGES + 1):
+        search_url = f"{parsed.scheme or 'https'}://{host}/search/{query}?page={page}"
+        response = request(session, search_url)
+        before = len(out)
+        soup = BeautifulSoup(response.text, "html.parser")
+        for anchor in soup.find_all("a", href=True):
+            href = urljoin(search_url, anchor.get("href", ""))
+            target = urlparse(href)
+            if (target.hostname or "").lower() != host:
+                continue
+            if re.fullmatch(r"/\d+/?", target.path or "") is None:
+                continue
+            title = " ".join(anchor.stripped_strings).strip()
+            add_history_candidate(out, seen, href, title, anime_title, latest_episode)
+        if len(out) == before and page > 1:
+            break
+    return out
+
+
+def search_blogspot_history(session: requests.Session, source_url: str, anime_title: str,
+                             latest_episode: float | None) -> list[dict]:
+    parsed = urlparse(source_url)
+    host = (parsed.hostname or "").lower()
+    if not host:
+        return []
+
+    search_url = (
+        f"{parsed.scheme or 'https'}://{host}/search?"
+        + urllib.parse.urlencode({"q": anime_title, "max-results": 50})
+    )
+    response = request(session, search_url)
+    out: list[dict] = []
+    seen: set[str] = set()
+    soup = BeautifulSoup(response.text, "html.parser")
+    for anchor in soup.find_all("a", href=True):
+        href = urljoin(search_url, anchor.get("href", ""))
+        target = urlparse(href)
+        if (target.hostname or "").lower() != host:
+            continue
+        if re.search(r"/\d{4}/\d{2}/.+\.html$", target.path or "", re.I) is None:
+            continue
+        title = " ".join(anchor.stripped_strings).strip()
+        add_history_candidate(out, seen, href, title, anime_title, latest_episode)
+    return out
+
+
+def naver_post_ids(url: str) -> tuple[str | None, str | None]:
+    decoded = unquote(url or "")
+    blog_match = re.search(r"[?&]blogId=([^&#]+)", decoded, re.I)
+    log_match = re.search(r"[?&]logNo=(\d+)", decoded, re.I)
+    if blog_match and log_match:
+        return blog_match.group(1), log_match.group(1)
+    match = re.search(
+        r"(?:https?://)?(?:m\.)?blog\.naver\.com/([^/?#]+)/(\d+)",
+        decoded,
+        re.I,
+    )
+    if match:
+        return match.group(1), match.group(2)
+    return None, None
+
+
+def naver_history_post_url(blog_id: str, href: str) -> str | None:
+    absolute = urljoin("https://m.blog.naver.com", href or "")
+    parsed = urlparse(absolute)
+    match = re.search(r"/([^/?#]+)/(\d+)", parsed.path or "")
+    if match:
+        return f"https://blog.naver.com/{match.group(1)}/{match.group(2)}"
+    params = parse_qs(parsed.query)
+    log_no = (params.get("logNo") or params.get("logno") or [""])[0]
+    item_blog_id = (params.get("blogId") or params.get("blogid") or [blog_id])[0]
+    if item_blog_id and str(log_no).isdigit():
+        return f"https://blog.naver.com/{item_blog_id}/{log_no}"
+    return None
+
+
+def search_naver_history(session: requests.Session, source_url: str, anime_title: str,
+                         latest_episode: float | None) -> list[dict]:
+    blog_id, _ = naver_post_ids(source_url)
+    if not blog_id:
+        return []
+
+    out: list[dict] = []
+    seen: set[str] = set()
+    for page in range(1, HISTORY_SEARCH_MAX_PAGES + 1):
+        search_url = (
+            "https://m.blog.naver.com/PostSearchList.naver?"
+            + urllib.parse.urlencode({
+                "blogId": blog_id,
+                "searchText": anime_title,
+                "orderType": "sim",
+                "currentPage": page,
+                "countPerPage": 30,
+            })
+        )
+        response = request(session, search_url)
+        before = len(out)
+        soup = BeautifulSoup(response.text, "html.parser")
+        for anchor in soup.find_all("a", href=True):
+            href = naver_history_post_url(blog_id, anchor.get("href", ""))
+            if not href:
+                continue
+            title = " ".join(anchor.stripped_strings).strip()
+            add_history_candidate(out, seen, href, title, anime_title, latest_episode)
+        if len(out) == before and page > 1:
+            break
+    return out
+
+
+def find_history_posts(session: requests.Session, item: dict) -> list[dict]:
+    source = source_url(item)
+    latest_episode = episode_number(item.get("episode"))
+    anime_title = str(item.get("anime_title") or "")
+    route = item.get("handler") or classify_source_url(source)
+    if latest_episode is None or latest_episode <= 1 or not source or not anime_title:
+        return []
+    if route == "naver":
+        return search_naver_history(session, source, anime_title, latest_episode)
+    if route == "blogspot":
+        return search_blogspot_history(session, source, anime_title, latest_episode)
+    if route == "tistory":
+        return search_tistory_history(session, source, anime_title, latest_episode)
+    return []
+
+
+def historical_destination(item: dict, target: Path, episode: str) -> Path:
+    return (
+        target / "anissia_subtitles"
+        / safe_name(f"{item.get('anime_no', '')}__{item.get('anime_title', '')}")
+        / safe_name(f"{episode or '0'}화")
+        / safe_name(item.get("creator") or "unknown")
+    )
+
+
+def maybe_backfill_history(session: requests.Session, state: dict, state_path: Path,
+                           item: dict, target: Path) -> None:
+    if item.get("source") != "anissia":
+        return
+
+    latest_episode = episode_number(item.get("episode"))
+    route = item.get("handler") or classify_source_url(source_url(item))
+    if latest_episode is None or latest_episode <= 1:
+        return
+    if route not in {"naver", "blogspot", "tistory"}:
+        return
+
+    key = backfill_identity(item)
+    if key in state["backfill_done"]:
+        return
+
+    # If discovery/search itself fails, do not mark this creator/work as done.
+    # A later monthly Pi run can retry the one-time search.
+    rows = find_history_posts(session, item)
+    downloaded = 0
+    errors: list[str] = []
+    for row in sorted(rows, key=lambda value: episode_number(value.get("episode")) or 0):
+        destination = historical_destination(item, target, str(row.get("episode") or ""))
+        try:
+            files = download_source_page(
+                session,
+                str(row.get("url") or ""),
+                destination,
+                classify_source_url(str(row.get("url") or "")),
+            )
+            downloaded += len(files)
+            print(
+                f"[+] backfill {item.get('anime_no')} {row.get('episode')}화 "
+                f"{item.get('creator')}: {len(files)} file(s)"
+            )
+        except Exception as exc:
+            errors.append(f"{row.get('episode')}화 {row.get('url')}: {exc}")
+            print(
+                f"[-] backfill {item.get('anime_no')} {row.get('episode')}화 "
+                f"{item.get('creator')}: {exc}"
+            )
+
+    state["backfill_done"][key] = {
+        "anime_no": str(item.get("anime_no") or ""),
+        "anime_title": str(item.get("anime_title") or ""),
+        "creator": str(item.get("creator") or ""),
+        "source_host": (urlparse(source_url(item)).hostname or "").lower(),
+        "searched_from_episode": str(item.get("episode") or ""),
+        "found_posts": len(rows),
+        "downloaded_files": downloaded,
+        "failed_posts": len(errors),
+        "completed_at": dt.datetime.now(KST).isoformat(timespec="seconds"),
+        "errors": errors[:10],
+    }
+    save_state(state_path, state)
+    print(
+        f"[=] backfill done {item.get('anime_no')} {item.get('creator')}: "
+        f"{len(rows)} post(s), {downloaded} file(s), {len(errors)} failed"
+    )
 
 
 def google_drive_file_id(url: str) -> str | None:
@@ -875,6 +1182,15 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
         else:
             raise RuntimeError(f"Unknown subtitle source: {source}")
 
+        if source == "anissia":
+            try:
+                maybe_backfill_history(session, state, state_path, item, target)
+            except Exception as backfill_exc:
+                # The current subtitle download succeeded. A failed one-time
+                # archive search must not turn the current item into a retry.
+                # Leaving backfill_done unset lets a future run try again.
+                print(f"[-] backfill search {item_id}: {backfill_exc}")
+
         state["success"][item_id] = {
             "source": source,
             "source_url": item.get("source_url"),
@@ -919,6 +1235,7 @@ def main() -> None:
     if args.dry_run:
         print(f"Local retry items: {len(state['retry'])}")
         print(f"Waiting for URL: {len(state['waiting_url'])}")
+        print(f"Backfill completed: {len(state['backfill_done'])}")
         print(f"Pending queue Releases: {len(pending)}")
         for release in pending:
             print(f"  - {release['tag_name']}")
@@ -931,6 +1248,7 @@ def main() -> None:
 
     print(f"Local retry items: {len(state['retry'])}")
     print(f"Waiting for URL: {len(state['waiting_url'])}")
+    print(f"Backfill completed: {len(state['backfill_done'])}")
     print(f"Pending queue Releases: {len(pending)}")
 
     args.target.mkdir(parents=True, exist_ok=True)
@@ -991,6 +1309,7 @@ def main() -> None:
         "success": len(state["success"]),
         "retry": len(state["retry"]),
         "waiting_url": len(state["waiting_url"]),
+        "backfill_done": len(state["backfill_done"]),
         "processed_releases": len(state["processed_releases"]),
         "retired": len(state["retired"]),
         "retired_this_run": retired_count,
