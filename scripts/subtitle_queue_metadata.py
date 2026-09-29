@@ -167,7 +167,19 @@ def read_episode_evidence(text: str, *, filename: bool = False) -> dict:
     episodes: set[int] = set()
     ranges: set[tuple[int, int]] = set()
 
-    working = raw
+    # Remove explicit season ranges before looking for episode ranges so
+    # "Season 1-4" is not recorded as episodes 1-4.
+    working = re.sub(
+        r"(?:season|시즌)\\s*\\d{1,2}\\s*(?:-|~|–|—|to|에서)\\s*(?:(?:season|시즌)\\s*)?\\d{1,2}",
+        " ",
+        raw,
+        flags=re.I,
+    )
+    working = re.sub(
+        r"(?<!\\d)\\d{1,2}\\s*(?:-|~|–|—|에서)\\s*\\d{1,2}\\s*기",
+        " ",
+        working,
+    )
     range_matches = list(re.finditer(
         r"(?<!\d)(\d{1,3})\s*(?:-|~|–|—|to)\s*(\d{1,3})(?:\s*(?:화|話|회))?",
         working,
@@ -206,7 +218,7 @@ def read_episode_evidence(text: str, *, filename: bool = False) -> dict:
         if 0 < value < 1000:
             episodes.add(value)
 
-    if filename:
+    if filename and not ranges:
         stem = Path(raw).stem
         stem = re.sub(r"(?:\s*\[[^\]]*\])+$", "", stem).strip()
         match = re.search(
