@@ -76,8 +76,12 @@ def classify_waiting_reason(item: dict) -> str:
     if str(item.get("source_url") or "").strip():
         return ""
     if str(item.get("source") or "") == "anissia":
-        episode = _episode_int(item.get("episode"))
-        if episode is None:
+        raw_episode = str(item.get("episode") or "").strip()
+        try:
+            episode = float(raw_episode)
+        except ValueError:
+            episode = None
+        if episode is None or episode <= 0:
             return "future_or_unreleased"
     return "no_url_yet"
 
