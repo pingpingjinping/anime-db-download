@@ -9,6 +9,8 @@ on:
     paths:
       - 'scripts/discover_subtitles.py'
       - 'scripts/pi_download_subtitle_queues.py'
+      - 'scripts/subtitle_queue_metadata.py'
+      - 'scripts/test_subtitle_queue_metadata.py'
       - 'scripts/pi_monthly_sync.sh'
       - 'state/subtitle-discovery.json'
       - 'requirements-pi-subtitles.txt'
@@ -33,7 +35,12 @@ jobs:
       - name: Validate scripts
         shell: bash
         run: |
-          python -m py_compile scripts/discover_subtitles.py scripts/pi_download_subtitle_queues.py
+          python -m py_compile \
+            scripts/discover_subtitles.py \
+            scripts/pi_download_subtitle_queues.py \
+            scripts/subtitle_queue_metadata.py \
+            scripts/test_subtitle_queue_metadata.py
+          python scripts/test_subtitle_queue_metadata.py
           bash -n scripts/pi_monthly_sync.sh
 
   discover:
