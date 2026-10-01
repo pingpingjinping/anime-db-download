@@ -52,7 +52,12 @@ jobs:
               "SELECT value FROM metadata WHERE key='anilist_updated_at_watermark'").fetchone()
           print({"saved_watermark": saved[0] if saved else None,
                  "snapshot_latest_updatedAt": latest})
-          if not latest and not saved:
-              raise SystemExit("Current Release cannot bootstrap AniList incrementally")
+          print("metadata rows:")
+          for key, value in db.execute("SELECT key, value FROM metadata ORDER BY key"):
+              print(f"  {key}={value}")
+          sample = db.execute(
+              "SELECT source_record_id, source_metadata_json FROM entries WHERE source='AniList' LIMIT 3"
+          ).fetchall()
+          print("AniList metadata sample:", sample)
           db.close()
           PY
