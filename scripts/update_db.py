@@ -168,8 +168,19 @@ def resolve_anilist_watermark(db, now):
     if snapshot_watermark:
         return min(snapshot_watermark, now), "snapshot_updatedAt"
 
+    generated = db.execute(
+        "SELECT value FROM metadata WHERE key='generated_at'").fetchone()
+    if generated:
+        try:
+            generated_date = dt.date.fromisoformat(str(generated[0])[:10])
+            generated_at = dt.datetime.combine(
+                generated_date, dt.time.min, tzinfo=dt.timezone.utc)
+            return min(int(generated_at.timestamp()), now), "snapshot_generated_at"
+        except (TypeError, ValueError):
+            pass
+
     raise ValueError(
-        "AniList watermark missing and snapshot contains no usable updatedAt metadata; "
+        "AniList watermark missing and snapshot contains neither updatedAt nor generated_at; "
         "refusing an unbounded bootstrap scan")
 
 
