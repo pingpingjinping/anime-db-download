@@ -6,7 +6,7 @@ AniList, ReAnime, Onnada, Anissia 네 출처의 애니메이션 DB를 비공개 
 
 매월 1일 10:17 KST GitHub Actions가 Release `db-v1`의 `anime_four_sources_multilingual_prepared.zip`을 내려받아 네 출처만 갱신합니다.
 
-- AniList: `UPDATED_AT_DESC` 순으로 저장한 체크포인트 이후만 확인합니다. 첫 증분 실행에 체크포인트가 없으면 기존 DB에 저장된 AniList `updatedAt` 최댓값을 시작점으로 삼고, 그 값도 없으면 무작정 장기간 조회하지 않고 중단합니다. API 요청 사이에 5초 기다리며 최근 하루를 겹쳐 확인해 페이지 경계 누락을 줄입니다.
+- AniList: `UPDATED_AT_DESC` 순으로 저장한 체크포인트 이후만 확인합니다. 첫 증분 실행에 체크포인트가 없으면 기존 DB의 AniList `updatedAt` 최댓값을 우선 사용하고, 구형 스냅샷처럼 그 값이 없으면 DB `generated_at` 생성일을 시작점으로 삼습니다. 둘 다 없으면 무작정 장기간 조회하지 않고 중단합니다. API 요청 사이에 5초 기다리며 최근 하루를 겹쳐 확인해 페이지 경계 누락을 줄입니다.
 - Anissia: 공개 목록 API에서 최근 페이지를 확인합니다.
 - ReAnime: 연도 내림차순 API에서 신규 항목을 확인합니다.
 - Onnada: 목록 페이지와 신규 상세 페이지를 1.2초 간격으로 확인합니다.
