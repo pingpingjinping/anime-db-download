@@ -1,6 +1,9 @@
 name: Monthly anime DB refresh
 
 on:
+  push:
+    branches:
+      - fix/db-release-asset-clobber
   schedule:
     # 1st of each month, 10:17 KST (01:17 UTC)
     - cron: '17 1 1 * *'
@@ -74,9 +77,16 @@ jobs:
           with gzip.open(root / "anime.db.gz", "rb") as src, raw_db.open("wb") as dst:
               while chunk := src.read(1024 * 1024):
                   dst.write(chunk)
-          archive = root / "anime_four_sources_multilingual_prepared_updated.zip"
+          archive = root / "anime_four_sources_multilingual_prepared.zip"
           with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
               zf.write(raw_db, arcname=entry)
           PY
-            gh release upload db-v1 "$RUNNER_TEMP/anime_four_sources_multilingual_prepared_updated.zip#anime_four_sources_multilingual_prepared.zip" --repo "$GITHUB_REPOSITORY" --clobber
+            gh release upload db-v1 "$RUNNER_TEMP/anime_four_sources_multilingual_prepared.zip" --repo "$GITHUB_REPOSITORY" --clobber
+
+            legacy_asset_id="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/db-v1" \
+              --jq '.assets[] | select(.name == "anime_four_sources_multilingual_prepared_updated.zip") | .id' | head -n 1)"
+            if [ -n "$legacy_asset_id" ]; then
+              echo "Removing stale duplicate Release asset: $legacy_asset_id"
+              gh api --method DELETE "repos/$GITHUB_REPOSITORY/releases/assets/$legacy_asset_id"
+            fi
           fi
