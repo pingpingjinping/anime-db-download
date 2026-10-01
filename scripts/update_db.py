@@ -21,7 +21,6 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SNAPSHOT = ROOT / "snapshot" / "anime.db.gz"
 SOURCES = {"AniList", "ReAnime", "Onnada", "Anissia"}
 ANILIST_URL = "https://graphql.anilist.co"
-ANILIST_LOOKBACK_SECONDS = 30 * 24 * 60 * 60
 ANILIST_OVERLAP_SECONDS = 24 * 60 * 60
 ANILIST_PAGE_SIZE = 50
 ANILIST_MAX_PAGES = 100
@@ -139,6 +138,41 @@ def incoming_rows(source, path):
                     yield json.loads(line)
 
 
+def latest_anilist_updated_at(db):
+    """Return the newest AniList updatedAt already captured in the snapshot."""
+    latest = 0
+    for (raw_metadata,) in db.execute(
+            "SELECT source_metadata_json FROM entries WHERE source='AniList'"):
+        try:
+            metadata = json.loads(raw_metadata or "{}")
+            updated = int(metadata.get("updatedAt") or 0)
+        except (TypeError, ValueError, json.JSONDecodeError):
+            continue
+        latest = max(latest, updated)
+    return latest or None
+
+
+def resolve_anilist_watermark(db, now):
+    """Use the saved checkpoint, or bootstrap it from the existing snapshot."""
+    saved = db.execute(
+        "SELECT value FROM metadata WHERE key='anilist_updated_at_watermark'").fetchone()
+    if saved:
+        try:
+            value = int(saved[0])
+        except (TypeError, ValueError):
+            value = 0
+        if value > 0:
+            return min(value, now), "saved"
+
+    snapshot_watermark = latest_anilist_updated_at(db)
+    if snapshot_watermark:
+        return min(snapshot_watermark, now), "snapshot_updatedAt"
+
+    raise ValueError(
+        "AniList watermark missing and snapshot contains no usable updatedAt metadata; "
+        "refusing an unbounded bootstrap scan")
+
+
 def anilist_rows(since, known):
     query = """
     query ($page: Int!, $perPage: Int!) {
@@ -191,7 +225,7 @@ def anilist_rows(since, known):
 def online_rows(source, known, anilist_since=None):
     if source == "AniList":
         if anilist_since is None:
-            anilist_since = int(time.time()) - ANILIST_LOOKBACK_SECONDS
+            raise ValueError("AniList incremental cutoff is required")
         yield from anilist_rows(anilist_since, known)
     elif source == "Anissia":
         first = fetch_json("https://api.anissia.net/anime/list/0?q=")
@@ -327,10 +361,14 @@ def main():
                 known = {str(r[0]) for r in db.execute("SELECT source_record_id FROM entries WHERE source=?", (source,))}
                 now = int(time.time())
                 if source == "AniList" and filename is None:
-                    saved = db.execute("SELECT value FROM metadata WHERE key='anilist_updated_at_watermark'").fetchone()
-                    watermark = int(saved[0]) if saved else now - ANILIST_LOOKBACK_SECONDS + ANILIST_OVERLAP_SECONDS
+                    watermark, watermark_source = resolve_anilist_watermark(db, now)
                     # Re-read the previous day's boundary so same-second updates or moving result pages are not lost.
                     anilist_since = max(0, watermark - ANILIST_OVERLAP_SECONDS)
+                    print(json.dumps({
+                        "anilist_watermark_source": watermark_source,
+                        "anilist_watermark": watermark,
+                        "anilist_since": anilist_since,
+                    }))
                 else:
                     watermark = None
                     anilist_since = None
