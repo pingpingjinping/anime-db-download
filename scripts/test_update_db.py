@@ -1,66 +1,76 @@
 #!/usr/bin/env python3
-import json
-import sqlite3
 import unittest
+from unittest import mock
 
 import update_db
 
 
-class AniListWatermarkTests(unittest.TestCase):
-    def make_db(self):
-        db = sqlite3.connect(":memory:")
-        db.execute("CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
-        db.execute("CREATE TABLE entries (source TEXT NOT NULL, source_metadata_json TEXT)")
-        return db
+class FakeResponse:
+    def __init__(self, rows, has_next_page):
+        self.status_code = 200
+        self.headers = {}
+        self._payload = {
+            "data": {
+                "Page": {
+                    "pageInfo": {"hasNextPage": has_next_page},
+                    "media": rows,
+                }
+            }
+        }
 
-    def test_saved_watermark_wins(self):
-        db = self.make_db()
-        db.execute("INSERT INTO metadata VALUES ('anilist_updated_at_watermark', '1700000000')")
-        db.execute("INSERT INTO entries VALUES ('AniList', ?)",
-                   (json.dumps({"updatedAt": 1800000000}),))
+    def raise_for_status(self):
+        pass
+
+    def json(self):
+        return self._payload
+
+
+class AniListIdIncrementTests(unittest.TestCase):
+    def test_id_watermark_uses_highest_numeric_id(self):
         self.assertEqual(
-            update_db.resolve_anilist_watermark(db, 1900000000),
-            (1700000000, "saved"),
+            update_db.anilist_id_watermark({"100", "250", "not-an-id", "42"}),
+            250,
         )
 
-    def test_bootstraps_from_latest_snapshot_updated_at(self):
-        db = self.make_db()
-        db.executemany("INSERT INTO entries VALUES ('AniList', ?)", [
-            (json.dumps({"updatedAt": 1700000000}),),
-            (json.dumps({"updatedAt": 1750000000}),),
-            ("not-json",),
-            (json.dumps({"updatedAt": None}),),
-        ])
-        self.assertEqual(
-            update_db.resolve_anilist_watermark(db, 1900000000),
-            (1750000000, "snapshot_updatedAt"),
-        )
+    def test_id_watermark_rejects_missing_numeric_ids(self):
+        with self.assertRaisesRegex(ValueError, "no numeric source IDs"):
+            update_db.anilist_id_watermark({"", "not-an-id"})
 
-    def test_snapshot_watermark_is_clamped_to_now(self):
-        db = self.make_db()
-        db.execute("INSERT INTO entries VALUES ('AniList', ?)",
-                   (json.dumps({"updatedAt": 2000000000}),))
-        self.assertEqual(
-            update_db.resolve_anilist_watermark(db, 1900000000),
-            (1900000000, "snapshot_updatedAt"),
+    @mock.patch.object(update_db.time, "sleep", return_value=None)
+    def test_rows_stop_when_stored_id_is_reached(self, _sleep):
+        response = FakeResponse(
+            [{"id": 105}, {"id": 104}, {"id": 100}, {"id": 99}],
+            has_next_page=True,
         )
+        with mock.patch.object(update_db.requests, "post", return_value=response) as post:
+            rows = list(update_db.anilist_rows(100))
 
-    def test_bootstraps_from_snapshot_generated_at(self):
-        db = self.make_db()
-        db.execute("INSERT INTO metadata VALUES ('generated_at', '2026-09-27')")
-        db.execute("INSERT INTO entries VALUES ('AniList', '{}')")
-        expected = int(update_db.dt.datetime(
-            2026, 9, 27, tzinfo=update_db.dt.timezone.utc).timestamp())
-        self.assertEqual(
-            update_db.resolve_anilist_watermark(db, 1900000000),
-            (expected, "snapshot_generated_at"),
-        )
+        self.assertEqual([row["id"] for row in rows], [105, 104])
+        self.assertEqual(post.call_count, 1)
+        payload = post.call_args.kwargs["json"]
+        self.assertIn("sort: [ID_DESC]", payload["query"])
 
-    def test_refuses_blind_bootstrap_without_snapshot_timestamp(self):
-        db = self.make_db()
-        db.execute("INSERT INTO entries VALUES ('AniList', '{}')")
-        with self.assertRaisesRegex(ValueError, "refusing an unbounded bootstrap scan"):
-            update_db.resolve_anilist_watermark(db, 1900000000)
+    @mock.patch.object(update_db.time, "sleep", return_value=None)
+    def test_rows_page_until_stored_id_is_reached(self, _sleep):
+        responses = [
+            FakeResponse([{"id": 105}, {"id": 104}], has_next_page=True),
+            FakeResponse([{"id": 103}, {"id": 100}], has_next_page=True),
+        ]
+        with mock.patch.object(update_db.requests, "post", side_effect=responses) as post:
+            rows = list(update_db.anilist_rows(100))
+
+        self.assertEqual([row["id"] for row in rows], [105, 104, 103])
+        self.assertEqual(post.call_count, 2)
+
+    @mock.patch.object(update_db.time, "sleep", return_value=None)
+    def test_rows_fail_closed_if_checkpoint_is_not_found(self, _sleep):
+        responses = [
+            FakeResponse([{"id": 105}], has_next_page=True),
+            FakeResponse([{"id": 104}], has_next_page=True),
+        ]
+        with mock.patch.object(update_db, "ANILIST_MAX_PAGES", 2),              mock.patch.object(update_db.requests, "post", side_effect=responses):
+            with self.assertRaisesRegex(ValueError, "ID scan exceeded 2 pages"):
+                list(update_db.anilist_rows(100))
 
 
 if __name__ == "__main__":
