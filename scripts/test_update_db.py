@@ -45,7 +45,18 @@ class AniListWatermarkTests(unittest.TestCase):
             (1900000000, "snapshot_updatedAt"),
         )
 
-    def test_refuses_blind_bootstrap_without_updated_at(self):
+    def test_bootstraps_from_snapshot_generated_at(self):
+        db = self.make_db()
+        db.execute("INSERT INTO metadata VALUES ('generated_at', '2026-09-27')")
+        db.execute("INSERT INTO entries VALUES ('AniList', '{}')")
+        expected = int(update_db.dt.datetime(
+            2026, 9, 27, tzinfo=update_db.dt.timezone.utc).timestamp())
+        self.assertEqual(
+            update_db.resolve_anilist_watermark(db, 1900000000),
+            (expected, "snapshot_generated_at"),
+        )
+
+    def test_refuses_blind_bootstrap_without_snapshot_timestamp(self):
         db = self.make_db()
         db.execute("INSERT INTO entries VALUES ('AniList', '{}')")
         with self.assertRaisesRegex(ValueError, "refusing an unbounded bootstrap scan"):
