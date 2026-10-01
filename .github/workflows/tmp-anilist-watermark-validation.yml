@@ -15,9 +15,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install dependencies
         run: python3 -m pip install requests beautifulsoup4
-      - name: Run watermark unit tests
+      - name: Run AniList incremental unit tests
         run: cd scripts && python3 -m unittest -v test_update_db.py
-      - name: Validate current Release snapshot bootstrap
+      - name: Validate current Release with live AniList ID scan
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -47,51 +47,17 @@ jobs:
           db_path = Path("${{ runner.temp }}") / "validate.db"
           db_path.write_bytes(raw)
           db = sqlite3.connect(db_path)
-          latest = update_db.latest_anilist_updated_at(db)
-          saved = db.execute(
-              "SELECT value FROM metadata WHERE key='anilist_updated_at_watermark'").fetchone()
-          print({"saved_watermark": saved[0] if saved else None,
-                 "snapshot_latest_updatedAt": latest})
-          import time
-          watermark, source = update_db.resolve_anilist_watermark(db, int(time.time()))
-          since = watermark - update_db.ANILIST_OVERLAP_SECONDS
-          print({"resolved_source": source, "watermark": watermark, "since": since})
-          if source != "snapshot_generated_at":
-              raise SystemExit(f"Expected snapshot_generated_at bootstrap, got {source}")
-
-          known_ids = [
-              int(row[0]) for row in db.execute(
+          known = {
+              str(row[0]) for row in db.execute(
                   "SELECT source_record_id FROM entries WHERE source='AniList'")
-              if str(row[0]).isdigit()
-          ]
-          max_known_id = max(known_ids)
-          query = """
-          query ($page: Int!, $perPage: Int!, $idGreater: Int!) {
-            Page(page: $page, perPage: $perPage) {
-              media(type: ANIME, countryOfOrigin: JP,
-                format_in: [TV, TV_SHORT, MOVIE, OVA, ONA],
-                id_greater: $idGreater, sort: [ID]) { id updatedAt }
-            }
           }
-          """
-          response = update_db.requests.post(
-              update_db.ANILIST_URL,
-              json={"query": query, "variables": {
-                  "page": 1,
-                  "perPage": update_db.ANILIST_PAGE_SIZE,
-                  "idGreater": max_known_id,
-              }},
-              timeout=30,
-          )
-          response.raise_for_status()
-          payload = response.json()
-          if payload.get("errors"):
-              raise SystemExit(payload["errors"])
-          rows = payload.get("data", {}).get("Page", {}).get("media") or []
+          after_id = update_db.anilist_id_watermark(known)
+          rows = list(update_db.anilist_rows(after_id))
           ids = [int(row["id"]) for row in rows]
-          print({"max_known_id": max_known_id, "new_id_rows": len(ids),
-                 "first_ids": ids[:10]})
-          if any(media_id <= max_known_id for media_id in ids):
-              raise SystemExit("AniList id_greater returned an ID at or below the watermark")
+          print({"stored_max_id": after_id, "new_rows": len(ids),
+                 "new_id_min": min(ids) if ids else None,
+                 "new_id_max": max(ids) if ids else None})
+          if any(media_id <= after_id for media_id in ids):
+              raise SystemExit("ID scan returned an item at or below the stored watermark")
           db.close()
           PY
