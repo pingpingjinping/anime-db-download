@@ -21,7 +21,6 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SNAPSHOT = ROOT / "snapshot" / "anime.db.gz"
 SOURCES = {"AniList", "ReAnime", "Onnada", "Anissia"}
 ANILIST_URL = "https://graphql.anilist.co"
-ANILIST_OVERLAP_SECONDS = 24 * 60 * 60
 ANILIST_PAGE_SIZE = 50
 ANILIST_MAX_PAGES = 100
 ANILIST_DELAY_SECONDS = 5.0  # Deliberately gentle: at most 12 requests/minute.
@@ -138,60 +137,22 @@ def incoming_rows(source, path):
                     yield json.loads(line)
 
 
-def latest_anilist_updated_at(db):
-    """Return the newest AniList updatedAt already captured in the snapshot."""
-    latest = 0
-    for (raw_metadata,) in db.execute(
-            "SELECT source_metadata_json FROM entries WHERE source='AniList'"):
-        try:
-            metadata = json.loads(raw_metadata or "{}")
-            updated = int(metadata.get("updatedAt") or 0)
-        except (TypeError, ValueError, json.JSONDecodeError):
-            continue
-        latest = max(latest, updated)
-    return latest or None
+def anilist_id_watermark(known):
+    """Return the highest numeric AniList ID already stored in the snapshot."""
+    numeric_ids = [int(value) for value in known if str(value).isdigit()]
+    if not numeric_ids:
+        raise ValueError("AniList snapshot contains no numeric source IDs")
+    return max(numeric_ids)
 
 
-def resolve_anilist_watermark(db, now):
-    """Use the saved checkpoint, or bootstrap it from the existing snapshot."""
-    saved = db.execute(
-        "SELECT value FROM metadata WHERE key='anilist_updated_at_watermark'").fetchone()
-    if saved:
-        try:
-            value = int(saved[0])
-        except (TypeError, ValueError):
-            value = 0
-        if value > 0:
-            return min(value, now), "saved"
-
-    snapshot_watermark = latest_anilist_updated_at(db)
-    if snapshot_watermark:
-        return min(snapshot_watermark, now), "snapshot_updatedAt"
-
-    generated = db.execute(
-        "SELECT value FROM metadata WHERE key='generated_at'").fetchone()
-    if generated:
-        try:
-            generated_date = dt.date.fromisoformat(str(generated[0])[:10])
-            generated_at = dt.datetime.combine(
-                generated_date, dt.time.min, tzinfo=dt.timezone.utc)
-            return min(int(generated_at.timestamp()), now), "snapshot_generated_at"
-        except (TypeError, ValueError):
-            pass
-
-    raise ValueError(
-        "AniList watermark missing and snapshot contains neither updatedAt nor generated_at; "
-        "refusing an unbounded bootstrap scan")
-
-
-def anilist_rows(since, known):
+def anilist_rows(after_id):
     query = """
     query ($page: Int!, $perPage: Int!) {
       Page(page: $page, perPage: $perPage) {
         pageInfo { hasNextPage }
         media(type: ANIME, countryOfOrigin: JP,
           format_in: [TV, TV_SHORT, MOVIE, OVA, ONA],
-          sort: [UPDATED_AT_DESC]) {
+          sort: [ID_DESC]) {
           id idMal updatedAt
           title { romaji english native }
           format status
@@ -202,7 +163,6 @@ def anilist_rows(since, known):
     }
     """
     page = 1
-    saw_old = False
     while page <= ANILIST_MAX_PAGES:
         response = requests.post(ANILIST_URL,
             json={"query": query, "variables": {"page": page, "perPage": ANILIST_PAGE_SIZE}},
@@ -220,24 +180,23 @@ def anilist_rows(since, known):
         if not isinstance(page_data, dict) or not isinstance(page_data.get("media"), list):
             raise ValueError(f"Unexpected AniList response; refusing incomplete update: {payload}")
         for row in page_data["media"]:
-            updated = int(row.get("updatedAt") or 0)
-            if updated < since:
-                saw_old = True
-                break
-            if str(row.get("id") or "") not in known:
-                yield row
-        if saw_old or not page_data.get("pageInfo", {}).get("hasNextPage"):
+            media_id = int(row.get("id") or 0)
+            if media_id <= after_id:
+                return
+            yield row
+        if not page_data.get("pageInfo", {}).get("hasNextPage"):
             return
         page += 1
         time.sleep(ANILIST_DELAY_SECONDS)
-    raise ValueError(f"AniList update exceeded {ANILIST_MAX_PAGES} pages; refusing partial snapshot")
+    raise ValueError(
+        f"AniList ID scan exceeded {ANILIST_MAX_PAGES} pages before reaching stored ID {after_id}")
 
 
-def online_rows(source, known, anilist_since=None):
+def online_rows(source, known, anilist_after_id=None):
     if source == "AniList":
-        if anilist_since is None:
-            raise ValueError("AniList incremental cutoff is required")
-        yield from anilist_rows(anilist_since, known)
+        if anilist_after_id is None:
+            raise ValueError("AniList ID watermark is required")
+        yield from anilist_rows(anilist_after_id)
     elif source == "Anissia":
         first = fetch_json("https://api.anissia.net/anime/list/0?q=")
         data = first.get("data") or {}
@@ -370,20 +329,12 @@ def main():
                 tasks.append((source, Path(filename)))
             for source, filename in tasks:
                 known = {str(r[0]) for r in db.execute("SELECT source_record_id FROM entries WHERE source=?", (source,))}
-                now = int(time.time())
                 if source == "AniList" and filename is None:
-                    watermark, watermark_source = resolve_anilist_watermark(db, now)
-                    # Re-read the previous day's boundary so same-second updates or moving result pages are not lost.
-                    anilist_since = max(0, watermark - ANILIST_OVERLAP_SECONDS)
-                    print(json.dumps({
-                        "anilist_watermark_source": watermark_source,
-                        "anilist_watermark": watermark,
-                        "anilist_since": anilist_since,
-                    }))
+                    anilist_after_id = anilist_id_watermark(known)
+                    print(json.dumps({"anilist_id_watermark": anilist_after_id}))
                 else:
-                    watermark = None
-                    anilist_since = None
-                rows = online_rows(source, known, anilist_since) if filename is None else incoming_rows(source, filename)
+                    anilist_after_id = None
+                rows = online_rows(source, known, anilist_after_id) if filename is None else incoming_rows(source, filename)
                 seen = set()
                 added = modified = scanned = 0
                 for row in rows:
@@ -434,10 +385,6 @@ def main():
                                    (source, source_id))
                 if not scanned and filename is not None:
                     raise ValueError(f"{source} yielded no records; refusing incomplete update")
-                if source == "AniList" and filename is None:
-                    if watermark != now:
-                        db.execute("INSERT OR REPLACE INTO metadata VALUES ('anilist_updated_at_watermark', ?)", (str(now),))
-                        state_changed = True
                 counts[source] = {"scanned": scanned, "added": added, "modified": modified}
             matching = refresh_auto_matches(db)
             state_changed = state_changed or matching["changed"]
