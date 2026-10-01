@@ -1,9 +1,6 @@
 name: Monthly anime DB refresh
 
 on:
-  push:
-    branches:
-      - fix/db-release-asset-clobber
   schedule:
     # 1st of each month, 10:17 KST (01:17 UTC)
     - cron: '17 1 1 * *'
