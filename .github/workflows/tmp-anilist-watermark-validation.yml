@@ -58,5 +58,33 @@ jobs:
           print({"resolved_source": source, "watermark": watermark, "since": since})
           if source != "snapshot_generated_at":
               raise SystemExit(f"Expected snapshot_generated_at bootstrap, got {source}")
+
+          query = """
+          query ($page: Int!, $perPage: Int!) {
+            Page(page: $page, perPage: $perPage) {
+              media(type: ANIME, countryOfOrigin: JP,
+                format_in: [TV, TV_SHORT, MOVIE, OVA, ONA],
+                sort: [UPDATED_AT_DESC]) { updatedAt }
+            }
+          }
+          """
+          response = update_db.requests.post(
+              update_db.ANILIST_URL,
+              json={"query": query, "variables": {
+                  "page": update_db.ANILIST_MAX_PAGES,
+                  "perPage": update_db.ANILIST_PAGE_SIZE,
+              }},
+              timeout=30,
+          )
+          response.raise_for_status()
+          payload = response.json()
+          if payload.get("errors"):
+              raise SystemExit(payload["errors"])
+          rows = payload.get("data", {}).get("Page", {}).get("media") or []
+          page100_oldest = min((int(row.get("updatedAt") or 0) for row in rows), default=0)
+          print({"page100_rows": len(rows), "page100_oldest": page100_oldest,
+                 "bootstrap_since": since})
+          if rows and page100_oldest >= since:
+              raise SystemExit("Bootstrap cutoff still extends beyond the 100-page safety limit")
           db.close()
           PY
