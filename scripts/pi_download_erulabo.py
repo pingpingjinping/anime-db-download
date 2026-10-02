@@ -2,12 +2,13 @@
 """Automatically click and download pending Erulabo subtitle pages sequentially.
 
 Iterates over all items in state.erulabo_pending:
-1. Opens the page and centers the download button
-2. Clicks the button using the virtual mouse
-3. Waits for the browser download to finish (up to timeout)
-4. Automatically saves the downloaded file with its original name (.zip) to disk
-5. Removes the item from state.erulabo_pending only on success
-6. Moves to the next item
+1. Navigates to the source URL in Chromium (DISPLAY=:99)
+2. Locates the button[data-file-url] and scrolls it into view
+3. Moves virtual mouse cursor to the button's exact center and sends mouse click
+4. Waits for the browser download event to complete (up to timeout)
+5. Saves the file with its original name (.zip) to ~/anime-db-download/downloads
+6. Removes the completed item from state.json
+7. Proceeds to the next queue item
 """
 from __future__ import annotations
 
@@ -26,16 +27,16 @@ DEFAULT_DOWNLOAD_DIR = Path.home() / "anime-db-download/downloads"
 DEFAULT_DISPLAY = ":99"
 DEFAULT_CDP_PORT = 9222
 WINDOW_SIZE = (1280, 900)
-DEFAULT_TIMEOUT_SECONDS = 60  # 최대 다운로드 대기 시간 (초)
+DEFAULT_TIMEOUT_SECONDS = 60
 
 
 def load_state(path: Path) -> dict:
     if not path.exists():
-        raise RuntimeError(f"Subtitle state does not exist: {path}")
+        raise RuntimeError(f"상태 파일이 존재하지 않습니다: {path}")
     state = json.loads(path.read_text(encoding="utf-8"))
     pending = state.get("erulabo_pending")
     if not isinstance(pending, dict):
-        raise RuntimeError("Subtitle state has no erulabo_pending map")
+        raise RuntimeError("상태 파일에 'erulabo_pending' 맵이 없습니다.")
     return state
 
 
@@ -48,7 +49,7 @@ def save_state(path: Path, state: dict) -> None:
 def command_path(name: str) -> str:
     value = shutil.which(name)
     if not value:
-        raise RuntimeError(f"Required command not found: {name}")
+        raise RuntimeError(f"필수 명령어를 찾을 수 없습니다: {name}")
     return value
 
 
@@ -70,7 +71,7 @@ def wait_until(predicate, timeout: float, description: str) -> None:
         if predicate():
             return
         time.sleep(0.25)
-    raise RuntimeError(f"Timed out waiting for {description}")
+    raise RuntimeError(f"{description} 대기 시간 초과 ({timeout}초)")
 
 
 def spawn(command: list[str], log_path: Path, *, env: dict[str, str] | None = None) -> None:
@@ -90,10 +91,10 @@ def spawn(command: list[str], log_path: Path, *, env: dict[str, str] | None = No
 def display_number(display: str) -> str:
     value = display.strip()
     if not value.startswith(":"):
-        raise RuntimeError(f"Unsupported X display: {display}")
+        raise RuntimeError(f"지원하지 않는 X 디스플레이 형식: {display}")
     number = value[1:].split(".", 1)[0]
     if not number.isdigit():
-        raise RuntimeError(f"Unsupported X display: {display}")
+        raise RuntimeError(f"지원하지 않는 X 디스플레이 형식: {display}")
     return number
 
 
@@ -170,9 +171,10 @@ def process_item(page, item_id: str, item: dict, save_dir: Path, timeout_sec: in
         button = page.locator("button[data-file-url]").first
         button.wait_for(state="visible", timeout=15_000)
     except Exception:
-        print(f"[!] {item_id}: 다운로드 버튼을 찾지 못했습니다. 건너뜁니다.")
+        print(f"[!] {item_id}: 다운로드 버튼을 찾지 못했습니다.")
         return False
 
+    # 뷰포트 중앙으로 스크롤 정렬
     button.evaluate(
         """el => el.scrollIntoView({
             behavior: "instant",
@@ -184,38 +186,42 @@ def process_item(page, item_id: str, item: dict, save_dir: Path, timeout_sec: in
 
     box = button.bounding_box()
     if box is None:
-        print(f"[!] {item_id}: 버튼 영역(Bounding Box)을 가져올 수 없습니다.")
+        print(f"[!] {item_id}: 버튼 좌표(Bounding Box)를 읽을 수 없습니다.")
         return False
 
     center_x = box["x"] + box["width"] / 2.0
     center_y = box["y"] + box["height"] / 2.0
 
-    print(f"    파일 URL: {button.get_attribute('data-file-url')}")
-    print(f"    가상 마우스 좌표: ({round(center_x)}, {round(center_y)})")
-
-    page.mouse.move(center_x, center_y)
-    page.wait_for_timeout(300)
+    print(f"    버튼 파일 속성: {button.get_attribute('data-file-url')}")
+    print(f"    가상 마우스 목표 좌표: ({round(center_x)}, {round(center_y)})")
 
     try:
-        print(f"    [*] 마우스 클릭 전송 및 다운로드 대기 중 (최대 {timeout_sec}초)...")
+        print(f"    [*] 가상 마우스 클릭 및 다운로드 대기 중 (최대 {timeout_sec}초)...")
         with page.expect_download(timeout=timeout_sec * 1000) as download_info:
-            page.mouse.click(center_x, center_y)
+            # 1. 가상 마우스 커서를 버튼 중심 위치로 이동
+            page.mouse.move(center_x, center_y)
+            page.wait_for_timeout(200)
+
+            # 2. 순수 가상 마우스 좌클릭 신호 전송 (JS 코드 사용 X)
+            page.mouse.down()
+            page.wait_for_timeout(100)
+            page.mouse.up()
+            print("    [+] 가상 마우스 클릭 신호 전송 완료")
 
         download = download_info.value
-        # 브라우저 임시 이름 대신 서버가 제공한 원래 파일명(xxx.zip) 획득
         filename = download.suggested_filename
 
         save_dir.mkdir(parents=True, exist_ok=True)
         save_path = save_dir / filename
 
-        # 임시 경로(/tmp/playwright-artifacts-...)에서 목적지 폴더로 온전한 파일명으로 저장
+        # 원래 파일명(.zip)으로 다운로드 폴더에 저장
         download.save_as(save_path)
 
-        print(f"    [+] [SUCCESS] 파일 다운로드 및 저장 성공: {save_path}")
+        print(f"    [+] [성공] 파일 다운로드 및 저장 완료: {save_path}")
         return True
 
     except Exception as exc:
-        print(f"    [-] [FAIL] 다운로드 감지 실패 또는 타임아웃: {exc}")
+        print(f"    [-] [실패] 다운로드 에러 또는 타임아웃: {exc}")
         return False
 
 
@@ -236,7 +242,7 @@ def main() -> None:
         return
 
     print(f"총 대기 항목 수: {len(pending_items)}개")
-    print(f"파일 저장 경로: {args.download_dir}")
+    print(f"저장 대상 폴더: {args.download_dir}")
 
     ensure_xvfb(args.display)
     ensure_chromium(args.display, args.profile, args.cdp_port)
@@ -262,17 +268,17 @@ def main() -> None:
             )
 
             if success:
-                # 다운로드가 정상 완료되었을 때만 JSON에서 제거 후 즉시 파일 갱신
+                # 다운로드가 성공한 경우에만 JSON 상태 파일에서 삭제
                 state["erulabo_pending"].pop(item_id, None)
                 save_state(args.state, state)
-                print(f"    [v] 상태 업데이트 완료: {item_id} 큐에서 삭제됨")
+                print(f"    [v] 상태 업데이트: {item_id} 삭제 완료")
             else:
-                print(f"    [!] 항목 {item_id} 처리에 실패하여 큐에 유지합니다.")
+                print(f"    [!] {item_id} 처리 실패로 큐에 보존합니다.")
 
-            # 다음 다운로드로 넘어가기 전 안전 쿨타임 (2초)
+            # 다음 항목으로 넘어가기 전 2초 대기
             page.wait_for_timeout(2000)
 
-    print("\n모든 대기 항목 처리가 끝났습니다.")
+    print("\n모든 대기열 처리가 완료되었습니다.")
 
 
 if __name__ == "__main__":
