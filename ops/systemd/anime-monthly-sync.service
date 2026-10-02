@@ -1,5 +1,5 @@
 [Unit]
-Description=Apply anime DB Release and download queued subtitles on the Pi
+Description=Apply monthly anime DB Release and AniAll mappings on the Pi
 Wants=network-online.target
 After=network-online.target docker.service
 
