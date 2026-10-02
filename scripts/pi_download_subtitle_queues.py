@@ -1248,6 +1248,7 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
     if item_id in state["success"]:
         state["retry"].pop(item_id, None)
         state["waiting_url"].pop(item_id, None)
+        state["erulabo_pending"].pop(item_id, None)
         return True
 
     # Missing source URLs are metadata-incomplete records, not download
@@ -1308,6 +1309,7 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
         }
         state["retry"].pop(item_id, None)
         state["waiting_url"].pop(item_id, None)
+        state["erulabo_pending"].pop(item_id, None)
         save_state(state_path, state)
         print(f"[+] {item_id}: {len(files)} file(s)")
         return True
