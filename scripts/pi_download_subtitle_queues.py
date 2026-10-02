@@ -868,7 +868,7 @@ def attachment_candidates(page_url: str, html_text: str) -> list[dict]:
     seen: set[str] = set()
 
     def add(url: str, filename: str = "") -> None:
-        url = unquote((url or "").replace("&amp;", "&")).strip()
+        url = (url or "").replace("&amp;", "&").strip()
         if not url:
             return
         absolute = urljoin(page_url, url)
@@ -1193,42 +1193,15 @@ def download_source_page(session: requests.Session, source_url: str, destination
 def download_aniall(session: requests.Session, item: dict, target: Path) -> list[Path]:
     response = request(session, item["source_url"])
     candidates = attachment_candidates(response.url, response.text)
-    if not candidates:
-        raise RuntimeError("No AniAll subtitle attachment found")
-
-    destination = target / "aniall_subtitles" / safe_name(item.get("title") or item.get("post_id") or "unknown")
     zip_candidates = [
         candidate for candidate in candidates
         if Path(clean_attachment_name(candidate.get("filename") or "")).suffix.lower() == ".zip"
         or ".zip" in candidate["url"].lower()
     ]
-
-    # Prefer the ZIP link exactly as before. Some Tistory posts expose both a
-    # signed kakaocdn ZIP URL and another attachment route, though. A stale
-    # signed URL can return 404 while the attachment is still downloadable in
-    # a browser. Only after the preferred ZIP candidates fail, try the other
-    # attachment candidates from the same freshly fetched post.
-    if zip_candidates:
-        try:
-            return unique_downloads(session, zip_candidates, destination, response.url)
-        except Exception as preferred_error:
-            preferred_urls = {candidate["url"] for candidate in zip_candidates}
-            fallback_candidates = [
-                candidate for candidate in candidates
-                if candidate["url"] not in preferred_urls
-            ]
-            if not fallback_candidates:
-                raise
-            try:
-                return unique_downloads(
-                    session, fallback_candidates, destination, response.url
-                )
-            except Exception as fallback_error:
-                raise RuntimeError(
-                    f"AniAll preferred ZIP download failed: {preferred_error}; "
-                    f"fallback attachment download failed: {fallback_error}"
-                ) from fallback_error
-
+    candidates = zip_candidates or candidates
+    if not candidates:
+        raise RuntimeError("No AniAll subtitle attachment found")
+    destination = target / "aniall_subtitles" / safe_name(item.get("title") or item.get("post_id") or "unknown")
     return unique_downloads(session, candidates, destination, response.url)
 
 
