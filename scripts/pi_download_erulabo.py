@@ -4,9 +4,10 @@
 Iterates over all items in state.erulabo_pending:
 1. Opens the page and centers the download button
 2. Clicks the button using the virtual mouse
-3. Waits for 60 seconds (download margin)
-4. Removes the item from state.erulabo_pending and updates state.json
-5. Moves to the next item
+3. Waits for the browser download to finish (up to timeout)
+4. Automatically saves the downloaded file with its original name (.zip) to disk
+5. Removes the item from state.erulabo_pending only on success
+6. Moves to the next item
 """
 from __future__ import annotations
 
@@ -14,18 +15,18 @@ import argparse
 import json
 import os
 import shutil
-import socket
-import subprocess
 import time
 import urllib.request
 from pathlib import Path
+import subprocess
 
 STATE_FILE = Path.home() / ".local/state/anime-db-download/subtitle-queue-state.json"
 PROFILE_DIR = Path.home() / ".local/share/anime-db-download/erulabo-browser-profile"
+DEFAULT_DOWNLOAD_DIR = Path.home() / "anime-db-download/downloads"
 DEFAULT_DISPLAY = ":99"
 DEFAULT_CDP_PORT = 9222
 WINDOW_SIZE = (1280, 900)
-WAIT_AFTER_CLICK_SECONDS = 60  # 클릭 후 대기 시간 (1분)
+DEFAULT_TIMEOUT_SECONDS = 60  # 최대 다운로드 대기 시간 (초)
 
 
 def load_state(path: Path) -> dict:
@@ -153,7 +154,7 @@ def get_pending_list(state: dict) -> list[tuple[str, dict]]:
     return [(item_id, item) for _, item_id, item in rows]
 
 
-def process_item(page, item_id: str, item: dict) -> bool:
+def process_item(page, item_id: str, item: dict, save_dir: Path, timeout_sec: int) -> bool:
     url = str(item.get("source_url") or "").strip()
     print(f"\n[>] 처리 시작: {item_id}")
     print(f"    URL: {url}")
@@ -190,26 +191,42 @@ def process_item(page, item_id: str, item: dict) -> bool:
     center_y = box["y"] + box["height"] / 2.0
 
     print(f"    파일 URL: {button.get_attribute('data-file-url')}")
-    print(f"    가상 마우스 좌표 클릭: ({round(center_x)}, {round(center_y)})")
+    print(f"    가상 마우스 좌표: ({round(center_x)}, {round(center_y)})")
 
-    # 가상 마우스 이동 및 클릭
     page.mouse.move(center_x, center_y)
     page.wait_for_timeout(300)
-    page.mouse.click(center_x, center_y)
-    print("    [+] 클릭 완료!")
 
-    print(f"    [*] 다운로드 대기 중... ({WAIT_AFTER_CLICK_SECONDS}초 대기)")
-    time.sleep(WAIT_AFTER_CLICK_SECONDS)
-    return True
+    try:
+        print(f"    [*] 마우스 클릭 전송 및 다운로드 대기 중 (최대 {timeout_sec}초)...")
+        with page.expect_download(timeout=timeout_sec * 1000) as download_info:
+            page.mouse.click(center_x, center_y)
+
+        download = download_info.value
+        # 브라우저 임시 이름 대신 서버가 제공한 원래 파일명(xxx.zip) 획득
+        filename = download.suggested_filename
+
+        save_dir.mkdir(parents=True, exist_ok=True)
+        save_path = save_dir / filename
+
+        # 임시 경로(/tmp/playwright-artifacts-...)에서 목적지 폴더로 온전한 파일명으로 저장
+        download.save_as(save_path)
+
+        print(f"    [+] [SUCCESS] 파일 다운로드 및 저장 성공: {save_path}")
+        return True
+
+    except Exception as exc:
+        print(f"    [-] [FAIL] 다운로드 감지 실패 또는 타임아웃: {exc}")
+        return False
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--state", type=Path, default=STATE_FILE)
     parser.add_argument("--profile", type=Path, default=PROFILE_DIR)
+    parser.add_argument("--download-dir", type=Path, default=DEFAULT_DOWNLOAD_DIR)
     parser.add_argument("--display", default=DEFAULT_DISPLAY)
     parser.add_argument("--cdp-port", type=int, default=DEFAULT_CDP_PORT)
-    parser.add_argument("--wait-sec", type=int, default=WAIT_AFTER_CLICK_SECONDS)
+    parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_SECONDS)
     args = parser.parse_args()
 
     state = load_state(args.state)
@@ -219,6 +236,7 @@ def main() -> None:
         return
 
     print(f"총 대기 항목 수: {len(pending_items)}개")
+    print(f"파일 저장 경로: {args.download_dir}")
 
     ensure_xvfb(args.display)
     ensure_chromium(args.display, args.profile, args.cdp_port)
@@ -235,13 +253,24 @@ def main() -> None:
 
         for idx, (item_id, item) in enumerate(pending_items, 1):
             print(f"\n==================== [{idx}/{len(pending_items)}] ====================")
-            success = process_item(page, item_id, item)
+            success = process_item(
+                page=page,
+                item_id=item_id,
+                item=item,
+                save_dir=args.download_dir,
+                timeout_sec=args.timeout,
+            )
 
             if success:
-                # 상태 파일 갱신 (완료된 건 pop 처리 후 저장)
+                # 다운로드가 정상 완료되었을 때만 JSON에서 제거 후 즉시 파일 갱신
                 state["erulabo_pending"].pop(item_id, None)
                 save_state(args.state, state)
-                print(f"    [v] 상태 업데이트 완료: {item_id} 제거됨")
+                print(f"    [v] 상태 업데이트 완료: {item_id} 큐에서 삭제됨")
+            else:
+                print(f"    [!] 항목 {item_id} 처리에 실패하여 큐에 유지합니다.")
+
+            # 다음 다운로드로 넘어가기 전 안전 쿨타임 (2초)
+            page.wait_for_timeout(2000)
 
     print("\n모든 대기 항목 처리가 끝났습니다.")
 
