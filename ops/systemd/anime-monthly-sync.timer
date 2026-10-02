@@ -1,8 +1,8 @@
 [Unit]
-Description=Apply monthly anime DB and subtitle archive on the 2nd
+Description=Apply monthly anime DB on the 3rd at 02:00 KST
 
 [Timer]
-OnCalendar=*-*-02 10:45:00 Asia/Seoul
+OnCalendar=*-*-03 02:00:00 Asia/Seoul
 Persistent=true
 Unit=anime-monthly-sync.service
 
