@@ -3,12 +3,14 @@
 
 Iterates over all items in state.erulabo_pending:
 1. Navigates to the source URL in Chromium (DISPLAY=:99)
-2. Locates the button[data-file-url] and scrolls it into view
-3. Moves virtual mouse cursor to the button's exact center and sends mouse click
-4. Waits for the browser download event to complete (up to timeout)
-5. Saves the file with its original name (.zip) to ~/anime-db-download/downloads
-6. Removes the completed item from state.json
-7. Proceeds to the next queue item
+2. Waits generously for page rendering and assets to settle
+3. Locates the button[data-file-url] and scrolls it into view
+4. Waits for layout shift / animations to stop
+5. Moves virtual mouse cursor to the calculated center and sends mouse click
+6. Waits for the browser download event to complete (up to timeout)
+7. Saves the file with its original name (.zip) to ~/anime-db-download/downloads
+8. Removes the completed item from state.json
+9. Proceeds to the next queue item
 """
 from __future__ import annotations
 
@@ -161,20 +163,23 @@ def process_item(page, item_id: str, item: dict, save_dir: Path, timeout_sec: in
     print(f"    URL: {url}")
 
     try:
+        # 뼈대 로드 후 네트워크가 잦아들 때까지 대기
         page.goto(url, wait_until="domcontentloaded", timeout=60_000)
     except Exception as exc:
         print(f"[~] 네비게이션 경고: {exc}")
 
-    page.wait_for_timeout(2_000)
+    # 1. 브라우저 렌더링/광고/스크립트 로딩 안착 대기 (기존 2초 -> 5초로 증가)
+    print("    [*] 페이지 렌더링 안정화 대기 (5초)...")
+    page.wait_for_timeout(5_000)
 
     try:
         button = page.locator("button[data-file-url]").first
-        button.wait_for(state="visible", timeout=15_000)
+        button.wait_for(state="visible", timeout=20_000)
     except Exception:
         print(f"[!] {item_id}: 다운로드 버튼을 찾지 못했습니다.")
         return False
 
-    # 뷰포트 중앙으로 스크롤 정렬
+    # 뷰포트 중앙으로 스크롤 이동
     button.evaluate(
         """el => el.scrollIntoView({
             behavior: "instant",
@@ -182,8 +187,12 @@ def process_item(page, item_id: str, item: dict, save_dir: Path, timeout_sec: in
             inline: "center"
         })"""
     )
-    page.wait_for_timeout(500)
 
+    # 2. 스크롤 완료 및 레이아웃 밀림 방지 대기 (기존 0.5초 -> 2.5초로 증가)
+    print("    [*] 가운데 정렬 후 레이아웃 정지 대기 (2.5초)...")
+    page.wait_for_timeout(2_500)
+
+    # 정지가 끝난 최종 위치에서 좌표 측정
     box = button.bounding_box()
     if box is None:
         print(f"[!] {item_id}: 버튼 좌표(Bounding Box)를 읽을 수 없습니다.")
@@ -198,13 +207,14 @@ def process_item(page, item_id: str, item: dict, save_dir: Path, timeout_sec: in
     try:
         print(f"    [*] 가상 마우스 클릭 및 다운로드 대기 중 (최대 {timeout_sec}초)...")
         with page.expect_download(timeout=timeout_sec * 1000) as download_info:
-            # 1. 가상 마우스 커서를 버튼 중심 위치로 이동
+            # 커서를 버튼 위로 먼저 이동
             page.mouse.move(center_x, center_y)
-            page.wait_for_timeout(200)
+            # 호버 상태 안착 대기 (기존 0.2초 -> 0.8초로 증가)
+            page.wait_for_timeout(800)
 
-            # 2. 순수 가상 마우스 좌클릭 신호 전송 (JS 코드 사용 X)
+            # 순수 가상 마우스 좌클릭 신호 전송
             page.mouse.down()
-            page.wait_for_timeout(100)
+            page.wait_for_timeout(150)
             page.mouse.up()
             print("    [+] 가상 마우스 클릭 신호 전송 완료")
 
