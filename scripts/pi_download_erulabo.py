@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
-"""Automatically click and download pending Erulabo subtitle pages sequentially.
+"""Automatically click and finalize pending Erulabo subtitle downloads.
 
-Iterates over all items in state.erulabo_pending:
-1. Navigates to the source URL in Chromium (DISPLAY=:99)
-2. Locates the button[data-file-url] and scrolls it into view
-3. Waits 5 seconds for layout settling
-4. Moves virtual mouse cursor to the calculated center
-5. Waits 3 seconds on hover
-6. Sends a single mouse click (page.mouse.click)
-7. Waits for the browser download event to complete (up to timeout)
-8. Saves the file with its original name (.zip) to ~/anime-db-download/downloads
-9. Removes the completed item from state.json
-10. Proceeds to the next queue item
+Workflow:
+1. Opens pending items sequentially in persistent Chromium.
+2. Centers the download button and executes virtual mouse click.
+3. Downloads the file to a temporary staging folder.
+4. Moves the file into the canonical Anissia folder structure.
+5. Records metadata under state['success'] and removes it from state['erulabo_pending'].
+6. Saves state.json.
 """
 from __future__ import annotations
 
@@ -24,9 +20,14 @@ import urllib.request
 from pathlib import Path
 import subprocess
 
+# 기존 프로젝트 모듈 import
+from pi_download_subtitle_queues import safe_name, save_state
+from subtitle_queue_metadata import build_download_metadata
+
 STATE_FILE = Path.home() / ".local/state/anime-db-download/subtitle-queue-state.json"
 PROFILE_DIR = Path.home() / ".local/share/anime-db-download/erulabo-browser-profile"
-DEFAULT_DOWNLOAD_DIR = Path.home() / "anime-db-download/downloads"
+DEFAULT_TARGET = Path("/home/pi/streaming-project/subtitle-data")
+DEFAULT_STAGING_DIR = Path("/tmp/erulabo-staging-downloads")
 DEFAULT_DISPLAY = ":99"
 DEFAULT_CDP_PORT = 9222
 WINDOW_SIZE = (1280, 900)
@@ -41,12 +42,6 @@ def load_state(path: Path) -> dict:
     if not isinstance(pending, dict):
         raise RuntimeError("상태 파일에 'erulabo_pending' 맵이 없습니다.")
     return state
-
-
-def save_state(path: Path, state: dict) -> None:
-    temp_path = path.with_suffix(".tmp")
-    temp_path.write_text(json.dumps(state, indent=2, ensure_ascii=False), encoding="utf-8")
-    temp_path.replace(path)
 
 
 def command_path(name: str) -> str:
@@ -158,7 +153,69 @@ def get_pending_list(state: dict) -> list[tuple[str, dict]]:
     return [(item_id, item) for _, item_id, item in rows]
 
 
-def process_item(page, item_id: str, item: dict, save_dir: Path, timeout_sec: int) -> bool:
+def erulabo_destination(item: dict, target: Path) -> Path:
+    return (
+        target
+        / "anissia_subtitles"
+        / safe_name(f"{item.get('anime_no', '')}__{item.get('anime_title', '')}")
+        / safe_name(f"{item.get('episode') or '0'}화")
+        / safe_name(item.get("creator") or "unknown")
+    )
+
+
+def collision_safe_path(path: Path) -> Path:
+    """같은 파일명이 이미 있으면 덮어쓰지 않고 (1), (2)... 추가."""
+    if not path.exists():
+        return path
+    stem = path.stem
+    suffix = path.suffix
+    for n in range(1, 1000):
+        candidate = path.with_name(f"{stem} ({n}){suffix}")
+        if not candidate.exists():
+            return candidate
+    raise RuntimeError(f"Too many duplicate filenames: {path}")
+
+
+def finalize_erulabo_download(
+    *,
+    state: dict,
+    state_path: Path,
+    item_id: str,
+    item: dict,
+    downloaded_file: Path,
+    target: Path,
+) -> Path:
+    """Erulabo 임시 다운로드 파일을 기존 Anissia 구조로 이동하고
+
+    일반 downloader와 동일한 success metadata를 기록한다.
+    """
+    downloaded_file = downloaded_file.resolve()
+    if not downloaded_file.is_file():
+        raise RuntimeError(f"Downloaded file not found: {downloaded_file}")
+
+    destination = erulabo_destination(item, target)
+    destination.mkdir(parents=True, exist_ok=True)
+    final_path = collision_safe_path(destination / downloaded_file.name)
+
+    # 1. 파일 이동 (이동 실패 시 에러가 나면서 pending이 보존됨)
+    shutil.move(str(downloaded_file), str(final_path))
+
+    # 2. 메타데이터 구성 및 success 기록
+    metadata = build_download_metadata(
+        item,
+        [final_path],
+        target,
+    )
+    state.setdefault("success", {})[item_id] = metadata
+
+    # 3. 마지막으로 pending 삭제 및 상태 디스크 동기화
+    state.get("erulabo_pending", {}).pop(item_id, None)
+    save_state(state_path, state)
+
+    return final_path
+
+
+def process_item(page, item_id: str, item: dict, staging_dir: Path, timeout_sec: int) -> Path | None:
     url = str(item.get("source_url") or "").strip()
     print(f"\n[>] 처리 시작: {item_id}")
     print(f"    URL: {url}")
@@ -176,7 +233,7 @@ def process_item(page, item_id: str, item: dict, save_dir: Path, timeout_sec: in
         button.wait_for(state="visible", timeout=20_000)
     except Exception:
         print(f"[!] {item_id}: 다운로드 버튼을 찾지 못했습니다.")
-        return False
+        return None
 
     # 1. 가운데 정렬 이동
     button.evaluate(
@@ -187,15 +244,14 @@ def process_item(page, item_id: str, item: dict, save_dir: Path, timeout_sec: in
         })"""
     )
 
-    # 2. 가운데 정렬 후 5초 대기
+    # 2. 정렬 후 5초 대기
     print("    [*] 가운데 정렬 완료 -> 5초 대기 중...")
     page.wait_for_timeout(5_000)
 
-    # 대기 후 정확한 버튼 중심 좌표 계산
     box = button.bounding_box()
     if box is None:
         print(f"[!] {item_id}: 버튼 좌표를 읽을 수 없습니다.")
-        return False
+        return None
 
     center_x = box["x"] + box["width"] / 2.0
     center_y = box["y"] + box["height"] / 2.0
@@ -203,13 +259,13 @@ def process_item(page, item_id: str, item: dict, save_dir: Path, timeout_sec: in
     print(f"    버튼 파일 속성: {button.get_attribute('data-file-url')}")
     print(f"    가상 마우스 목표 좌표: ({round(center_x)}, {round(center_y)})")
 
-    # 3. 커서 이동 후 클릭 대기 3초
+    # 3. 커서 이동 후 3초 대기
     print("    [*] 커서 이동 중...")
     page.mouse.move(center_x, center_y)
     print("    [*] 커서 안착 완료 -> 클릭 대기 3초 중...")
     page.wait_for_timeout(3_000)
 
-    # 4. 1회 클릭 및 다운로드 감지
+    # 4. 1회 클릭 및 임시 디렉토리로 다운로드 수신
     try:
         print(f"    [*] 마우스 1회 클릭 및 다운로드 대기 중 (최대 {timeout_sec}초)...")
         with page.expect_download(timeout=timeout_sec * 1000) as download_info:
@@ -219,25 +275,25 @@ def process_item(page, item_id: str, item: dict, save_dir: Path, timeout_sec: in
         download = download_info.value
         filename = download.suggested_filename
 
-        save_dir.mkdir(parents=True, exist_ok=True)
-        save_path = save_dir / filename
+        staging_dir.mkdir(parents=True, exist_ok=True)
+        temp_download_path = staging_dir / filename
 
-        # 원래 파일명(.zip)으로 다운로드 폴더에 저장
-        download.save_as(save_path)
-
-        print(f"    [+] [성공] 파일 다운로드 및 저장 완료: {save_path}")
-        return True
+        # 1차 임시 저장
+        download.save_as(temp_download_path)
+        print(f"    [+] 1차 임시 다운로드 수신 완료: {temp_download_path}")
+        return temp_download_path
 
     except Exception as exc:
         print(f"    [-] [실패] 다운로드 에러 또는 타임아웃: {exc}")
-        return False
+        return None
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--state", type=Path, default=STATE_FILE)
     parser.add_argument("--profile", type=Path, default=PROFILE_DIR)
-    parser.add_argument("--download-dir", type=Path, default=DEFAULT_DOWNLOAD_DIR)
+    parser.add_argument("--target", type=Path, default=DEFAULT_TARGET)
+    parser.add_argument("--staging-dir", type=Path, default=DEFAULT_STAGING_DIR)
     parser.add_argument("--display", default=DEFAULT_DISPLAY)
     parser.add_argument("--cdp-port", type=int, default=DEFAULT_CDP_PORT)
     parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_SECONDS)
@@ -250,7 +306,7 @@ def main() -> None:
         return
 
     print(f"총 대기 항목 수: {len(pending_items)}개")
-    print(f"저장 대상 폴더: {args.download_dir}")
+    print(f"최종 자막 데이터 폴더: {args.target}")
 
     ensure_xvfb(args.display)
     ensure_chromium(args.display, args.profile, args.cdp_port)
@@ -267,23 +323,31 @@ def main() -> None:
 
         for idx, (item_id, item) in enumerate(pending_items, 1):
             print(f"\n==================== [{idx}/{len(pending_items)}] ====================")
-            success = process_item(
+            downloaded_temp_file = process_item(
                 page=page,
                 item_id=item_id,
                 item=item,
-                save_dir=args.download_dir,
+                staging_dir=args.staging_dir,
                 timeout_sec=args.timeout,
             )
 
-            if success:
-                # 다운로드가 성공한 경우에만 JSON 상태 파일에서 삭제
-                state["erulabo_pending"].pop(item_id, None)
-                save_state(args.state, state)
-                print(f"    [v] 상태 업데이트: {item_id} 삭제 완료")
+            if downloaded_temp_file:
+                # 파일 이동 -> success 기록 -> pending 제거 -> state.json 저장
+                final_path = finalize_erulabo_download(
+                    state=state,
+                    state_path=args.state,
+                    item_id=item_id,
+                    item=item,
+                    downloaded_file=downloaded_temp_file,
+                    target=args.target,
+                )
+                print(f"[+] [성공] Erulabo 자막 반영 완료")
+                print(f"    파일: {final_path}")
+                print(f"    상태: success 기록 + erulabo_pending 삭제")
             else:
-                print(f"    [!] {item_id} 처리 실패로 큐에 보존합니다.")
+                print(f"[!] {item_id} 다운로드 실패: 큐에 그대로 보존합니다.")
 
-            # 다음 항목으로 넘어가기 전 2초 대기
+            # 다음 항목으로 넘어가기 전 안전 쿨타임
             page.wait_for_timeout(2000)
 
     print("\n모든 대기열 처리가 완료되었습니다.")
