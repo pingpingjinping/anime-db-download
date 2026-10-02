@@ -36,9 +36,11 @@ docker compose up -d --build anime caddy
 docker compose ps
 ```
 
+Pi의 자동 반영은 매월 3일 02:00 KST에 실행됩니다. GitHub의 DB Release 갱신과 AniAll audit는 기존처럼 1일에 먼저 끝나므로 Pi는 준비된 최신 자산을 3일 새벽에 받아옵니다.
+
 Pi importer는 고정 행 수가 아닌 네 출처가 모두 있는지 확인하므로 월별 DB 증가분을 받아들입니다. 기존 스트리밍 링크와 기준 DB의 검토 연결은 importer가 다시 계산하거나 덮어쓰지 않습니다. AniAll 매칭 후보는 이 기준 DB 파일에 병합하지 않습니다.
 
-## 월별 자막 발견 + Pi 다운로드
+## 주간 자막 발견 + Pi 다운로드
 
 자막은 **GitHub에서 실제 파일을 받지 않습니다.** 역할을 둘로 나눕니다.
 
@@ -49,7 +51,7 @@ Pi importer는 고정 행 수가 아닌 네 출처가 모두 있는지 확인하
 
 ### GitHub discovery
 
-**Monthly subtitle discovery** workflow는 매월 1일 14:17 KST에 실행됩니다.
+**Weekly subtitle discovery** workflow는 매주 일요일 01:00 KST에 실행됩니다. Pi의 실제 자막 다운로드는 같은 날 04:00 KST에 시작하므로 discovery가 끝날 시간을 확보합니다.
 
 - AniAll: 자막자료실 목록과 게시글 메타데이터만 확인합니다. 첨부파일은 다운로드하지 않습니다.
 - Anissia: 전체 작품의 caption API만 확인합니다. caption의 `website` 페이지에는 접속하지 않습니다.
@@ -74,14 +76,12 @@ queue 예시:
 
 ### Pi 다운로드
 
-Pi는 매월 2일 10:45 KST에 다음 순서로 동작합니다.
+Pi는 역할을 두 timer로 분리합니다.
 
-1. 기존 `db-v1` Release를 받아 애니 DB import
-2. 아직 처리하지 않은 `subs-queue-*` Release를 순서대로 받음
-3. queue에 들어 있는 소수의 자막 페이지에만 실제 접속
-4. 첨부 ZIP/ASS/SMI 등을 `~/streaming-project/subtitle-data`에 저장
-5. 실패 항목은 Pi 로컬 retry state에 남기고 다음 실행에서 먼저 재시도
-6. 같은 URL/항목이 3개월 동안 계속 실패하면 4개월차부터 active retry에서 제거
+- 매월 3일 02:00 KST: 최신 `db-v1` Release를 받아 애니 DB를 반영하고 새 AniAll 매칭을 import
+- 매주 일요일 04:00 KST: 아직 처리하지 않은 `subs-queue-*` Release를 순서대로 받고 실제 자막 페이지/파일을 다운로드한 뒤 Erulabo pending도 이어서 처리
+
+주간 자막 다운로드에서는 queue에 들어 있는 소수의 실제 페이지에만 접속하고, 첨부 ZIP/ASS/SMI 등을 `~/streaming-project/subtitle-data`에 저장합니다. 실패 항목은 Pi 로컬 retry state에 남겨 다음 주 실행에서 먼저 재시도하며, 같은 URL/항목이 3개월 동안 계속 실패하면 4개월차부터 active retry에서 제거합니다.
 
 즉 Anissia 수천 작품 API 확인은 GitHub가 하고, Pi는 **신규 후보 몇 건의 실제 페이지/파일 다운로드만** 담당합니다. subtitle 다운로드 프로세스는 `nice -n 15` + `ionice -c3`로 낮은 우선순위로 실행됩니다.
 
@@ -102,13 +102,15 @@ python3 -m venv ~/.local/share/anime-db-download/venv
 
 sudo cp ~/anime-db-download/ops/systemd/anime-monthly-sync.service /etc/systemd/system/
 sudo cp ~/anime-db-download/ops/systemd/anime-monthly-sync.timer /etc/systemd/system/
+sudo cp ~/anime-db-download/ops/systemd/anime-weekly-subtitles.service /etc/systemd/system/
+sudo cp ~/anime-db-download/ops/systemd/anime-weekly-subtitles.timer /etc/systemd/system/
 
 # 기존 DB 전용 timer와 중복 실행되지 않게 비활성화
 sudo systemctl disable --now streaming-anime-db-update.timer 2>/dev/null || true
 
 sudo systemctl daemon-reload
-sudo systemctl enable --now anime-monthly-sync.timer
-systemctl list-timers anime-monthly-sync.timer
+sudo systemctl enable --now anime-monthly-sync.timer anime-weekly-subtitles.timer
+systemctl list-timers anime-monthly-sync.timer anime-weekly-subtitles.timer
 ```
 
 수동 테스트:
@@ -116,9 +118,12 @@ systemctl list-timers anime-monthly-sync.timer
 ```bash
 sudo systemctl start anime-monthly-sync.service
 journalctl -u anime-monthly-sync.service -n 200 --no-pager
+
+sudo systemctl start anime-weekly-subtitles.service
+journalctl -u anime-weekly-subtitles.service -n 200 --no-pager
 ```
 
-Pi 다운로드 state는 `~/.local/state/anime-db-download/subtitle-queue-state.json`, 실패 이력은 `~/.local/state/anime-db-download/subtitle-download-failed.jsonl`에 저장됩니다. Erulabo URL은 일반 retry와 분리해 `erulabo_pending`에 보관합니다. 월별 sync는 일반 queue 다운로드를 모두 끝낸 뒤 `scripts/pi_download_erulabo.py`를 자동 실행합니다. pending이 있으면 첫 Erulabo 페이지를 GUI Chromium에 열고 다운로드 버튼을 화면 중앙에 배치한 뒤 X11 커서를 버튼 위로 이동합니다. pending이 없으면 helper는 바로 종료합니다. helper는 버튼을 클릭하거나 success state를 변경하지 않습니다.
+Pi 다운로드 state는 `~/.local/state/anime-db-download/subtitle-queue-state.json`, 실패 이력은 `~/.local/state/anime-db-download/subtitle-download-failed.jsonl`에 저장됩니다. Erulabo URL은 일반 retry와 분리해 `erulabo_pending`에 보관합니다. 주간 subtitle sync는 일반 queue 다운로드를 모두 끝낸 뒤 `scripts/pi_download_erulabo.py`를 자동 실행합니다. pending이 있으면 첫 Erulabo 페이지를 GUI Chromium에 열고 다운로드 버튼을 화면 중앙에 배치한 뒤 X11 커서를 버튼 위로 이동합니다. pending이 없으면 helper는 바로 종료합니다. helper는 버튼을 클릭하거나 success state를 변경하지 않습니다.
 
 helper는 필요하면 Xvfb, Chromium, x11vnc, noVNC를 localhost 전용으로 기동하며 Chromium 프로필은 `~/.local/share/anime-db-download/erulabo-browser-profile`에 유지합니다. noVNC를 사용할 때는 Pi의 6080 포트를 외부에 직접 열지 말고 SSH 터널로 접속합니다. 수동 재실행이 필요하면 다음 명령을 사용할 수 있습니다.
 
@@ -138,4 +143,4 @@ helper는 필요하면 Xvfb, Chromium, x11vnc, noVNC를 localhost 전용으로 �
 
 이 메타데이터는 다운로드를 막거나 플레이어 회차를 자동 배치하기 위한 것이 아니라, 잘못 받은 자료를 나중에 안전하게 검토하기 위한 근거입니다.
 
-첫 전환 테스트는 머지 후 **Actions → Monthly subtitle discovery → Run workflow**를 한 번 실행해 2026-09-26 이후 queue를 새로 만든 다음, Pi에서 `anime-monthly-sync.service`를 수동 실행하면 됩니다.
+첫 전환 테스트는 머지 후 **Actions → Weekly subtitle discovery → Run workflow**를 한 번 실행해 queue를 만든 다음, Pi에서 `anime-weekly-subtitles.service`를 수동 실행하면 됩니다.
