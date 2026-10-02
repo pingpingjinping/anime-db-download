@@ -1,9 +1,10 @@
 name: Aniall Match Audit
 
 on:
-  schedule:
-    # Run after the four-source DB refresh on the 1st at 12:17 KST.
-    - cron: '17 3 1 * *'
+  workflow_run:
+    workflows: ["Monthly anime DB refresh"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
     inputs:
       db_tag:
@@ -22,6 +23,7 @@ permissions:
 
 jobs:
   audit:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
