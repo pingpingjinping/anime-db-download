@@ -51,7 +51,7 @@ Pi importer는 고정 행 수가 아닌 네 출처가 모두 있는지 확인하
 
 ### GitHub discovery
 
-**Weekly subtitle discovery** workflow는 매주 일요일 01:00 KST에 실행됩니다. Pi의 실제 자막 다운로드는 같은 날 04:00 KST에 시작하므로 discovery가 끝날 시간을 확보합니다.
+**Weekly subtitle discovery** workflow는 매주 토요일 04:00 KST에 실행됩니다. Pi의 실제 자막 다운로드는 다음 날인 일요일 04:00 KST에 시작하므로 약 24시간의 여유를 둡니다.
 
 - AniAll: 자막자료실 목록과 게시글 메타데이터만 확인합니다. 첨부파일은 다운로드하지 않습니다.
 - Anissia: 전체 작품의 caption API만 확인합니다. caption의 `website` 페이지에는 접속하지 않습니다.
