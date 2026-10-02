@@ -1,7 +1,7 @@
 {
   "version": 1,
   "bootstrap_cutoff_kst": "2026-09-25T23:59:59+09:00",
-  "watermark_kst": "2026-10-01T20:36:26+09:00",
+  "watermark_kst": "2026-10-03T07:38:28+09:00",
   "discovered": {
     "aniall": {
       "5571": {
@@ -38,6 +38,11 @@
         "published_at": "2026-09-29T10:06:04+09:00",
         "title": "[Ohys-Raws] 오리엔트 (BS7 1280x720 x264 AAC)_자막",
         "source_url": "https://aniall.tistory.com/5573"
+      },
+      "5579": {
+        "published_at": "2026-10-02T09:18:34+09:00",
+        "title": "[ReinForce] 스트라이크 더 블러드 (BDRip 1920x1080 x264 FLAC)_자막",
+        "source_url": "https://aniall.tistory.com/5579"
       }
     },
     "anissia": {
@@ -314,11 +319,66 @@
         "updated_at": "2026-09-30T14:27:00+09:00",
         "source_url": "",
         "handler": "empty"
+      },
+      "f6384ec04c3292aafe342c3790efadd2aa9cebc900beeee25b717ad9bf80b746": {
+        "id": "anissia:f6384ec04c3292aafe342c3790efadd2aa9cebc900beeee25b717ad9bf80b746",
+        "source": "anissia",
+        "anime_no": "3550",
+        "anime_title": "얼음 성벽 2기",
+        "episode": "15",
+        "creator": "C소라",
+        "updated_at": "2026-10-02T11:17:00+09:00",
+        "source_url": "https://csora556.blogspot.com/2026/10/2.html",
+        "handler": "blogspot"
+      },
+      "9d5a2412a182ffa7f0cb08004e1681a88b915aa35be21357a369994138f33d94": {
+        "id": "anissia:9d5a2412a182ffa7f0cb08004e1681a88b915aa35be21357a369994138f33d94",
+        "source": "anissia",
+        "anime_no": "3468",
+        "anime_title": "파리에 피는 에투알",
+        "episode": "1",
+        "creator": "하느",
+        "updated_at": "2026-10-01T23:15:00+09:00",
+        "source_url": "https://harne1.tistory.com/763",
+        "handler": "tistory"
+      },
+      "1769e71f219effbff83040537576f87ee86d70e7622a891572f2db2fe78ea7cb": {
+        "id": "anissia:1769e71f219effbff83040537576f87ee86d70e7622a891572f2db2fe78ea7cb",
+        "source": "anissia",
+        "anime_no": "3424",
+        "anime_title": "FX 전사 쿠루미",
+        "episode": "1",
+        "creator": "코코렛",
+        "updated_at": "2026-10-01T23:06:00+09:00",
+        "source_url": "https://felia.tistory.com/1187",
+        "handler": "tistory"
+      },
+      "9d1654fd0f70ac27f91fbef3bcc21a5a7dd33b3ff5a98480acceabee58970698": {
+        "id": "anissia:9d1654fd0f70ac27f91fbef3bcc21a5a7dd33b3ff5a98480acceabee58970698",
+        "source": "anissia",
+        "anime_no": "3271",
+        "anime_title": "원조! 뱅드림 쨩",
+        "episode": "52",
+        "creator": "C소라",
+        "updated_at": "2026-10-01T22:48:00+09:00",
+        "source_url": "https://csora556.blogspot.com/2025/11/blog-post_14.html",
+        "handler": "blogspot"
+      },
+      "b6ce2b31d4d69ab025913a6588c7ed7a0ab977166438ca3de5aae8093b0a75ec": {
+        "id": "anissia:b6ce2b31d4d69ab025913a6588c7ed7a0ab977166438ca3de5aae8093b0a75ec",
+        "source": "anissia",
+        "anime_no": "3188",
+        "anime_title": "전생 귀족, 감정 스킬로 성공하다 3기",
+        "episode": "1",
+        "creator": "에루샤",
+        "updated_at": "2026-10-02T09:00:00+09:00",
+        "source_url": "https://erulabo.com/859",
+        "handler": "website"
       }
     }
   },
   "retry": {
     "anissia_api": {}
   },
-  "last_run_at_utc": "2026-10-01T11:50:11+00:00"
+  "last_run_at_utc": "2026-10-02T22:51:52+00:00"
 }
