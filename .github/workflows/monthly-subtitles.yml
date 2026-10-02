@@ -1,9 +1,9 @@
-name: Monthly subtitle discovery
+name: Weekly subtitle discovery
 
 on:
   schedule:
-    # After the monthly DB refresh and AniAll audit: 14:17 KST (05:17 UTC)
-    - cron: '17 5 1 * *'
+    # Sunday 01:00 KST (Saturday 16:00 UTC), ahead of the Pi 04:00 download.
+    - cron: '0 16 * * 6'
   workflow_dispatch:
   pull_request:
     paths:
@@ -11,17 +11,17 @@ on:
       - 'scripts/pi_download_subtitle_queues.py'
       - 'scripts/subtitle_queue_metadata.py'
       - 'scripts/test_subtitle_queue_metadata.py'
-      - 'scripts/pi_monthly_sync.sh'
+      - 'scripts/pi_weekly_subtitle_sync.sh'
       - 'state/subtitle-discovery.json'
       - 'requirements-pi-subtitles.txt'
-      - 'ops/systemd/anime-monthly-sync.*'
+      - 'ops/systemd/anime-weekly-subtitles.*'
       - '.github/workflows/monthly-subtitles.yml'
 
 permissions:
   contents: write
 
 concurrency:
-  group: monthly-subtitle-discovery
+  group: weekly-subtitle-discovery
   cancel-in-progress: false
 
 jobs:
@@ -39,9 +39,10 @@ jobs:
             scripts/discover_subtitles.py \
             scripts/pi_download_subtitle_queues.py \
             scripts/subtitle_queue_metadata.py \
-            scripts/test_subtitle_queue_metadata.py
+            scripts/test_subtitle_queue_metadata.py \
+            scripts/pi_download_erulabo.py
           python scripts/test_subtitle_queue_metadata.py
-          bash -n scripts/pi_monthly_sync.sh
+          bash -n scripts/pi_weekly_subtitle_sync.sh
 
   discover:
     if: github.event_name != 'pull_request'
@@ -104,7 +105,7 @@ jobs:
           tag="subs-queue-${day}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           notes="$RUNNER_TEMP/subtitle-queue-notes.txt"
           {
-            echo "Monthly subtitle discovery queue"
+            echo "Weekly subtitle discovery queue"
             echo
             echo "- bootstrap cutoff: 2026-09-25 23:59:59 KST"
             echo "- queued: ${QUEUE_COUNT}"
@@ -151,7 +152,7 @@ jobs:
         shell: bash
         run: |
           {
-            echo "## Monthly subtitle discovery"
+            echo "## Weekly subtitle discovery"
             echo
             echo "- queued: ${{ steps.summary.outputs.queue_count || 'n/a' }}"
             echo "- AniAll: ${{ steps.summary.outputs.aniall || 'n/a' }}"
