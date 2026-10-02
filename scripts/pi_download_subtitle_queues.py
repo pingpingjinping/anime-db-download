@@ -868,7 +868,7 @@ def attachment_candidates(page_url: str, html_text: str) -> list[dict]:
     seen: set[str] = set()
 
     def add(url: str, filename: str = "") -> None:
-        url = unquote((url or "").replace("&amp;", "&")).strip()
+        url = (url or "").replace("&amp;", "&").strip()
         if not url:
             return
         absolute = urljoin(page_url, url)
