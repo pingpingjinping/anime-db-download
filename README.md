@@ -95,7 +95,7 @@ git clone git@github.com:pingpingjinping/anime-db-download.git
 cd ~/anime-db-download
 
 sudo apt update
-sudo apt install -y python3-venv
+sudo apt install -y python3-venv chromium xvfb x11vnc novnc websockify xdotool
 
 python3 -m venv ~/.local/share/anime-db-download/venv
 ~/.local/share/anime-db-download/venv/bin/pip install -r ~/anime-db-download/requirements-pi-subtitles.txt
@@ -118,7 +118,15 @@ sudo systemctl start anime-monthly-sync.service
 journalctl -u anime-monthly-sync.service -n 200 --no-pager
 ```
 
-Pi 다운로드 state는 `~/.local/state/anime-db-download/subtitle-queue-state.json`, 실패 이력은 `~/.local/state/anime-db-download/subtitle-download-failed.jsonl`에 저장됩니다. 실패 기간은 실행 횟수가 아니라 **달력 월 기준**으로 계산합니다. 예를 들어 9월에 처음 실패한 항목은 9·10·11월까지 재시도하고 12월(4개월차)부터 retry에서 제거합니다. 제거된 ID는 재처리 방지를 위해 state의 `retired`에 남고, 상세 이력은 `~/.local/state/anime-db-download/subtitle-download-retired.jsonl`에 기록됩니다. 같은 달에 수동 실행을 여러 번 해도 실패 개월 수는 늘어나지 않습니다. Pi가 한 달 이상 꺼져 있어도 미처리 queue Release를 오래된 순서부터 모두 소비합니다.
+Pi 다운로드 state는 `~/.local/state/anime-db-download/subtitle-queue-state.json`, 실패 이력은 `~/.local/state/anime-db-download/subtitle-download-failed.jsonl`에 저장됩니다. Erulabo URL은 일반 retry와 분리해 `erulabo_pending`에 보관합니다. 일반 queue 다운로드가 끝난 뒤 다음 helper를 실행하면 첫 pending Erulabo 페이지를 GUI Chromium에 열고 다운로드 버튼을 화면 중앙에 배치한 뒤 X11 커서를 버튼 위로 이동합니다. helper는 버튼을 클릭하거나 success state를 변경하지 않습니다.
+
+```bash
+~/.local/share/anime-db-download/venv/bin/python ~/anime-db-download/scripts/pi_download_erulabo.py
+```
+
+helper는 필요하면 Xvfb, Chromium, x11vnc, noVNC를 localhost 전용으로 기동하며 Chromium 프로필은 `~/.local/share/anime-db-download/erulabo-browser-profile`에 유지합니다. noVNC를 사용할 때는 Pi의 6080 포트를 외부에 직접 열지 말고 SSH 터널로 접속합니다.
+
+실패 기간은 실행 횟수가 아니라 **달력 월 기준**으로 계산합니다. 예를 들어 9월에 처음 실패한 항목은 9·10·11월까지 재시도하고 12월(4개월차)부터 retry에서 제거합니다. 제거된 ID는 재처리 방지를 위해 state의 `retired`에 남고, 상세 이력은 `~/.local/state/anime-db-download/subtitle-download-retired.jsonl`에 기록됩니다. 같은 달에 수동 실행을 여러 번 해도 실패 개월 수는 늘어나지 않습니다. Pi가 한 달 이상 꺼져 있어도 미처리 queue Release를 오래된 순서부터 모두 소비합니다.
 
 다운로드 state에는 진단 메타데이터도 함께 기록합니다.
 

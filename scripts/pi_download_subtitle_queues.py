@@ -170,6 +170,7 @@ def load_state(path: Path) -> dict:
             "success": {},
             "retry": {},
             "waiting_url": {},
+            "erulabo_pending": {},
             "retired": {},
             "backfill_done": {},
         }
@@ -180,6 +181,7 @@ def load_state(path: Path) -> dict:
     state.setdefault("success", {})
     state.setdefault("retry", {})
     state.setdefault("waiting_url", {})
+    state.setdefault("erulabo_pending", {})
     state.setdefault("retired", {})
     state.setdefault("backfill_done", {})
     return state
@@ -217,6 +219,24 @@ def first_failed_month(retry: dict) -> str:
 
 def source_url(item: dict) -> str:
     return str(item.get("source_url") or "").strip()
+
+
+def is_erulabo_url(value: str) -> bool:
+    host = (urlparse(value or "").hostname or "").lower().rstrip(".")
+    return host == "erulabo.com" or host.endswith(".erulabo.com")
+
+
+def move_to_erulabo_pending(state: dict, item_id: str, item: dict) -> None:
+    now = dt.datetime.now(KST).isoformat(timespec="seconds")
+    previous = state["erulabo_pending"].get(item_id) or {}
+    state["erulabo_pending"][item_id] = {
+        "item": item,
+        "queued_at": previous.get("queued_at") or now,
+        "last_seen": now,
+        "reason": "erulabo_turnstile",
+    }
+    state["retry"].pop(item_id, None)
+    state["waiting_url"].pop(item_id, None)
 
 
 def waiting_identity(item: dict) -> tuple[str, ...]:
@@ -1228,6 +1248,7 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
     if item_id in state["success"]:
         state["retry"].pop(item_id, None)
         state["waiting_url"].pop(item_id, None)
+        state["erulabo_pending"].pop(item_id, None)
         return True
 
     # Missing source URLs are metadata-incomplete records, not download
@@ -1249,6 +1270,12 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
 
     if item_id in state["retired"]:
         state["retry"].pop(item_id, None)
+        return False
+
+    if item.get("source") == "anissia" and is_erulabo_url(source_url(item)):
+        move_to_erulabo_pending(state, item_id, item)
+        save_state(state_path, state)
+        print(f"[>] {item_id}: queued for separate Erulabo browser step")
         return False
 
     try:
@@ -1282,6 +1309,7 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
         }
         state["retry"].pop(item_id, None)
         state["waiting_url"].pop(item_id, None)
+        state["erulabo_pending"].pop(item_id, None)
         save_state(state_path, state)
         print(f"[+] {item_id}: {len(files)} file(s)")
         return True
@@ -1322,6 +1350,7 @@ def main() -> None:
         print(f"Retry reasons: {reason_counts(state['retry'])}")
         print(f"Waiting for URL: {len(state['waiting_url'])}")
         print(f"Waiting reasons: {reason_counts(state['waiting_url'])}")
+        print(f"Erulabo browser pending: {len(state['erulabo_pending'])}")
         print(f"Backfill completed: {len(state['backfill_done'])}")
         print(f"Pending queue Releases: {len(pending)}")
         for release in pending:
@@ -1337,6 +1366,7 @@ def main() -> None:
     print(f"Retry reasons: {reason_counts(state['retry'])}")
     print(f"Waiting for URL: {len(state['waiting_url'])}")
     print(f"Waiting reasons: {reason_counts(state['waiting_url'])}")
+    print(f"Erulabo browser pending: {len(state['erulabo_pending'])}")
     print(f"Backfill completed: {len(state['backfill_done'])}")
     print(f"Pending queue Releases: {len(pending)}")
 
@@ -1401,6 +1431,7 @@ def main() -> None:
         "retry_reasons": reason_counts(state["retry"]),
         "waiting_url": len(state["waiting_url"]),
         "waiting_reasons": reason_counts(state["waiting_url"]),
+        "erulabo_pending": len(state["erulabo_pending"]),
         "backfill_done": len(state["backfill_done"]),
         "processed_releases": len(state["processed_releases"]),
         "retired": len(state["retired"]),
