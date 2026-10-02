@@ -19,7 +19,7 @@ AniList, ReAnime, Onnada, Anissia 네 출처의 애니메이션 DB를 비공개 
 
 ## AniAll 별도 매칭
 
-AniAll은 기준 DB의 출처 행으로 저장하지 않습니다. 매월 1일 12:17 KST 별도의 **Aniall Match Audit** workflow가 최신 4출처 DB를 받아 AniAll 자막자료실 전체 목록을 천천히 다시 확인하고, 제목·연도·시즌·형식 후보를 대조합니다. 시즌 종료 뒤 예전 작품의 자막 글이 추가될 수 있어, 최근 글만 훑지 않고 전체 목록을 다시 대조합니다.
+AniAll은 기준 DB의 출처 행으로 저장하지 않습니다. 매월 1일 10:17 KST에 시작하는 **Monthly anime DB refresh**가 성공적으로 끝나면 **Aniall Match Audit** workflow가 자동으로 이어서 실행됩니다. 따라서 DB 갱신이 늦어져도 audit가 먼저 시작하지 않으며, DB 갱신이 실패하면 자동 audit도 실행하지 않습니다. audit는 최신 4출처 DB를 받아 AniAll 자막자료실 전체 목록을 천천히 다시 확인하고, 제목·연도·시즌·형식 후보를 대조합니다. 시즌 종료 뒤 예전 작품의 자막 글이 추가될 수 있어, 최근 글만 훑지 않고 전체 목록을 다시 대조합니다.
 
 결과는 기준 DB ZIP과 분리된 GitHub Actions artifact로 보관하며, 후보는 검토용입니다. workflow는 **Actions → Aniall Match Audit → Run workflow**에서 수동 실행할 수도 있습니다. 기본적으로 1.2초 간격으로 요청합니다.
 
@@ -36,7 +36,7 @@ docker compose up -d --build anime caddy
 docker compose ps
 ```
 
-Pi의 자동 반영은 매월 3일 02:00 KST에 실행됩니다. GitHub의 DB Release 갱신과 AniAll audit는 기존처럼 1일에 먼저 끝나므로 Pi는 준비된 최신 자산을 3일 새벽에 받아옵니다.
+Pi의 자동 반영은 매월 3일 02:00 KST에 실행됩니다. GitHub의 DB Release 갱신이 성공하면 AniAll audit가 바로 이어서 실행되므로, Pi는 준비된 최신 자산을 3일 새벽에 받아옵니다.
 
 Pi importer는 고정 행 수가 아닌 네 출처가 모두 있는지 확인하므로 월별 DB 증가분을 받아들입니다. 기존 스트리밍 링크와 기준 DB의 검토 연결은 importer가 다시 계산하거나 덮어쓰지 않습니다. AniAll 매칭 후보는 이 기준 DB 파일에 병합하지 않습니다.
 
