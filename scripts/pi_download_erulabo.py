@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Prepare pending Erulabo subtitle pages in a persistent GUI Chromium session.
+"""Automatically click and download pending Erulabo subtitle pages sequentially.
 
-This helper is intentionally separate from pi_download_subtitle_queues.py.
-The normal queue downloader records Erulabo items in state.erulabo_pending.
-Run this script afterwards to open the first pending page, center its
-button[data-file-url] download control in the viewport, and move the X11
-pointer over the button. It does not click the button or mark the item as
-downloaded.
+Iterates over all items in state.erulabo_pending:
+1. Opens the page and centers the download button
+2. Clicks the button using the virtual mouse
+3. Waits for 60 seconds (download margin)
+4. Removes the item from state.erulabo_pending and updates state.json
+5. Moves to the next item
 """
 from __future__ import annotations
 
@@ -24,9 +24,8 @@ STATE_FILE = Path.home() / ".local/state/anime-db-download/subtitle-queue-state.
 PROFILE_DIR = Path.home() / ".local/share/anime-db-download/erulabo-browser-profile"
 DEFAULT_DISPLAY = ":99"
 DEFAULT_CDP_PORT = 9222
-DEFAULT_VNC_PORT = 5900
-DEFAULT_NOVNC_PORT = 6080
 WINDOW_SIZE = (1280, 900)
+WAIT_AFTER_CLICK_SECONDS = 60  # 클릭 후 대기 시간 (1분)
 
 
 def load_state(path: Path) -> dict:
@@ -39,19 +38,17 @@ def load_state(path: Path) -> dict:
     return state
 
 
+def save_state(path: Path, state: dict) -> None:
+    temp_path = path.with_suffix(".tmp")
+    temp_path.write_text(json.dumps(state, indent=2, ensure_ascii=False), encoding="utf-8")
+    temp_path.replace(path)
+
+
 def command_path(name: str) -> str:
     value = shutil.which(name)
     if not value:
         raise RuntimeError(f"Required command not found: {name}")
     return value
-
-
-def tcp_open(port: int) -> bool:
-    try:
-        with socket.create_connection(("127.0.0.1", port), timeout=0.5):
-            return True
-    except OSError:
-        return False
 
 
 def cdp_ready(port: int) -> bool:
@@ -144,43 +141,7 @@ def ensure_chromium(display: str, profile: Path, cdp_port: int) -> None:
     wait_until(lambda: cdp_ready(cdp_port), 15, "Chromium CDP")
 
 
-def ensure_vnc(display: str, vnc_port: int, novnc_port: int) -> None:
-    if not tcp_open(vnc_port):
-        x11vnc = command_path("x11vnc")
-        spawn(
-            [
-                x11vnc,
-                "-display",
-                display,
-                "-localhost",
-                "-rfbport",
-                str(vnc_port),
-                "-forever",
-                "-shared",
-                "-nopw",
-            ],
-            Path("/tmp/erulabo-x11vnc.log"),
-        )
-        wait_until(lambda: tcp_open(vnc_port), 8, "x11vnc")
-
-    if not tcp_open(novnc_port):
-        websockify = command_path("websockify")
-        web_root = Path("/usr/share/novnc")
-        if not (web_root / "vnc.html").exists():
-            raise RuntimeError(f"noVNC web root not found: {web_root}")
-        spawn(
-            [
-                websockify,
-                f"--web={web_root}",
-                f"127.0.0.1:{novnc_port}",
-                f"127.0.0.1:{vnc_port}",
-            ],
-            Path("/tmp/erulabo-novnc.log"),
-        )
-        wait_until(lambda: tcp_open(novnc_port), 8, "noVNC websockify")
-
-
-def first_pending(state: dict) -> tuple[str, dict] | None:
+def get_pending_list(state: dict) -> list[tuple[str, dict]]:
     rows = []
     for item_id, pending in state.get("erulabo_pending", {}).items():
         item = (pending or {}).get("item") or {}
@@ -188,106 +149,58 @@ def first_pending(state: dict) -> tuple[str, dict] | None:
         if not url:
             continue
         rows.append((str((pending or {}).get("queued_at") or ""), item_id, item))
-    if not rows:
-        return None
     rows.sort(key=lambda row: (row[0], row[1]))
-    _, item_id, item = rows[0]
-    return item_id, item
+    return [(item_id, item) for _, item_id, item in rows]
 
 
-def move_x_pointer(display: str, page, box: dict) -> tuple[int, int] | None:
-    xdotool = shutil.which("xdotool")
-    if not xdotool:
-        return None
+def process_item(page, item_id: str, item: dict) -> bool:
+    url = str(item.get("source_url") or "").strip()
+    print(f"\n[>] 처리 시작: {item_id}")
+    print(f"    URL: {url}")
 
-    metrics = page.evaluate(
-        """() => ({
-            screenX: window.screenX,
-            screenY: window.screenY,
-            outerWidth: window.outerWidth,
-            outerHeight: window.outerHeight,
-            innerWidth: window.innerWidth,
-            innerHeight: window.innerHeight
+    try:
+        page.goto(url, wait_until="domcontentloaded", timeout=60_000)
+    except Exception as exc:
+        print(f"[~] 네비게이션 경고: {exc}")
+
+    page.wait_for_timeout(2_000)
+
+    try:
+        button = page.locator("button[data-file-url]").first
+        button.wait_for(state="visible", timeout=15_000)
+    except Exception:
+        print(f"[!] {item_id}: 다운로드 버튼을 찾지 못했습니다. 건너뜁니다.")
+        return False
+
+    button.evaluate(
+        """el => el.scrollIntoView({
+            behavior: "instant",
+            block: "center",
+            inline: "center"
         })"""
     )
-    left_inset = max(0.0, (metrics["outerWidth"] - metrics["innerWidth"]) / 2.0)
-    top_inset = max(0.0, metrics["outerHeight"] - metrics["innerHeight"])
+    page.wait_for_timeout(500)
 
-    x = round(metrics["screenX"] + left_inset + box["x"] + box["width"] / 2.0)
-    y = round(metrics["screenY"] + top_inset + box["y"] + box["height"] / 2.0)
+    box = button.bounding_box()
+    if box is None:
+        print(f"[!] {item_id}: 버튼 영역(Bounding Box)을 가져올 수 없습니다.")
+        return False
 
-    env = os.environ.copy()
-    env["DISPLAY"] = display
-    subprocess.run(
-        [xdotool, "mousemove", "--sync", str(x), str(y)],
-        check=True,
-        env=env,
-    )
-    return x, y
+    center_x = box["x"] + box["width"] / 2.0
+    center_y = box["y"] + box["height"] / 2.0
 
+    print(f"    파일 URL: {button.get_attribute('data-file-url')}")
+    print(f"    가상 마우스 좌표 클릭: ({round(center_x)}, {round(center_y)})")
 
-def prepare_pending(item_id: str, item: dict, cdp_port: int, display: str) -> None:
-    try:
-        from playwright.sync_api import sync_playwright
-    except ImportError as exc:
-        raise RuntimeError(
-            "Playwright is not installed in this Python environment. "
-            "Install requirements-pi-subtitles.txt first."
-        ) from exc
+    # 가상 마우스 이동 및 클릭
+    page.mouse.move(center_x, center_y)
+    page.wait_for_timeout(300)
+    page.mouse.click(center_x, center_y)
+    print("    [+] 클릭 완료!")
 
-    url = str(item.get("source_url") or "").strip()
-    if not url:
-        raise RuntimeError(f"{item_id} has no source_url")
-
-    with sync_playwright() as playwright:
-        browser = playwright.chromium.connect_over_cdp(
-            f"http://127.0.0.1:{cdp_port}"
-        )
-        context = browser.contexts[0]
-        page = context.pages[0] if context.pages else context.new_page()
-
-        try:
-            page.goto(url, wait_until="domcontentloaded", timeout=60_000)
-        except Exception as exc:
-            # GUI Chromium can finish rendering a useful page even if navigation
-            # reports a transient network error. Let the selector check decide.
-            print(f"[~] navigation warning: {exc}")
-
-        page.wait_for_timeout(2_000)
-        button = page.locator("button[data-file-url]").first
-        button.wait_for(state="visible", timeout=30_000)
-
-        button.evaluate(
-            """el => el.scrollIntoView({
-                behavior: "instant",
-                block: "center",
-                inline: "center"
-            })"""
-        )
-        page.wait_for_timeout(500)
-
-        box = button.bounding_box()
-        if box is None:
-            raise RuntimeError("Erulabo download button has no bounding box")
-
-        pointer = move_x_pointer(display, page, box)
-        viewport_center = (
-            round(box["x"] + box["width"] / 2.0),
-            round(box["y"] + box["height"] / 2.0),
-        )
-
-        print(f"[+] Prepared Erulabo item: {item_id}")
-        print(f"    URL: {page.url}")
-        print(f"    file: {button.get_attribute('data-file-url')}")
-        print(f"    button center in viewport: {viewport_center[0]},{viewport_center[1]}")
-        if pointer is None:
-            print("    X pointer: not moved (xdotool is not installed)")
-        else:
-            print(f"    X pointer: {pointer[0]},{pointer[1]}")
-        print("    No click was sent.")
-
-        # Do not call browser.close(): this browser was started independently
-        # and must remain available for the manual noVNC step.
+    print(f"    [*] 다운로드 대기 중... ({WAIT_AFTER_CLICK_SECONDS}초 대기)")
+    time.sleep(WAIT_AFTER_CLICK_SECONDS)
+    return True
 
 
 def main() -> None:
@@ -296,30 +209,41 @@ def main() -> None:
     parser.add_argument("--profile", type=Path, default=PROFILE_DIR)
     parser.add_argument("--display", default=DEFAULT_DISPLAY)
     parser.add_argument("--cdp-port", type=int, default=DEFAULT_CDP_PORT)
-    parser.add_argument("--vnc-port", type=int, default=DEFAULT_VNC_PORT)
-    parser.add_argument("--novnc-port", type=int, default=DEFAULT_NOVNC_PORT)
+    parser.add_argument("--wait-sec", type=int, default=WAIT_AFTER_CLICK_SECONDS)
     args = parser.parse_args()
 
     state = load_state(args.state)
-    pending = first_pending(state)
-    if pending is None:
-        print("No pending Erulabo subtitle items.")
+    pending_items = get_pending_list(state)
+    if not pending_items:
+        print("대기 중인 Erulabo 자막 항목이 없습니다.")
         return
 
-    item_id, item = pending
-    print(f"Erulabo pending: {len(state['erulabo_pending'])}")
-    print(f"Preparing: {item_id}")
+    print(f"총 대기 항목 수: {len(pending_items)}개")
 
     ensure_xvfb(args.display)
     ensure_chromium(args.display, args.profile, args.cdp_port)
-    ensure_vnc(args.display, args.vnc_port, args.novnc_port)
-    prepare_pending(item_id, item, args.cdp_port, args.display)
 
-    print()
-    print(
-        f"noVNC is listening on Pi localhost:{args.novnc_port}. "
-        f"Use an SSH tunnel, then open /vnc.html."
-    )
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError as exc:
+        raise RuntimeError("Playwright가 설치되어 있지 않습니다.") from exc
+
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.connect_over_cdp(f"http://127.0.0.1:{args.cdp_port}")
+        context = browser.contexts[0]
+        page = context.pages[0] if context.pages else context.new_page()
+
+        for idx, (item_id, item) in enumerate(pending_items, 1):
+            print(f"\n==================== [{idx}/{len(pending_items)}] ====================")
+            success = process_item(page, item_id, item)
+
+            if success:
+                # 상태 파일 갱신 (완료된 건 pop 처리 후 저장)
+                state["erulabo_pending"].pop(item_id, None)
+                save_state(args.state, state)
+                print(f"    [v] 상태 업데이트 완료: {item_id} 제거됨")
+
+    print("\n모든 대기 항목 처리가 끝났습니다.")
 
 
 if __name__ == "__main__":
