@@ -171,9 +171,9 @@ def ensure_vnc(display: str, vnc_port: int, novnc_port: int) -> None:
         spawn(
             [
                 websockify,
+                f"--web={web_root}",
                 f"127.0.0.1:{novnc_port}",
                 f"127.0.0.1:{vnc_port}",
-                f"--web={web_root}",
             ],
             Path("/tmp/erulabo-novnc.log"),
         )
