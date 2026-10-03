@@ -34,11 +34,11 @@ class SubtitleQueueMetadataTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 queue_cache_cleanup(item, [root.parent / "outside.srt"], root)
 
-    def test_aniall_same_title_posts_use_distinct_source_ids(self):
+    def test_aniall_same_title_posts_share_the_title_folder(self):
         first = aniall_folder_identity({"post_id": "100", "title": "동일 제목", "source_url": "https://aniall.tistory.com/100"})
         second = aniall_folder_identity({"post_id": "101", "title": "동일 제목", "source_url": "https://aniall.tistory.com/101"})
-        self.assertEqual(first, "100__동일 제목")
-        self.assertNotEqual(first, second)
+        self.assertEqual(first, "동일 제목")
+        self.assertEqual(first, second)
 
     def test_aniall_invalid_or_conflicting_identity_is_rejected(self):
         for post_id, url in (("", "https://aniall.tistory.com/100"),
