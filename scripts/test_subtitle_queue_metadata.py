@@ -7,6 +7,7 @@ import zipfile
 from pathlib import Path
 
 from subtitle_queue_metadata import (
+    aniall_folder_identity,
     build_download_metadata,
     classify_failure,
     classify_waiting_reason,
@@ -16,6 +17,20 @@ from subtitle_queue_metadata import (
 
 
 class SubtitleQueueMetadataTests(unittest.TestCase):
+    def test_aniall_same_title_posts_use_distinct_source_ids(self):
+        first = aniall_folder_identity({"post_id": "100", "title": "동일 제목", "source_url": "https://aniall.tistory.com/100"})
+        second = aniall_folder_identity({"post_id": "101", "title": "동일 제목", "source_url": "https://aniall.tistory.com/101"})
+        self.assertEqual(first, "100__동일 제목")
+        self.assertNotEqual(first, second)
+
+    def test_aniall_invalid_or_conflicting_identity_is_rejected(self):
+        for post_id, url in (("", "https://aniall.tistory.com/100"),
+                             ("../100", "https://aniall.tistory.com/100"),
+                             ("100", "https://aniall.tistory.com/101")):
+            with self.subTest(post_id=post_id):
+                with self.assertRaises(ValueError):
+                    aniall_folder_identity({"post_id": post_id, "source_url": url})
+
     def test_history_match_keeps_distinguishing_subtitle(self):
         self.assertFalse(history_title_matches(
             "책벌레의 하극상 영주의 양녀 1화",
