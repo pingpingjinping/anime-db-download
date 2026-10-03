@@ -43,13 +43,16 @@ def queue_cache_cleanup(item: dict, files: list[Path], target: Path) -> Path:
 
 
 def aniall_folder_identity(item: dict) -> str:
-    """A post ID is the source identity, even when blog titles are identical."""
+    """Validate the exact post identity; its display folder uses only the title."""
     post_id = str(item.get("post_id") or "")
     if not re.fullmatch(r"[1-9]\d*", post_id):
         raise ValueError("Missing or invalid AniAll post ID")
     if str(item.get("source_url") or "") != f"https://aniall.tistory.com/{post_id}":
         raise ValueError("AniAll post ID and source URL disagree")
-    return f"{post_id}__{item.get('title') or post_id}"
+    title = str(item.get("title") or "").strip()
+    if not title:
+        raise ValueError("Missing AniAll title")
+    return title
 
 
 def _episode_int(value) -> int | None:

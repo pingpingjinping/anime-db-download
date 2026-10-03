@@ -29,6 +29,8 @@ from zoneinfo import ZoneInfo
 import requests
 from bs4 import BeautifulSoup
 
+from subtitle_work_storage import safe_name, work_directory, register_sources, preserve_download
+
 from subtitle_queue_metadata import (
     aniall_folder_identity,
     build_download_metadata,
@@ -62,14 +64,6 @@ UA = (
     "Chrome/125.0.0.0 Safari/537.36"
 )
 
-
-def safe_name(value: str, limit: int = 160) -> str:
-    value = unicodedata.normalize("NFKC", value or "").strip()
-    value = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "_", value)
-    value = re.sub(r"\s+", " ", value).strip(" .")
-    if not value:
-        value = "_"
-    return value[:limit].rstrip(" .") or "_"
 
 
 def clean_attachment_name(value: str) -> str:
@@ -586,8 +580,7 @@ def find_history_posts(session: requests.Session, item: dict) -> list[dict]:
 
 def historical_destination(item: dict, target: Path, episode: str) -> Path:
     return (
-        target / "anissia_subtitles"
-        / safe_name(f"{item.get('anime_no', '')}__{item.get('anime_title', '')}")
+        work_directory(item, target)
         / safe_name(f"{episode or '0'}화")
         / safe_name(item.get("creator") or "unknown")
     )
@@ -704,6 +697,7 @@ def maybe_backfill_history(session: requests.Session, state: dict, state_path: P
                 destination,
                 classify_source_url(str(row.get("url") or "")),
             )
+            register_sources({**item, "episode": row.get("episode"), "source_url": row.get("url")}, files, target)
             downloaded += len(files)
             print(
                 f"[+] backfill {item.get('anime_no')} {row.get('episode')}화 "
@@ -816,8 +810,7 @@ def save_response_file(response: requests.Response, destination_dir: Path, *,
                 output.write(chunk)
         if total == 0:
             raise RuntimeError("Downloaded attachment was empty")
-        temporary.replace(destination)
-        return destination
+        return preserve_download(temporary, destination)
     except Exception:
         temporary.unlink(missing_ok=True)
         raise
@@ -1224,14 +1217,13 @@ def download_aniall(session: requests.Session, item: dict, target: Path) -> list
     candidates = zip_candidates or candidates
     if not candidates:
         raise RuntimeError("No AniAll subtitle attachment found")
-    destination = target / "aniall_subtitles" / safe_name(folder_identity)
+    destination = work_directory(item, target)
     return unique_downloads(session, candidates, destination, response.url)
 
 
 def download_anissia(session: requests.Session, item: dict, target: Path) -> list[Path]:
     destination = (
-        target / "anissia_subtitles"
-        / safe_name(f"{item.get('anime_no', '')}__{item.get('anime_title', '')}")
+        work_directory(item, target)
         / safe_name(f"{item.get('episode') or '0'}화")
         / safe_name(item.get("creator") or "unknown")
     )
@@ -1299,6 +1291,7 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
                 # Leaving backfill_done unset lets a future run try again.
                 print(f"[-] backfill search {item_id}: {backfill_exc}")
 
+        register_sources(item, files, target)
         metadata = build_download_metadata(item, files, target)
         queue_cache_cleanup(item, files, target)
         state["success"][item_id] = {
