@@ -27,7 +27,7 @@ if ! "$PI_PYTHON" -c 'import requests, bs4, playwright' >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "=== [1/4] Download queued subtitles from Pi/home IP ==="
+echo "=== [1/5] Download queued subtitles from Pi/home IP ==="
 if command -v ionice >/dev/null 2>&1; then
   nice -n 15 ionice -c3 "$PI_PYTHON" "$ARCHIVE_REPO/scripts/pi_download_subtitle_queues.py" \
     --target "$STREAMING_REPO/subtitle-data"
@@ -37,18 +37,24 @@ else
 fi
 
 echo
-echo "=== [2/4] Process pending Erulabo subtitles ==="
+echo "=== [2/5] Process pending Erulabo subtitles ==="
 "$PI_PYTHON" "$ARCHIVE_REPO/scripts/pi_download_erulabo.py" \
   --target "$STREAMING_REPO/subtitle-data"
 
 echo
-echo "=== [3/4] Import published exact AniAll mappings ==="
+echo "=== [3/5] Import published exact AniAll mappings ==="
 /usr/bin/python3 "$ARCHIVE_REPO/scripts/pi_import_aniall_matches.py"
 
 echo
-echo "=== [4/4] Match newly downloaded AniAll posts ==="
+echo "=== [4/5] Match newly downloaded AniAll posts ==="
 /usr/bin/python3 "$STREAMING_REPO/scripts/match-weekly-aniall.py" \
   --target "$STREAMING_REPO/subtitle-data"
+
+echo
+echo "=== [5/5] Remove identical viewing caches for new downloads ==="
+if ! (cd "$STREAMING_REPO" && docker compose exec -T anime nice -n 15 node scripts/subtitle-cache/cleanup.cjs); then
+  echo "Cache cleanup deferred: pending jobs kept. Ensure the updated anime image is running." >&2
+fi
 
 echo
 echo "Weekly Pi subtitle sync completed."
