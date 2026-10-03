@@ -20,6 +20,16 @@ ARCHIVE_EXTENSIONS = {".zip", ".7z", ".rar"}
 MAX_ZIP_MEMBERS = 5000
 
 
+def aniall_folder_identity(item: dict) -> str:
+    """A post ID is the source identity, even when blog titles are identical."""
+    post_id = str(item.get("post_id") or "")
+    if not re.fullmatch(r"[1-9]\d*", post_id):
+        raise ValueError("Missing or invalid AniAll post ID")
+    if str(item.get("source_url") or "") != f"https://aniall.tistory.com/{post_id}":
+        raise ValueError("AniAll post ID and source URL disagree")
+    return f"{post_id}__{item.get('title') or post_id}"
+
+
 def _episode_int(value) -> int | None:
     try:
         number = float(str(value).strip())

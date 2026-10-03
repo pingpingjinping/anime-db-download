@@ -30,6 +30,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from subtitle_queue_metadata import (
+    aniall_folder_identity,
     build_download_metadata,
     classify_failure,
     classify_waiting_reason,
@@ -1211,6 +1212,7 @@ def download_source_page(session: requests.Session, source_url: str, destination
 
 
 def download_aniall(session: requests.Session, item: dict, target: Path) -> list[Path]:
+    folder_identity = aniall_folder_identity(item)
     response = request(session, item["source_url"])
     candidates = attachment_candidates(response.url, response.text)
     zip_candidates = [
@@ -1221,7 +1223,7 @@ def download_aniall(session: requests.Session, item: dict, target: Path) -> list
     candidates = zip_candidates or candidates
     if not candidates:
         raise RuntimeError("No AniAll subtitle attachment found")
-    destination = target / "aniall_subtitles" / safe_name(item.get("title") or item.get("post_id") or "unknown")
+    destination = target / "aniall_subtitles" / safe_name(folder_identity)
     return unique_downloads(session, candidates, destination, response.url)
 
 
