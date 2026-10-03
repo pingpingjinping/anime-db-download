@@ -245,9 +245,9 @@ def process_item(page, item_id: str, item: dict, staging_dir: Path, timeout_sec:
         })"""
     )
 
-    # 2. 정렬 후 5초 대기
-    print("    [*] 가운데 정렬 완료 -> 5초 대기 중...")
-    page.wait_for_timeout(5_000)
+    # 2. 정렬 후 10초 대기
+    print("    [*] 가운데 정렬 완료 -> 10초 대기 중...")
+    page.wait_for_timeout(10_000)
 
     box = button.bounding_box()
     if box is None:
@@ -260,11 +260,11 @@ def process_item(page, item_id: str, item: dict, staging_dir: Path, timeout_sec:
     print(f"    버튼 파일 속성: {button.get_attribute('data-file-url')}")
     print(f"    가상 마우스 목표 좌표: ({round(center_x)}, {round(center_y)})")
 
-    # 3. 커서 이동 후 3초 대기
+    # 3. 커서 이동 후 5초 대기
     print("    [*] 커서 이동 중...")
     page.mouse.move(center_x, center_y)
-    print("    [*] 커서 안착 완료 -> 클릭 대기 3초 중...")
-    page.wait_for_timeout(3_000)
+    print("    [*] 커서 안착 완료 -> 클릭 대기 5초 중...")
+    page.wait_for_timeout(5_000)
 
     # 4. 1회 클릭 및 임시 디렉토리로 다운로드 수신
     try:
