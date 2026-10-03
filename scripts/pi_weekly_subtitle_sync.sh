@@ -38,8 +38,12 @@ fi
 
 echo
 echo "=== [2/5] Process pending Erulabo subtitles ==="
+erulabo_status=0
 "$PI_PYTHON" "$ARCHIVE_REPO/scripts/pi_download_erulabo.py" \
-  --target "$STREAMING_REPO/subtitle-data"
+  --target "$STREAMING_REPO/subtitle-data" || erulabo_status=$?
+if (( erulabo_status != 0 )); then
+  echo "Erulabo step failed (exit $erulabo_status); continuing AniAll mapping and cache cleanup. Pending entries can be retried." >&2
+fi
 
 echo
 echo "=== [3/5] Import published exact AniAll mappings ==="
@@ -57,4 +61,8 @@ if ! (cd "$STREAMING_REPO" && docker compose exec -T anime nice -n 15 node scrip
 fi
 
 echo
+if (( erulabo_status != 0 )); then
+  echo "Weekly Pi subtitle sync finished with Erulabo failure (exit $erulabo_status)." >&2
+  exit "$erulabo_status"
+fi
 echo "Weekly Pi subtitle sync completed."
