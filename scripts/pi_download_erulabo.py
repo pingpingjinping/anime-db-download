@@ -139,7 +139,7 @@ def ensure_chromium(display: str, profile: Path, cdp_port: int) -> None:
         Path("/tmp/erulabo-chromium.log"),
         env=env,
     )
-    wait_until(lambda: cdp_ready(cdp_port), 15, "Chromium CDP")
+    wait_until(lambda: cdp_ready(cdp_port), 60, "Chromium CDP")
 
 
 def get_pending_list(state: dict) -> list[tuple[str, dict]]:
