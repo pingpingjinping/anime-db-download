@@ -9,6 +9,9 @@ history backfill.
 from __future__ import annotations
 
 import re
+import hashlib
+import json
+import os
 import unicodedata
 import zipfile
 from collections import Counter
@@ -18,6 +21,25 @@ from urllib.parse import unquote
 SUBTITLE_MEMBER_EXTENSIONS = {".smi", ".srt", ".ass", ".ssa", ".vtt"}
 ARCHIVE_EXTENSIONS = {".zip", ".7z", ".rar"}
 MAX_ZIP_MEMBERS = 5000
+
+
+def queue_cache_cleanup(item: dict, files: list[Path], target: Path) -> Path:
+    """Queue only this successful download; never scan historical subtitles."""
+    item_id = str(item.get("id") or "")
+    if not item_id or item.get("source") not in ("aniall", "anissia"):
+        raise ValueError("Missing cleanup job identity")
+    relative = [path.relative_to(target).as_posix() for path in files]
+    if not relative or any(".." in Path(path).parts for path in relative):
+        raise ValueError("Invalid cleanup file paths")
+    fields = ("id", "source", "post_id", "anime_no", "title", "anime_title", "source_url", "episode")
+    job = {"id": item_id, "item": {key: item.get(key) for key in fields if key in item}, "files": relative}
+    pending = target / ".cache-cleanup-pending"
+    pending.mkdir(parents=True, exist_ok=True)
+    filename = pending / (hashlib.sha256(item_id.encode()).hexdigest() + ".json")
+    temporary = filename.with_suffix(f".{os.getpid()}.tmp")
+    temporary.write_text(json.dumps(job, ensure_ascii=False) + "\n", encoding="utf-8")
+    temporary.replace(filename)
+    return filename
 
 
 def aniall_folder_identity(item: dict) -> str:

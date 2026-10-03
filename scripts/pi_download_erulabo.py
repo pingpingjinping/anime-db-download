@@ -22,7 +22,7 @@ import subprocess
 
 # 기존 프로젝트 모듈 import
 from pi_download_subtitle_queues import safe_name, save_state
-from subtitle_queue_metadata import build_download_metadata
+from subtitle_queue_metadata import build_download_metadata, queue_cache_cleanup
 
 STATE_FILE = Path.home() / ".local/state/anime-db-download/subtitle-queue-state.json"
 PROFILE_DIR = Path.home() / ".local/share/anime-db-download/erulabo-browser-profile"
@@ -206,6 +206,7 @@ def finalize_erulabo_download(
         [final_path],
         target,
     )
+    queue_cache_cleanup(item, [final_path], target)
     state.setdefault("success", {})[item_id] = metadata
 
     # 3. 마지막으로 pending 삭제 및 상태 디스크 동기화

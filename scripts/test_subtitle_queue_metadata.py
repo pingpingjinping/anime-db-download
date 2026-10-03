@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import tempfile
+import json
 import unittest
 import zipfile
 from pathlib import Path
@@ -13,10 +14,26 @@ from subtitle_queue_metadata import (
     classify_waiting_reason,
     history_title_matches,
     read_episode_evidence,
+    queue_cache_cleanup,
 )
 
 
 class SubtitleQueueMetadataTests(unittest.TestCase):
+    def test_cleanup_queue_contains_only_new_paths_and_has_stable_job_id(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            file = root / "anissia_subtitles/100__작품/1화/제작자/01.srt"
+            file.parent.mkdir(parents=True)
+            file.write_text("subtitle")
+            item = {"id": "anissia:test", "source": "anissia", "anime_no": "100", "anime_title": "작품", "episode": "1"}
+            job = queue_cache_cleanup(item, [file], root)
+            payload = json.loads(job.read_text())
+            self.assertEqual(payload["files"], [file.relative_to(root).as_posix()])
+            self.assertEqual(queue_cache_cleanup(item, [file], root), job)
+            self.assertEqual(len(list(job.parent.glob("*.json"))), 1)
+            with self.assertRaises(ValueError):
+                queue_cache_cleanup(item, [root.parent / "outside.srt"], root)
+
     def test_aniall_same_title_posts_use_distinct_source_ids(self):
         first = aniall_folder_identity({"post_id": "100", "title": "동일 제목", "source_url": "https://aniall.tistory.com/100"})
         second = aniall_folder_identity({"post_id": "101", "title": "동일 제목", "source_url": "https://aniall.tistory.com/101"})

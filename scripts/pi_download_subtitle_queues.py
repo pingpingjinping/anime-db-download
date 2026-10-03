@@ -37,6 +37,7 @@ from subtitle_queue_metadata import (
     history_title_matches as strict_history_title_matches,
     normalize_work_identity,
     reason_counts,
+    queue_cache_cleanup,
 )
 
 REPO = "pingpingjinping/anime-db-download"
@@ -1299,6 +1300,7 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
                 print(f"[-] backfill search {item_id}: {backfill_exc}")
 
         metadata = build_download_metadata(item, files, target)
+        queue_cache_cleanup(item, files, target)
         state["success"][item_id] = {
             "source": source,
             "source_url": item.get("source_url"),
