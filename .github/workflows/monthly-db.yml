@@ -22,7 +22,7 @@ jobs:
       - name: Install HTML parser dependencies
         run: python3 -m pip install requests beautifulsoup4
       - name: Run updater unit tests
-        run: cd scripts && python3 -m unittest -v test_update_db.py
+        run: cd scripts && python3 -m unittest -v test_update_db.py test_reviewed_subtitle_runtime.py
       - name: Download and unpack current Release snapshot
         env:
           GH_TOKEN: ${{ github.token }}
@@ -87,3 +87,4 @@ jobs:
               gh api --method DELETE "repos/$GITHUB_REPOSITORY/releases/assets/$legacy_asset_id"
             fi
           fi
+
