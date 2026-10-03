@@ -1,0 +1,38 @@
+name: Reviewed subtitle DB release
+on:
+  push:
+    branches: [codex/reviewed-db-release-20261003]
+    paths: [.github/workflows/reviewed-db-release.yml, release-inputs/**, scripts/merge-reviewed-runtime.py]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: anime-db-release
+  cancel-in-progress: false
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Download the current release without changing it
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p snapshot
+          gh api "repos/$GITHUB_REPOSITORY/releases/tags/db-v1" > snapshot/release_metadata.json
+          gh release download db-v1 --repo "$GITHUB_REPOSITORY" --pattern anime_four_sources_multilingual_prepared.zip --dir snapshot
+          python3 - <<'PY'
+          import json,hashlib,pathlib
+          root=pathlib.Path("snapshot")
+          release=json.loads((root/"release_metadata.json").read_text())
+          assets=[a for a in release["assets"] if a["name"]=="anime_four_sources_multilingual_prepared.zip"]
+          assert len(assets)==1
+          actual=hashlib.sha256((root/assets[0]["name"]).read_bytes()).hexdigest()
+          assert assets[0]["digest"]=="sha256:"+actual
+          print("Current release SHA256:",actual)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: current-db-before-review
+          path: snapshot/*
+          retention-days: 7
