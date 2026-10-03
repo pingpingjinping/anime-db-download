@@ -16,6 +16,7 @@ from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 from match_new_sources import prepare_tables, refresh_auto_matches
+from reviewed_subtitle_runtime import refresh_runtime_work_links
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SNAPSHOT = ROOT / "snapshot" / "anime.db.gz"
@@ -387,7 +388,8 @@ def main():
                     raise ValueError(f"{source} yielded no records; refusing incomplete update")
                 counts[source] = {"scanned": scanned, "added": added, "modified": modified}
             matching = refresh_auto_matches(db)
-            state_changed = state_changed or matching["changed"]
+            runtime_changed = refresh_runtime_work_links(db)
+            state_changed = state_changed or matching["changed"] or runtime_changed
             db.execute("DELETE FROM year_summary")
             db.execute("""INSERT INTO year_summary(year,source,record_count)
               SELECT year,source,count(*) FROM entries GROUP BY year,source""")
