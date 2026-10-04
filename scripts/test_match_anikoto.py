@@ -1,0 +1,135 @@
+import copy
+import json
+import unittest
+import sqlite3
+import tempfile
+from pathlib import Path
+from unittest.mock import patch
+
+import match_anikoto as matcher
+from catalog_corrections import corrected_rows
+
+
+def row(source='AniList', identity='1', title='Example Show', year=2020, format='TV', count=12, **fields):
+    return {'source': source, 'source_record_id': identity, 'title_romaji': title,
+            'title_native': '', 'title_ko': '', 'title_english': '', 'year': year,
+            'format': format, 'status': 'FINISHED', 'cross_source_ids_json': '{}',
+            'source_metadata_json': json.dumps({'episodes': count}), **fields}
+
+
+def listing(identity='example-slug', title='Example Show', format='TV', count=12):
+    return {'source': 'Anikoto', 'source_record_id': identity, 'title': title,
+            'title_jp_raw': title, 'year': None, 'format': format, 'total_episodes': count}
+
+
+class MatchingTests(unittest.TestCase):
+    def test_unique_complete_title_and_metadata_creates_a_link_without_mutating_inputs(self):
+        rows, listings = [row()], [listing()]
+        before = copy.deepcopy((rows, listings))
+        links, outcomes, _ = matcher.compare(listings, rows)
+        self.assertEqual((links[0]['target_source'], links[0]['target_id']), ('AniList', '1'))
+        self.assertEqual(outcomes[0]['status'], 'automatic')
+        self.assertEqual((rows, listings), before)
+
+    def test_remakes_with_same_title_are_ambiguous_without_an_upstream_year(self):
+        links, outcomes, _ = matcher.compare([listing()], [row(), row(identity='2', year=2010)])
+        self.assertFalse(links)
+        self.assertEqual(outcomes[0]['reason'], 'multiple_targets')
+
+    def test_multiple_anikoto_slugs_for_one_target_are_not_arbitrarily_selected(self):
+        links, outcomes, _ = matcher.compare([listing('one'), listing('two')], [row()])
+        self.assertFalse(links)
+        self.assertTrue(all(o['reason'] == 'multiple_anikoto_records' for o in outcomes))
+
+    def test_format_episode_season_and_part_conflicts_prevent_automatic_links(self):
+        for source in [row(format='MOVIE'), row(count=13), row(title_english='Example Show Season 2'),
+                       row(title_english='Example Show Part 2'), row(year=None), row(count=None), row(status='CANCELLED')]:
+            with self.subTest(source=source):
+                self.assertFalse(matcher.compare([listing()], [source])[0])
+
+    def test_title_symbols_and_sequel_words_are_not_collapsed(self):
+        pairs = [('Hidamari Sketch', 'Hidamari Sketch x ☆☆☆'), ('WORKING!', 'WORKING!!'),
+                 ('Saenai Heroine', 'Saenai Heroine ♭'), ('Example', 'Example Recap')]
+        for original, sequel in pairs:
+            with self.subTest(sequel=sequel):
+                self.assertNotEqual(matcher.key(original), matcher.key(sequel))
+                self.assertFalse(matcher.compare([listing(title=sequel)], [row(title=original)])[0])
+
+    def test_fullwidth_case_and_multiplication_symbol_are_normalized(self):
+        self.assertEqual(matcher.key('Ｈｉｄａｍａｒｉ　Sketch×365'), matcher.key('Hidamari Sketch x 365'))
+
+    def test_wrong_existing_source_id_is_flagged_and_cannot_be_propagated(self):
+        wrong = row('Anissia', '26', year=2010, title='', title_ko='히다마리 스케치×☆☆☆',
+                    cross_source_ids_json='{"anilist_ids":["1"]}')
+        links, _, conflicts = matcher.compare([listing()], [row(year=2007), wrong])
+        self.assertEqual(links[0]['source_refs'], [{'source': 'AniList', 'id': '1'}])
+        self.assertEqual(conflicts[0]['reasons'], ['year_conflict'])
+
+    def test_recorded_reanime_id_needs_matching_title_year_format_and_counts(self):
+        good = row('ReAnime', 'good', cross_source_ids_json='{"anilist_ids":["1"]}')
+        bad = row('ReAnime', 'bad', title='Different Work', cross_source_ids_json='{"anilist_ids":["1"]}')
+        links, _, _ = matcher.compare([listing()], [row(), good, bad])
+        self.assertEqual(links[0]['source_refs'], [{'source': 'AniList', 'id': '1'}, {'source': 'ReAnime', 'id': 'good'}])
+
+    def test_reviewed_rejection_and_explicit_acceptance_override_automation(self):
+        rejected = {'example-slug': {'status': 'rejected', 'reason': 'Different release'}}
+        self.assertFalse(matcher.compare([listing()], [row()], rejected)[0])
+        accepted = {'example-slug': {'status': 'accepted', 'target': 'AniList:1', 'reason': 'Reviewed original title'}}
+        links, _, _ = matcher.compare([listing(count=13)], [row()], accepted)
+        self.assertEqual(links[0]['status'], 'reviewed')
+        self.assertEqual(links[0]['evidence']['rule'], 'reviewed_decision')
+
+    def test_correction_has_identity_guards_and_keeps_unrelated_source_fields(self):
+        original = row(title_ko='Example', cross_source_ids_json='{"mal_ids":["99"]}')
+        change = {'source': 'AniList', 'id': '1', 'expected': {'title_ko': 'Example', 'year': 2020},
+                  'set': {'format': 'TV_SHORT'}, 'cross_source_ids': {'reanime_ids': ['new']},
+                  'reason': 'Official corrected format', 'urls': ['https://example.com/official']}
+        result = corrected_rows([original], [change])[0]
+        self.assertEqual(json.loads(result['cross_source_ids_json'])['mal_ids'], ['99'])
+        self.assertEqual(original['format'], 'TV')
+        with self.assertRaisesRegex(ValueError, 'identity changed'):
+            corrected_rows([row(title_ko='Different')], [change])
+        self.assertEqual(corrected_rows([result], [change]), [result])
+
+    def test_partial_snapshot_is_rejected_before_reading_the_baseline(self):
+        with patch.object(matcher, 'validate_catalog', return_value={'complete': False}), \
+                patch.object(matcher, 'read_catalog', side_effect=AssertionError('must not read')):
+            with self.assertRaisesRegex(ValueError, 'completed crawl'):
+                matcher.match('baseline.db', 'catalog.db', 'output')
+
+    def test_database_copy_preserves_reviewed_links_and_protected_rows(self):
+        with tempfile.TemporaryDirectory() as root:
+            baseline, catalog, matches, output = [Path(root)/n for n in ['base.db','catalog.db','matches.json','out.db']]
+            with sqlite3.connect(baseline) as db:
+                db.executescript('''CREATE TABLE entries(source TEXT,source_record_id TEXT);
+                    CREATE TABLE protected_episode(file_id TEXT,target_episode INTEGER);
+                    INSERT INTO protected_episode VALUES ('original',1);
+                    CREATE TABLE anikoto_work_links(anikoto_id TEXT PRIMARY KEY,target_source TEXT,target_id TEXT,status TEXT,payload_json TEXT);
+                    INSERT INTO anikoto_work_links VALUES ('manual','AniList','99','reviewed','{"reviewed":true}');
+                    INSERT INTO anikoto_work_links VALUES ('rejected','AniList','88','rejected','{"rejected":true}');
+                    INSERT INTO anikoto_work_links VALUES ('old','AniList','77','automatic','{}');''')
+            with sqlite3.connect(catalog) as db:
+                db.execute('CREATE TABLE anikoto_catalog(source_record_id TEXT,payload_json TEXT,last_seen_run TEXT)')
+                db.executemany('INSERT INTO anikoto_catalog VALUES (?,?,?)', [('current','{}','run'),('stale','{}','previous')])
+            before = (matcher.sha256(baseline),matcher.sha256(catalog))
+            payload = {'metadata':{'baseline_sha256':before[0],'anikoto_sha256':before[1],'crawl_run_id':'run'},
+                       'links':[{'anikoto_id':slug,'target_source':'AniList','target_id':'1','status':'automatic'}
+                                for slug in ['manual','rejected','current']],
+                       'rejections':[{'anikoto_id':'new-rejection','status':'rejected','reason':'Verified different season'}]}
+            matches.write_text(json.dumps(payload))
+            matcher.create_matched_database(baseline,catalog,matches,output)
+            self.assertEqual(before,(matcher.sha256(baseline),matcher.sha256(catalog)))
+            with sqlite3.connect(output) as db:
+                self.assertEqual(db.execute('SELECT * FROM protected_episode').fetchall(),[('original',1)])
+                self.assertEqual(db.execute('SELECT anikoto_id,target_id,status FROM anikoto_work_links ORDER BY anikoto_id').fetchall(),
+                                 [('current','1','automatic'),('manual','99','reviewed'),('new-rejection','','rejected'),('rejected','88','rejected')])
+                self.assertEqual(db.execute('SELECT source_record_id FROM anikoto_catalog').fetchall(),[('current',)])
+            with self.assertRaisesRegex(ValueError,'new path'):
+                matcher.create_matched_database(baseline,catalog,matches,output)
+            with sqlite3.connect(baseline) as db:db.execute("INSERT INTO protected_episode VALUES ('new',2)")
+            with self.assertRaisesRegex(ValueError,'inputs changed'):
+                matcher.create_matched_database(baseline,catalog,matches,Path(root)/'other.db')
+
+
+if __name__ == '__main__':
+    unittest.main()

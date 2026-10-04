@@ -1,0 +1,15 @@
+{
+  "rule_version": 2,
+  "baseline_sha256": "f6d13dca357f075b8562365ce546d642b75b99a543faced6e6b74e5c82b276d1",
+  "anikoto_sha256": "876ef82980df1a30fc6fd85e2f4ac0ae56a335b2297bfaccaf0415daba9d67cc",
+  "crawl_run_id": "d24d8a3780d843b58ffeb312c3b88a6e",
+  "records": 8949,
+  "automatic": 4522,
+  "reviewed": 0,
+  "needs_review": 2994,
+  "unmatched": 1433,
+  "rejected": 0,
+  "existing_source_conflicts": 575,
+  "input_databases_unchanged": true,
+  "catalog_corrections": 2
+}

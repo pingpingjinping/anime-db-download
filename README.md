@@ -46,7 +46,26 @@ python3 scripts/prepare_anikoto_catalog.py --db state/anikoto-catalog.sqlite --e
 python3 scripts/crawl_anikoto.py --db state/anikoto-catalog.sqlite --export-dir output/anikoto
 ```
 
-접속 도메인이 바뀌면 `--base-url https://새도메인`을 지정합니다. 목록이 중복되거나 페이지 수가 스캔 중 바뀌면 완료로 처리하지 않고 기존 수집분을 남깁니다. 이때 원인 확인 후 `--fresh`로 새 스캔을 시작할 수 있습니다. 새 스캔에서 관찰되지 않은 기존 작품을 삭제하지 않으며 JSONL에는 해당 실행의 관찰분만 내보냅니다. 기존 기준 DB와의 확정 연결은 이 원본 목록을 검토한 다음 단계에서 추가합니다.
+접속 도메인이 바뀌면 `--base-url https://새도메인`을 지정합니다. 목록이 중복되거나 페이지 수가 스캔 중 바뀌면 완료로 처리하지 않고 기존 수집분을 남깁니다. 이때 원인 확인 후 `--fresh`로 새 스캔을 시작할 수 있습니다. 새 스캔에서 관찰되지 않은 기존 작품을 삭제하지 않으며 JSONL에는 해당 실행의 관찰분만 내보냅니다.
+
+## Anikoto 작품 연결
+
+**Actions → Anikoto reviewed catalog matching → Run workflow**는 저장된 완료 목록과 현재 `db-v1` 기준 DB를 비교합니다. Anikoto 사이트에 재접속하지 않으며 Release를 덮어쓰지 않습니다. 결과 ZIP은 `anikoto-matched-database` artifact로 보관합니다.
+
+전체 제목·형식·총화수가 일치하고 양쪽 작품 후보가 각각 하나인 경우만 자동 연결합니다. 제목의 시즌·파트·별표·숫자는 보존하며 동명 리메이크, 회차 차이, 연도 없는 기준 작품, 메타데이터 부족은 보류합니다. 기준 DB의 다른 출처 ID도 제목·연도 및 있는 형식·회차 정보가 뒷받침될 때만 함께 연결합니다. 2026-10-04 초기 결과는 **8,949작품 중 4,522개 자동 연결, 2,994개 후보 검토, 1,433개 정확한 제목 후보 없음**입니다. 발견한 기존 출처 충돌 575건은 확인 목록이며 모두 오류라는 뜻은 아닙니다.
+
+`data/anikoto/catalog-corrections.json`에는 공식 근거를 확인한 수정만 기록합니다. 현재는 히다마리 3기의 Anissia:26 / Onnada:2050 연결과 본편 총화수를 교정합니다. 수정은 제목·연도와 기존 행을 검증한 뒤 적용하며 원래 입력 DB는 읽기 전용으로 유지합니다.
+
+```bash
+python3 scripts/match_anikoto.py --baseline /path/to/reviewed-baseline.db \
+  --catalog state/anikoto-catalog.sqlite --output output/matching \
+  --corrections data/anikoto/catalog-corrections.json \
+  --corrected-db output/anime_four_sources_multilingual_prepared.db
+```
+
+새 DB는 기존 자막 파일·ZIP·검수·확정 회차를 보존하고 `anikoto_catalog`, `anikoto_work_links`, `anikoto_match_metadata`를 추가합니다. Anikoto는 기존 네 출처의 `entries`에 섞지 않습니다. 이 DB를 소비하는 앱은 `anikoto_work_links.payload_json`의 `source_refs`로 정확한 출처 ID를 조회해야 하며, 기존 importer가 이 표를 읽지 않으면 플레이어 동작은 아직 바뀌지 않습니다. 기존 DB의 `reviewed`·`rejected` 연결은 다음 자동 실행에서도 유지합니다.
+
+`anikoto-matches.json`은 확정된 연결과 근거, `anikoto-match-review.jsonl`은 미연결 후보와 사유, `existing-source-conflicts.json`은 기존 출처 충돌, `anikoto-match-report.json`은 입력 SHA-256과 결과 수입니다. 수동 검수는 `--decisions` JSON으로 전달할 수 있습니다. 예: `{"slug":{"status":"accepted","target":"AniList:1852","reason":"원제 및 시즌 직접 확인"}}`. 거절은 `status=rejected`와 이유를 기록합니다. 파일별 검수와 확정 회차는 이 명령에서 재판정하지 않습니다.
 
 ## AniAll 별도 매칭
 

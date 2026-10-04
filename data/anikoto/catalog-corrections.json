@@ -1,0 +1,19 @@
+[
+  {
+    "source": "Onnada", "id": "2050",
+    "expected": {"title_ko": "히다마리 스케치×☆☆☆", "year": 2010},
+    "set": {"format": "TV", "existing_match_status": "strong_exact"},
+    "cross_source_ids": {"anilist_ids": ["7062"], "reanime_ids": ["hidamari-sketch-x-hoshimittsu-q7fuhc"]},
+    "metadata": {"onnada_episodes": "12"},
+    "reason": "2010년 3기 ☆☆☆는 AniList:7062 및 ReAnime의 Hoshimittsu TV 작품. TBS 공식 3기 각화 소개는 본편 #1–#12이며 특별편은 별도. 기존 온나다 총화수 13을 본편 12로 교정.",
+    "urls": ["https://www.tbs.co.jp/anime/hidamari/3rd/story/story.html", "https://www.tbs.co.jp/anime/hidamari/3rd/index-j.html"]
+  },
+  {
+    "source": "Anissia", "id": "26",
+    "expected": {"title_ko": "히다마리 스케치×☆☆☆", "year": 2010},
+    "set": {"title_native": "ひだまりスケッチ×☆☆☆", "format": "TV"},
+    "cross_source_ids": {"anilist_ids": ["7062"], "reanime_ids": ["hidamari-sketch-x-hoshimittsu-q7fuhc"], "onnada_ids": ["2050"]},
+    "reason": "2010년 3기 ☆☆☆의 기존 2007년 1기 AniList:1852 / ReAnime:hidamari-sketch-kkrwd8 연결을 제거하고 3기 ID로 교정. TBS 3rd 공식 제목, 연도, TV 본편과 기준 DB AniList:7062 및 ReAnime Hoshimittsu 원제·총화수 일치.",
+    "urls": ["https://www.tbs.co.jp/anime/hidamari/3rd/index-j.html", "https://www.tbs.co.jp/anime/hidamari/3rd/story/story.html"]
+  }
+]
