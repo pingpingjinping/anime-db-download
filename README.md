@@ -23,7 +23,9 @@ AniList, ReAnime, Onnada, Anissia 네 출처의 애니메이션 DB를 비공개 
 
 ## Anikoto 원본 목록 수집
 
-Anikoto는 기존 네 출처 기준 DB와 별도로 **목록 메타데이터만** 먼저 수집합니다. **Actions → Anikoto catalog crawl → Run workflow**에서 수동 실행합니다. 자동 예약은 추가하지 않습니다. 기본값은 전체 목록이며 `max_pages`에 숫자를 넣으면 그 실행에서 지정한 페이지 수까지만 받아 중단합니다. 다음 실행은 `resume`을 켜서 이전 artifact의 중단 지점부터 이어갈 수 있습니다. 완료된 DB를 다시 실행하면 새 전체 스캔을 시작합니다.
+Anikoto는 기존 네 출처 기준 DB와 별도로 **목록 메타데이터만** 보관합니다. **2026-10-04 20:56 KST에 수집 완료한 299페이지·8,949작품**이 `data/anikoto/anikoto_listing_20261004.zip`에 초기 DB로 들어 있습니다. 이 결과를 바로 사용할 수 있으므로 처음부터 다시 크롤링할 필요가 없습니다. `seed.json`에 ZIP·SQLite SHA-256, 수집 완료 시각, 수집 코드 커밋과 페이지·작품 수를 기록합니다.
+
+**Actions → Anikoto catalog crawl → Run workflow**의 기본 `mode=use_existing`은 기존 DB를 복원하고 아래 파일을 내보내기만 하며 Anikoto에 접속하지 않습니다. `resume=true`이면 최신 artifact의 DB를 우선 사용하고, artifact가 없거나 `resume=false`이면 저장소의 초기 DB를 사용합니다. 자동 예약은 없습니다. artifact 보관 기간이 지난 뒤에는 초기 DB로 돌아가므로, 갱신 결과를 장기 보관하려면 artifact를 별도로 내려받아 보관합니다.
 
 - `anikoto-catalog.sqlite`: 작품 원문 정보, 페이지별 수집 근거와 재개 상태
 - `anikoto-catalog.jsonl`: 해당 실행에서 관찰한 작품 목록
@@ -31,10 +33,16 @@ Anikoto는 기존 네 출처 기준 DB와 별도로 **목록 메타데이터만*
 
 결과는 `anikoto-catalog` Actions artifact로 90일 보관합니다. 제목순 목록을 요청 사이 1.2초 간격으로 읽고, 작품 ID·사이트 ID·표시 제목·원제 표기·형식·장르·포스터 URL·자막/더빙/전체 회차 수·평점을 기록합니다. 상세 페이지·영상·자막 파일은 받지 않습니다. 목록에 없는 연도·방영 상태는 추정하지 않고 비워 두며, 작품 연결은 `unmatched`로 남깁니다. 기존 `db-v1` Release, 검수 작품 연결과 확정 자막 회차에는 반영하지 않습니다.
 
-로컬 실행과 재개:
+로컬에서 초기 DB를 복원하거나 이미 있는 DB를 내보내기 (사이트 요청 없음):
 
 ```bash
 python3 -m pip install requests beautifulsoup4
+python3 scripts/prepare_anikoto_catalog.py --db state/anikoto-catalog.sqlite --export-dir output/anikoto
+```
+
+사이트 목록을 갱신할 때만 Actions의 `mode=refresh`를 선택합니다. `max_pages=0`은 전체 목록이고 숫자를 지정하면 해당 실행의 페이지 수를 제한합니다. `resume=true`이면 중단된 수집을 이어가며, 완료된 DB에서는 새 전체 스캔을 시작합니다. 기본 모드로 중단된 DB를 내보내면 보고서의 `complete=false`를 그대로 유지합니다. 로컬에서 갱신하려면:
+
+```bash
 python3 scripts/crawl_anikoto.py --db state/anikoto-catalog.sqlite --export-dir output/anikoto
 ```
 

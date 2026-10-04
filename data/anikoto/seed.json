@@ -1,0 +1,12 @@
+{
+  "archive": "anikoto_listing_20261004.zip",
+  "archive_sha256": "30f24d0c0f1b96a076c019accaffa056492e83a6dc18965e15495f54effb6ba2",
+  "database_sha256": "876ef82980df1a30fc6fd85e2f4ac0ae56a335b2297bfaccaf0415daba9d67cc",
+  "run_id": "d24d8a3780d843b58ffeb312c3b88a6e",
+  "records_in_run": 8949,
+  "pages_collected": 299,
+  "source": "Anikoto",
+  "scope": "listing_only",
+  "finished_at": "2026-10-04T11:56:33+00:00",
+  "collector_commit": "b3850e92530e75e2d196fbcc356056148267f38f"
+}

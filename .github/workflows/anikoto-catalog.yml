@@ -3,6 +3,14 @@ name: Anikoto catalog crawl
 on:
   workflow_dispatch:
     inputs:
+      mode:
+        description: Use the saved DB or explicitly refresh from the website
+        type: choice
+        options:
+          - use_existing
+          - refresh
+        default: use_existing
+        required: true
       base_url:
         description: Anikoto website origin
         default: https://anikoto.cz
@@ -12,7 +20,7 @@ on:
         default: '0'
         required: true
       resume:
-        description: Resume the last interrupted artifact when available
+        description: Reuse the latest artifact (otherwise use the checked-in initial DB)
         type: boolean
         default: true
 
@@ -35,7 +43,9 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install requests beautifulsoup4
       - name: Verify the listing collector
-        run: python -m unittest discover -s scripts -p 'test_crawl_anikoto.py' -v
+        run: |
+          python -m unittest discover -s scripts -p 'test_crawl_anikoto.py' -v
+          python -m unittest discover -s scripts -p 'test_prepare_anikoto_catalog.py' -v
       - name: Restore the latest crawl artifact when requested
         if: inputs.resume
         env:
@@ -51,7 +61,10 @@ jobs:
               pathlib.Path('output/anikoto-catalog.sqlite').write_bytes(archive.read('anikoto-catalog.sqlite'))
           PY
           fi
-      - name: Collect Anikoto listing metadata only
+      - name: Prepare and export the saved catalog without crawling
+        run: python scripts/prepare_anikoto_catalog.py --db output/anikoto-catalog.sqlite --export-dir output
+      - name: Refresh Anikoto listing metadata only when selected
+        if: inputs.mode == 'refresh'
         env:
           ANIKOTO_BASE_URL: ${{ inputs.base_url }}
           ANIKOTO_MAX_PAGES: ${{ inputs.max_pages }}
