@@ -79,6 +79,12 @@ class MatchingTests(unittest.TestCase):
         self.assertEqual(links[0]['status'], 'reviewed')
         self.assertEqual(links[0]['evidence']['rule'], 'reviewed_decision')
 
+    def test_an_automatic_link_cannot_claim_an_explicitly_reviewed_target(self):
+        decisions={'manual':{'status':'accepted','target':'AniList:1','reason':'Confirmed other edition'}}
+        links,outcomes,_=matcher.compare([listing('manual',count=13),listing('automatic')],[row()],decisions)
+        self.assertEqual([link['anikoto_id'] for link in links],['manual'])
+        self.assertEqual(next(o for o in outcomes if o['anikoto_id']=='automatic')['reason'],'reviewed_target_already_linked')
+
     def test_correction_has_identity_guards_and_keeps_unrelated_source_fields(self):
         original = row(title_ko='Example', cross_source_ids_json='{"mal_ids":["99"]}')
         change = {'source': 'AniList', 'id': '1', 'expected': {'title_ko': 'Example', 'year': 2020},
@@ -97,23 +103,44 @@ class MatchingTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'completed crawl'):
                 matcher.match('baseline.db', 'catalog.db', 'output')
 
+    def test_previous_rejection_is_applied_to_the_next_match_report(self):
+        with tempfile.TemporaryDirectory() as root:
+            baseline,catalog=Path(root)/'baseline.db',Path(root)/'catalog.db'
+            with sqlite3.connect(baseline) as db:
+                db.execute('CREATE TABLE anikoto_work_links(anikoto_id TEXT,target_source TEXT,target_id TEXT,status TEXT,payload_json TEXT)')
+                db.execute('INSERT INTO anikoto_work_links VALUES (?,?,?,?,?)',('example-slug','','','rejected','{"reason":"Different edition"}'))
+            with sqlite3.connect(catalog) as db:
+                db.execute('CREATE TABLE anikoto_catalog(source_record_id TEXT,payload_json TEXT,last_seen_run TEXT)')
+                db.execute('INSERT INTO anikoto_catalog VALUES (?,?,?)',('example-slug',json.dumps(listing()),'run'))
+            with patch.object(matcher,'validate_catalog',return_value={'complete':True,'run_id':'run'}), \
+                    patch.object(matcher,'read_catalog',return_value=[row()]):
+                report=matcher.match(baseline,catalog,Path(root)/'out')
+            self.assertEqual((report['automatic'],report['rejected']),(0,1))
+            payload=json.loads((Path(root)/'out/anikoto-matches.json').read_text())
+            self.assertEqual(payload['rejections'][0]['reason'],'Different edition')
+
     def test_database_copy_preserves_reviewed_links_and_protected_rows(self):
         with tempfile.TemporaryDirectory() as root:
             baseline, catalog, matches, output = [Path(root)/n for n in ['base.db','catalog.db','matches.json','out.db']]
             with sqlite3.connect(baseline) as db:
-                db.executescript('''CREATE TABLE entries(source TEXT,source_record_id TEXT);
+                db.executescript('''CREATE TABLE entries(source TEXT,source_record_id TEXT,year INTEGER,title_ko TEXT);
+                    INSERT INTO entries VALUES ('AniList','99',1999,'Reviewed title');
                     CREATE TABLE protected_episode(file_id TEXT,target_episode INTEGER);
                     INSERT INTO protected_episode VALUES ('original',1);
                     CREATE TABLE anikoto_work_links(anikoto_id TEXT PRIMARY KEY,target_source TEXT,target_id TEXT,status TEXT,payload_json TEXT);
                     INSERT INTO anikoto_work_links VALUES ('manual','AniList','99','reviewed','{"reviewed":true}');
                     INSERT INTO anikoto_work_links VALUES ('rejected','AniList','88','rejected','{"rejected":true}');
-                    INSERT INTO anikoto_work_links VALUES ('old','AniList','77','automatic','{}');''')
+                    INSERT INTO anikoto_work_links VALUES ('old','AniList','77','automatic','{}');
+                    CREATE TABLE anikoto_catalog(source_record_id TEXT PRIMARY KEY,payload_json TEXT NOT NULL);
+                    INSERT INTO anikoto_catalog VALUES ('manual','{"title":"Reviewed original","genre_links":[{"name":"unused"}]}');
+                    INSERT INTO anikoto_catalog VALUES ('old','{"unused":"stale unlinked payload"}');''')
             with sqlite3.connect(catalog) as db:
                 db.execute('CREATE TABLE anikoto_catalog(source_record_id TEXT,payload_json TEXT,last_seen_run TEXT)')
-                db.executemany('INSERT INTO anikoto_catalog VALUES (?,?,?)', [('current','{}','run'),('stale','{}','previous')])
+                db.executemany('INSERT INTO anikoto_catalog VALUES (?,?,?)', [('current','{"title":"Current","genres":["Comedy"],"genre_links":[{"name":"unused"}],"score":8}','run'),('stale','{}','previous'),('unmatched','{}','run')])
             before = (matcher.sha256(baseline),matcher.sha256(catalog))
             payload = {'metadata':{'baseline_sha256':before[0],'anikoto_sha256':before[1],'crawl_run_id':'run'},
-                       'links':[{'anikoto_id':slug,'target_source':'AniList','target_id':'1','status':'automatic'}
+                       'links':[{'anikoto_id':slug,'target_source':'AniList','target_id':'1','status':'automatic',
+                                 'source_refs':[{'source':'AniList','id':'1'}]}
                                 for slug in ['manual','rejected','current']],
                        'rejections':[{'anikoto_id':'new-rejection','status':'rejected','reason':'Verified different season'}]}
             matches.write_text(json.dumps(payload))
@@ -123,7 +150,15 @@ class MatchingTests(unittest.TestCase):
                 self.assertEqual(db.execute('SELECT * FROM protected_episode').fetchall(),[('original',1)])
                 self.assertEqual(db.execute('SELECT anikoto_id,target_id,status FROM anikoto_work_links ORDER BY anikoto_id').fetchall(),
                                  [('current','1','automatic'),('manual','99','reviewed'),('new-rejection','','rejected'),('rejected','88','rejected')])
-                self.assertEqual(db.execute('SELECT source_record_id FROM anikoto_catalog').fetchall(),[('current',)])
+                self.assertEqual(db.execute('SELECT source_record_id FROM anikoto_catalog ORDER BY source_record_id').fetchall(),[('current',),('manual',)])
+                info=json.loads(db.execute("SELECT payload_json FROM anikoto_catalog WHERE source_record_id='manual'").fetchone()[0])
+                self.assertEqual((info['year'],info['korean_title']),(1999,'Reviewed title'))
+                info=json.loads(db.execute("SELECT payload_json FROM anikoto_catalog WHERE source_record_id='current'").fetchone()[0])
+                self.assertEqual(info['genres'],['Comedy'])
+                self.assertNotIn('genre_links',info)
+                self.assertNotIn('score',info)
+                self.assertEqual(json.loads(db.execute("SELECT payload_json FROM anikoto_work_links WHERE anikoto_id='current'").fetchone()[0]),
+                                 {'source_refs':[{'source':'AniList','id':'1'}]})
             with self.assertRaisesRegex(ValueError,'new path'):
                 matcher.create_matched_database(baseline,catalog,matches,output)
             with sqlite3.connect(baseline) as db:db.execute("INSERT INTO protected_episode VALUES ('new',2)")
