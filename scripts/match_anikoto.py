@@ -13,7 +13,18 @@ from match_new_sources import season, part
 from prepare_anikoto_catalog import DEFAULT_DB, ROOT, validate_catalog
 
 RULE_VERSION = 2
+RUNTIME_VERSION = 2
 FIELDS = ('title_ko', 'title_native', 'title_romaji', 'title_english', 'title', 'title_jp_raw')
+RUNTIME_CATALOG_FIELDS = ('source_record_id', 'title', 'title_native', 'title_romaji',
+                          'format', 'genres', 'poster_url', 'sub_episodes', 'dub_episodes', 'total_episodes')
+
+
+def runtime_catalog(listing, link):
+    """Only accepted works and fields used for display/filtering/playback enter the DB."""
+    result = {name: listing[name] for name in RUNTIME_CATALOG_FIELDS if listing.get(name) not in (None, '', [])}
+    result.update({'source_record_id':link['anikoto_id'], 'year':link.get('year'),
+                   'korean_title':link.get('korean_title','')})
+    return {name:value for name,value in result.items() if value not in (None,'',[])}
 
 
 def key(title):
@@ -202,6 +213,11 @@ def compare(listings, rows, decisions=None):
         else:
             raise ValueError('Invalid reviewed status or target')
         outcome['reason'] = decision['reason']
+    reviewed_targets = {row['target'] for row in outcomes if row['status']=='reviewed'}
+    for outcome in outcomes:
+        if outcome['status']=='automatic' and outcome['target'] in reviewed_targets:
+            outcome['status'],outcome['reason']='needs_review','reviewed_target_already_linked'
+            outcome.pop('target')
     links = []
     for outcome in outcomes:
         if outcome['status'] not in ('automatic', 'reviewed'):
@@ -250,15 +266,41 @@ def create_matched_database(baseline, catalog, matches, destination, corrections
             preserved = {row[0] for row in db.execute("SELECT anikoto_id FROM anikoto_work_links WHERE status IN ('reviewed','rejected')")}
             db.execute("DELETE FROM anikoto_work_links WHERE status NOT IN ('reviewed','rejected')")
             current_run = expected['crawl_run_id']
-            db.executemany('INSERT OR REPLACE INTO anikoto_catalog VALUES (?,?)', src.execute(
-                'SELECT source_record_id,payload_json FROM anikoto_catalog WHERE last_seen_run=?', (current_run,)))
+            new_links = {link['anikoto_id']:link for link in payload['links']}
+            listings = {slug:json.loads(value) for slug,value in src.execute(
+                'SELECT source_record_id,payload_json FROM anikoto_catalog WHERE last_seen_run=?', (current_run,))}
             for link in payload['links'] + payload.get('rejections', []):
                 if link['anikoto_id'] not in preserved or link['status'] in ('reviewed','rejected'):
+                    # Full evidence is exported separately; runtime only needs exact source IDs.
+                    content = {'source_refs':link['source_refs']} if link['status'] == 'automatic' else link
                     db.execute('INSERT OR REPLACE INTO anikoto_work_links VALUES (?,?,?,?,?)',
-                               (link['anikoto_id'], link.get('target_source',''), link.get('target_id',''), link['status'], json.dumps(link, ensure_ascii=False)))
+                               (link['anikoto_id'], link.get('target_source',''), link.get('target_id',''), link['status'], json.dumps(content, ensure_ascii=False,separators=(',',':'))))
+            # Drop unmatched/stale catalog payloads, retaining old reviewed identities.
+            accepted = list(db.execute("SELECT anikoto_id,target_source,target_id,payload_json FROM anikoto_work_links WHERE status IN ('automatic','reviewed')"))
+            for slug,source,identity,value in accepted:
+                listing = listings.get(slug)
+                old = db.execute('SELECT payload_json FROM anikoto_catalog WHERE source_record_id=?',(slug,)).fetchone()
+                if listing is None and old:
+                    listing = json.loads(old[0])
+                if listing is None:
+                    raise ValueError('Accepted Anikoto identity has no saved listing: '+slug)
+                link = new_links.get(slug)
+                if slug in preserved:
+                    # An automatic proposal must not change the metadata of a manual target.
+                    record = db.execute('SELECT year,title_ko FROM entries WHERE source=? AND source_record_id=?',(source,identity)).fetchone()
+                    old_link = json.loads(value)
+                    link = {'anikoto_id':slug,'year':record[0] if record else old_link.get('year'),
+                            'korean_title':record[1] if record else old_link.get('korean_title','')}
+                db.execute('INSERT OR REPLACE INTO anikoto_catalog VALUES (?,?)',
+                           (slug,json.dumps(runtime_catalog(listing,link),ensure_ascii=False,separators=(',',':'))))
+            db.execute("DELETE FROM anikoto_catalog WHERE source_record_id NOT IN (SELECT anikoto_id FROM anikoto_work_links WHERE status IN ('automatic','reviewed'))")
             db.execute('INSERT OR REPLACE INTO anikoto_match_metadata VALUES (?,?)', ('latest_match_report', json.dumps(expected, ensure_ascii=False)))
+            db.execute('INSERT OR REPLACE INTO anikoto_match_metadata VALUES (?,?)', ('runtime_format_version',str(RUNTIME_VERSION)))
             if db.execute('PRAGMA quick_check').fetchone()[0] != 'ok':
                 raise ValueError('Matched database failed its integrity check')
+        # Reclaim obsolete large payload pages after replacing an older full-data DB.
+        with sqlite3.connect(destination) as db:
+            db.execute('VACUUM')
     except Exception:
         destination.unlink(missing_ok=True)
         raise
@@ -284,6 +326,19 @@ def match(baseline, catalog, output, decisions=None, corrections=None):
     with sqlite3.connect(catalog.resolve().as_uri() + '?mode=ro', uri=True) as db:
         listings = [json.loads(row[0]) for row in db.execute(
             'SELECT payload_json FROM anikoto_catalog WHERE last_seen_run=?', (source_summary['run_id'],))]
+    # Carry manual accept/reject decisions into candidate selection as well as DB writes.
+    known = {row['source_record_id'] for row in listings}
+    retained = {}
+    with sqlite3.connect(baseline.resolve().as_uri()+'?mode=ro',uri=True) as db:
+        if db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='anikoto_work_links'").fetchone():
+            for slug,source,identity,status,value in db.execute("SELECT * FROM anikoto_work_links WHERE status IN ('reviewed','rejected')"):
+                if slug not in known:
+                    continue
+                link=json.loads(value)
+                reason=link.get('reason') or link.get('evidence',{}).get('decision_reason') or 'Existing reviewed decision'
+                retained[slug]={'status':'accepted' if status=='reviewed' else 'rejected','reason':reason}
+                if status=='reviewed':retained[slug]['target']=source+':'+identity
+    decisions={**retained,**(decisions or {})}
     links, outcomes, conflicts = compare(listings, rows, decisions)
     counts = Counter(row['status'] for row in outcomes)
     summary = {'rule_version': RULE_VERSION, **before, 'crawl_run_id': source_summary['run_id'],

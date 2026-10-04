@@ -1,19 +1,48 @@
 name: Anikoto reviewed catalog matching
 
 on:
+  workflow_run:
+    workflows: ["Monthly anime DB refresh"]
+    types: [completed]
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - scripts/match_anikoto.py
+      - scripts/catalog_corrections.py
+      - scripts/package_anikoto_release.py
+      - data/anikoto/catalog-corrections.json
+      - .github/workflows/anikoto-match.yml
   workflow_dispatch:
+    inputs:
+      mode:
+        description: Reuse the saved catalog or refresh the full website listing
+        type: choice
+        options: [use_existing, refresh]
+        default: use_existing
+        required: true
+      publish:
+        description: Publish the verified compact DB to db-v1
+        type: boolean
+        default: true
+      base_url:
+        description: Anikoto website origin (refresh mode)
+        default: https://anikoto.cz
+        required: true
 
 permissions:
-  contents: read
+  contents: write
 
+# Serialize publication with the monthly baseline writer.
 concurrency:
-  group: anikoto-catalog-matching
+  group: anime-db-refresh
   cancel-in-progress: false
 
 jobs:
   match:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -22,18 +51,41 @@ jobs:
       - run: python -m pip install requests beautifulsoup4
       - name: Verify matching and protected database records
         run: python -m unittest discover -s scripts -p 'test_*.py' -v
-      - name: Restore the completed saved listing without crawling
-        run: python scripts/prepare_anikoto_catalog.py --db output/anikoto-catalog.sqlite --export-dir output/catalog
-      - name: Download the current reviewed baseline
+      - name: Restore the latest complete saved listing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p output/catalog
+          has_catalog="$(gh release list --repo "$GITHUB_REPOSITORY" --limit 1000 --json tagName --jq 'any(.[]; .tagName == "anikoto-catalog")')"
+          if [ "$has_catalog" = true ]; then
+            gh release download anikoto-catalog --repo "$GITHUB_REPOSITORY" \
+              --pattern anikoto_listing_latest.zip --dir "$RUNNER_TEMP"
+            python - <<'PY'
+          import os, pathlib, zipfile
+          with zipfile.ZipFile(pathlib.Path(os.environ['RUNNER_TEMP'])/'anikoto_listing_latest.zip') as archive:
+              pathlib.Path('output/anikoto-catalog.sqlite').write_bytes(archive.read('anikoto-catalog.sqlite'))
+          PY
+          fi
+          python scripts/prepare_anikoto_catalog.py --db output/anikoto-catalog.sqlite --export-dir output/catalog
+      - name: Refresh the full listing after monthly DB success or explicit refresh
+        if: ${{ github.event_name == 'workflow_run' || inputs.mode == 'refresh' }}
+        env:
+          ANIKOTO_BASE_URL: ${{ inputs.base_url || 'https://anikoto.cz' }}
+        run: |
+          python scripts/crawl_anikoto.py --db output/anikoto-catalog.sqlite \
+            --base-url "$ANIKOTO_BASE_URL" --max-pages 0 --delay 1.2 --export-dir output/catalog
+      - name: Download and fingerprint the current reviewed baseline
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release download db-v1 --repo "$GITHUB_REPOSITORY" \
             --pattern anime_four_sources_multilingual_prepared.zip --dir "$RUNNER_TEMP"
           python - <<'PY'
-          import gzip, os, pathlib, zipfile
+          import gzip, hashlib, os, pathlib, zipfile
           root = pathlib.Path(os.environ['RUNNER_TEMP'])
-          with zipfile.ZipFile(root/'anime_four_sources_multilingual_prepared.zip') as archive:
+          packed = root/'anime_four_sources_multilingual_prepared.zip'
+          (root/'baseline-asset.sha256').write_text(hashlib.sha256(packed.read_bytes()).hexdigest())
+          with zipfile.ZipFile(packed) as archive:
               candidates = [n for n in archive.namelist() if n.lower().endswith(('.db','.db.gz','.sqlite'))]
               if len(candidates) != 1:
                   raise ValueError('Expected exactly one SQLite baseline')
@@ -42,28 +94,69 @@ jobs:
               data = gzip.decompress(data)
           (root/'baseline.db').write_bytes(data)
           PY
-      - name: Match exact identities and apply reviewed catalog corrections to a copy
+      - name: Match identities and write a compact runtime database copy
         run: |
           python scripts/match_anikoto.py --baseline "$RUNNER_TEMP/baseline.db" \
             --catalog output/anikoto-catalog.sqlite --output output/matching \
             --corrections data/anikoto/catalog-corrections.json \
             --corrected-db output/anime_four_sources_multilingual_prepared.db
-      - name: Package matched database and review evidence
+      - name: Verify protected rows and package separate runtime and crawl assets
+        run: |
+          python scripts/package_anikoto_release.py --baseline "$RUNNER_TEMP/baseline.db" \
+            --matched-db output/anime_four_sources_multilingual_prepared.db \
+            --catalog output/anikoto-catalog.sqlite --catalog-exports output/catalog \
+            --matching-dir output/matching --output output/release \
+            --corrections data/anikoto/catalog-corrections.json
+      - name: Publish complete raw listing separately from the application DB
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.publish }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view anikoto-catalog --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create anikoto-catalog --repo "$GITHUB_REPOSITORY" --latest=false \
+              --title 'Anikoto complete catalog' --notes 'Completed source listing; runtime DB and review candidates are stored separately.'
+          fi
+          gh release upload anikoto-catalog output/release/anikoto_listing_latest.zip \
+            --repo "$GITHUB_REPOSITORY" --clobber
+      - name: Publish compact runtime DB after rechecking the baseline asset
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.publish }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          current_digest="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/db-v1" \
+            --jq '.assets[] | select(.name == "anime_four_sources_multilingual_prepared.zip") | .digest')"
+          expected_digest="sha256:$(cat "$RUNNER_TEMP/baseline-asset.sha256")"
+          if [ "$current_digest" != "$expected_digest" ]; then
+            echo 'Baseline Release changed during matching; rerun before publishing.' >&2
+            exit 1
+          fi
+          gh release upload db-v1 output/release/anime_four_sources_multilingual_prepared.zip \
+            output/release/anikoto-release-validation.json output/matching/anikoto-match-report.json \
+            --repo "$GITHUB_REPOSITORY" --clobber
+      - name: Summarize matching and package size
+        if: always()
         run: |
           python - <<'PY'
-          import pathlib, zipfile
-          root = pathlib.Path('output')
-          with zipfile.ZipFile(root/'anime_anikoto_matched.zip','w',zipfile.ZIP_DEFLATED,compresslevel=6) as archive:
-              archive.write(root/'anime_four_sources_multilingual_prepared.db','anime_four_sources_multilingual_prepared.db')
-              for file in sorted((root/'matching').glob('*')):
-                  archive.write(file,file.name)
-              archive.write('data/anikoto/catalog-corrections.json','catalog-corrections.json')
+          import json, os, pathlib
+          summary=pathlib.Path(os.environ['GITHUB_STEP_SUMMARY'])
+          with summary.open('a') as out:
+              out.write('## Anikoto matching\n\n')
+              for filename in ['output/matching/anikoto-match-report.json','output/release/anikoto-release-validation.json']:
+                  path=pathlib.Path(filename)
+                  if path.exists():
+                      data=json.loads(path.read_text())
+                      data.pop('protected_tables',None)
+                      out.write('```json\n'+json.dumps(data,ensure_ascii=False,indent=2)+'\n```\n\n')
           PY
-      - uses: actions/upload-artifact@v4
+      - name: Preserve raw crawl checkpoint and review evidence
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: anikoto-matched-database
           path: |
-            output/anime_anikoto_matched.zip
-            output/matching/anikoto-match-report.json
-          if-no-files-found: error
+            output/anikoto-catalog.sqlite
+            output/catalog/
+            output/matching/
+            output/release/
+          if-no-files-found: ignore
           retention-days: 90
