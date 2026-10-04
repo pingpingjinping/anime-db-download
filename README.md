@@ -21,6 +21,25 @@ AniList, ReAnime, Onnada, Anissia 네 출처의 애니메이션 DB를 비공개 
 
 기존 출처 간 검토 연결과 결정은 보존합니다. 새 작품과 제목·연도·형식이 바뀐 항목은 `monthly_review`에 기록하고, 새 매칭을 자동 확정하지 않습니다. DB가 바뀌면 같은 `db-v1` Release의 ZIP 자산을 갱신합니다.
 
+## Anikoto 원본 목록 수집
+
+Anikoto는 기존 네 출처 기준 DB와 별도로 **목록 메타데이터만** 먼저 수집합니다. **Actions → Anikoto catalog crawl → Run workflow**에서 수동 실행합니다. 자동 예약은 추가하지 않습니다. 기본값은 전체 목록이며 `max_pages`에 숫자를 넣으면 그 실행에서 지정한 페이지 수까지만 받아 중단합니다. 다음 실행은 `resume`을 켜서 이전 artifact의 중단 지점부터 이어갈 수 있습니다. 완료된 DB를 다시 실행하면 새 전체 스캔을 시작합니다.
+
+- `anikoto-catalog.sqlite`: 작품 원문 정보, 페이지별 수집 근거와 재개 상태
+- `anikoto-catalog.jsonl`: 해당 실행에서 관찰한 작품 목록
+- `anikoto-crawl-report.json`: 완료/부분 수집 여부, 페이지·작품 수, 무결성 검사
+
+결과는 `anikoto-catalog` Actions artifact로 90일 보관합니다. 제목순 목록을 요청 사이 1.2초 간격으로 읽고, 작품 ID·사이트 ID·표시 제목·원제 표기·형식·장르·포스터 URL·자막/더빙/전체 회차 수·평점을 기록합니다. 상세 페이지·영상·자막 파일은 받지 않습니다. 목록에 없는 연도·방영 상태는 추정하지 않고 비워 두며, 작품 연결은 `unmatched`로 남깁니다. 기존 `db-v1` Release, 검수 작품 연결과 확정 자막 회차에는 반영하지 않습니다.
+
+로컬 실행과 재개:
+
+```bash
+python3 -m pip install requests beautifulsoup4
+python3 scripts/crawl_anikoto.py --db state/anikoto-catalog.sqlite --export-dir output/anikoto
+```
+
+접속 도메인이 바뀌면 `--base-url https://새도메인`을 지정합니다. 목록이 중복되거나 페이지 수가 스캔 중 바뀌면 완료로 처리하지 않고 기존 수집분을 남깁니다. 이때 원인 확인 후 `--fresh`로 새 스캔을 시작할 수 있습니다. 새 스캔에서 관찰되지 않은 기존 작품을 삭제하지 않으며 JSONL에는 해당 실행의 관찰분만 내보냅니다. 기존 기준 DB와의 확정 연결은 이 원본 목록을 검토한 다음 단계에서 추가합니다.
+
 ## AniAll 별도 매칭
 
 AniAll은 기준 DB의 출처 행으로 저장하지 않습니다. 매월 1일 10:17 KST에 시작하는 **Monthly anime DB refresh**가 성공적으로 끝나면 **Aniall Match Audit** workflow가 자동으로 이어서 실행됩니다. 따라서 DB 갱신이 늦어져도 audit가 먼저 시작하지 않으며, DB 갱신이 실패하면 자동 audit도 실행하지 않습니다. audit는 최신 4출처 DB를 받아 AniAll 자막자료실 전체 목록을 천천히 다시 확인하고, 제목·연도·시즌·형식 후보를 대조합니다. 시즌 종료 뒤 예전 작품의 자막 글이 추가될 수 있어, 최근 글만 훑지 않고 전체 목록을 다시 대조합니다.
