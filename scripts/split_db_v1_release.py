@@ -100,6 +100,38 @@ def copy_table(source, dest, name):
         dest.execute(index_sql)
 
 
+RUNTIME_EXPORT_COLUMNS = (
+    'pid','source','pack_id','zip_relative_path','member_path','sha256','bundle_id',
+    'target_source','target_id','review_status','reason','work_title_ko',
+    'season_format','work_format','reanime_id','language_review','quality_notes',
+    'content_extension','work_confirmed',
+)
+
+
+def materialize_runtime_export(source, dest):
+    cursor = source.execute('SELECT * FROM subtitle_runtime_files ORDER BY pid')
+    columns = tuple(item[0] for item in cursor.description)
+    if columns != RUNTIME_EXPORT_COLUMNS:
+        raise ValueError(
+            'Unexpected subtitle_runtime_files columns: ' + ','.join(columns)
+        )
+    definitions = ','.join(
+        f'"{name}" ' + ('INTEGER NOT NULL' if name == 'work_confirmed' else 'TEXT')
+        for name in columns
+    )
+    dest.execute(f'CREATE TABLE subtitle_runtime_files_export ({definitions})')
+    placeholders = ','.join('?' for _ in columns)
+    while batch := cursor.fetchmany(1000):
+        dest.executemany(
+            f'INSERT INTO subtitle_runtime_files_export VALUES ({placeholders})',
+            batch,
+        )
+    dest.execute(
+        'CREATE UNIQUE INDEX idx_subtitle_runtime_export_pid '
+        'ON subtitle_runtime_files_export(pid)'
+    )
+
+
 def validate_catalog_db(path, require_split=True):
     with sqlite3.connect(path) as db:
         if db.execute('PRAGMA quick_check').fetchone()[0] != 'ok':
@@ -232,14 +264,7 @@ def split_release(source_zip, output_dir):
             try:
                 for name in REGISTRY_TABLES:
                     copy_table(before, reg, name)
-                reg.execute(
-                    'CREATE TABLE subtitle_runtime_files_export AS '
-                    'SELECT * FROM subtitle_runtime_files ORDER BY pid'
-                )
-                reg.execute(
-                    'CREATE UNIQUE INDEX idx_subtitle_runtime_export_pid '
-                    'ON subtitle_runtime_files_export(pid)'
-                )
+                materialize_runtime_export(before, reg)
                 reg.execute(
                     "INSERT OR REPLACE INTO subtitle_runtime_metadata VALUES ('asset_role',?)",
                     (json.dumps('reviewed_subtitle_registry'),),
