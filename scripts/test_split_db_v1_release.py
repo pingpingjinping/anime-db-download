@@ -29,14 +29,14 @@ class SplitDbV1ReleaseTests(unittest.TestCase):
                 if name == 'subtitle_runtime_metadata':
                     db.execute('CREATE TABLE subtitle_runtime_metadata(key TEXT PRIMARY KEY,value TEXT)')
                 elif name == 'packaged_files_v6':
-                    db.execute('CREATE TABLE packaged_files_v6(pid TEXT PRIMARY KEY)')
+                    db.execute('CREATE TABLE packaged_files_v6(pid TEXT PRIMARY KEY,member_path TEXT,original_path TEXT,action TEXT)')
                 elif name == 'subtitle_confirmed_episodes':
                     db.execute('CREATE TABLE subtitle_confirmed_episodes(map_id INTEGER PRIMARY KEY)')
                 else:
                     db.execute(f'CREATE TABLE {name}(id INTEGER PRIMARY KEY)')
             db.executemany(
-                'INSERT INTO packaged_files_v6 VALUES (?)',
-                ((f'p{i}',) for i in range(55530)),
+                'INSERT INTO packaged_files_v6 VALUES (?,?,?,?)',
+                ((f'p{i}', f'p{i}.smi', f'p{i}.smi', 'kept') for i in range(55530)),
             )
             db.executemany(
                 'INSERT INTO subtitle_confirmed_episodes VALUES (?)',
