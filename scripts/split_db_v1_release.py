@@ -199,9 +199,12 @@ def split_release(source_zip, output_dir):
                 raise ValueError('Legacy combined asset has no subtitle_runtime_files view')
 
             protected_tables = sorted(
-                before_tables
-                - set(REGISTRY_TABLES)
-                - set(DERIVED_REGISTRY_TABLES)
+                name for name in (
+                    before_tables
+                    - set(REGISTRY_TABLES)
+                    - set(DERIVED_REGISTRY_TABLES)
+                )
+                if not name.startswith('sqlite_')
             )
             protected_hashes = {
                 name: table_digest(before, name)
