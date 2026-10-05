@@ -50,7 +50,27 @@ class SplitDbV1ReleaseTests(unittest.TestCase):
                 ],
             )
             db.execute('CREATE TABLE subtitle_work_reanime_links(id INTEGER PRIMARY KEY)')
-            db.execute('CREATE VIEW subtitle_runtime_files AS SELECT pid FROM packaged_files_v6')
+            db.execute('''CREATE VIEW subtitle_runtime_files AS
+              SELECT pid,
+                'aniall' AS source,
+                'pack' AS pack_id,
+                'aniall/sample.zip' AS zip_relative_path,
+                pid || '.smi' AS member_path,
+                'sha' AS sha256,
+                'bundle' AS bundle_id,
+                'AniList' AS target_source,
+                '1' AS target_id,
+                'confirmed' AS review_status,
+                '' AS reason,
+                'work' AS work_title_ko,
+                'TV' AS season_format,
+                'TV' AS work_format,
+                'slug' AS reanime_id,
+                '' AS language_review,
+                '' AS quality_notes,
+                '.smi' AS content_extension,
+                1 AS work_confirmed
+              FROM packaged_files_v6''')
             db.execute('CREATE VIEW subtitle_file_episode_links AS SELECT map_id FROM subtitle_confirmed_episodes')
         self.source_zip = self.root / 'combined.zip'
         with zipfile.ZipFile(self.source_zip, 'w', zipfile.ZIP_DEFLATED) as archive:
