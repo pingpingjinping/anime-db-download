@@ -13,7 +13,8 @@ from catalog_corrections import corrected_rows
 RUNTIME_ASSET = 'anime_four_sources_multilingual_prepared.zip'
 CATALOG_ASSET = 'anikoto_listing_latest.zip'
 GENERATED_TABLES = {'entries', 'subtitle_work_reanime_links', 'anikoto_catalog',
-                    'anikoto_work_links', 'anikoto_match_metadata'}
+                    'anikoto_work_links', 'anikoto_work_link_targets',
+                    'anikoto_review_state', 'anikoto_match_metadata'}
 
 
 def digest(path):
@@ -67,10 +68,20 @@ def package(baseline, matched, catalog, matching_dir, catalog_exports, output, c
         matched_report=after.execute("SELECT value FROM anikoto_match_metadata WHERE key='latest_match_report'").fetchone()
         if not matched_report or json.loads(matched_report[0])!=report:
             raise ValueError('Runtime database does not correspond to the matching report')
-        missing=after.execute("SELECT anikoto_id FROM anikoto_work_links WHERE status IN ('automatic','reviewed') EXCEPT SELECT source_record_id FROM anikoto_catalog").fetchall()
-        extra=after.execute("SELECT source_record_id FROM anikoto_catalog EXCEPT SELECT anikoto_id FROM anikoto_work_links WHERE status IN ('automatic','reviewed')").fetchall()
-        if missing or extra:
-            raise ValueError('Runtime must contain exactly the accepted Anikoto catalog identities')
+        has_targets=after.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='anikoto_work_link_targets'").fetchone()
+        if has_targets:
+            missing=after.execute("SELECT DISTINCT anikoto_id FROM anikoto_work_link_targets EXCEPT SELECT source_record_id FROM anikoto_catalog").fetchall()
+            extra=after.execute("SELECT source_record_id FROM anikoto_catalog EXCEPT SELECT DISTINCT anikoto_id FROM anikoto_work_link_targets").fetchall()
+            dangling=after.execute("""SELECT t.anikoto_id FROM anikoto_work_link_targets t
+                LEFT JOIN entries e ON e.source=t.target_source AND e.source_record_id=t.target_id
+                WHERE e.source IS NULL LIMIT 1""").fetchall()
+            if missing or extra or dangling:
+                raise ValueError('Runtime multi-target Anikoto links are inconsistent')
+        else:
+            missing=after.execute("SELECT anikoto_id FROM anikoto_work_links WHERE status IN ('automatic','reviewed') EXCEPT SELECT source_record_id FROM anikoto_catalog").fetchall()
+            extra=after.execute("SELECT source_record_id FROM anikoto_catalog EXCEPT SELECT anikoto_id FROM anikoto_work_links WHERE status IN ('automatic','reviewed')").fetchall()
+            if missing or extra:
+                raise ValueError('Runtime must contain exactly the accepted Anikoto catalog identities')
         count=after.execute('SELECT COUNT(*) FROM anikoto_catalog').fetchone()[0]
     output.mkdir(parents=True,exist_ok=True)
     runtime=output/RUNTIME_ASSET
