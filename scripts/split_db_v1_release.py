@@ -100,38 +100,6 @@ def copy_table(source, dest, name):
         dest.execute(index_sql)
 
 
-RUNTIME_EXPORT_COLUMNS = (
-    'pid','source','pack_id','zip_relative_path','member_path','sha256','bundle_id',
-    'target_source','target_id','review_status','reason','work_title_ko',
-    'season_format','work_format','reanime_id','language_review','quality_notes',
-    'content_extension','work_confirmed',
-)
-
-
-def materialize_runtime_export(source, dest):
-    cursor = source.execute('SELECT * FROM subtitle_runtime_files ORDER BY pid')
-    columns = tuple(item[0] for item in cursor.description)
-    if columns != RUNTIME_EXPORT_COLUMNS:
-        raise ValueError(
-            'Unexpected subtitle_runtime_files columns: ' + ','.join(columns)
-        )
-    definitions = ','.join(
-        f'"{name}" ' + ('INTEGER NOT NULL' if name == 'work_confirmed' else 'TEXT')
-        for name in columns
-    )
-    dest.execute(f'CREATE TABLE subtitle_runtime_files_export ({definitions})')
-    placeholders = ','.join('?' for _ in columns)
-    while batch := cursor.fetchmany(1000):
-        dest.executemany(
-            f'INSERT INTO subtitle_runtime_files_export VALUES ({placeholders})',
-            batch,
-        )
-    dest.execute(
-        'CREATE UNIQUE INDEX idx_subtitle_runtime_export_pid '
-        'ON subtitle_runtime_files_export(pid)'
-    )
-
-
 def validate_catalog_db(path, require_split=True):
     with sqlite3.connect(path) as db:
         if db.execute('PRAGMA quick_check').fetchone()[0] != 'ok':
@@ -171,16 +139,20 @@ def validate_registry_db(path):
             raise ValueError(f'Registry is missing tables: {sorted(missing)}')
         if 'entries' in tables:
             raise ValueError('Registry asset must not contain the catalog entries table')
-        if 'subtitle_runtime_files_export' not in tables:
-            raise ValueError('Registry is missing materialized runtime export')
         metadata = {
             key: json.loads(value)
             for key, value in db.execute('SELECT key,value FROM subtitle_runtime_metadata')
         }
         if metadata.get('format_version') != 1 or metadata.get('completed_bundles') != 1109:
             raise ValueError('Registry metadata is incomplete')
-        files = db.execute(
-            'SELECT COUNT(*) FROM subtitle_runtime_files_export'
+        files = db.execute("""SELECT COUNT(*) FROM packaged_files_v6 f
+          WHERE f.action='kept' AND (
+            lower(f.member_path) LIKE '%.ass' OR lower(f.member_path) LIKE '%.ssa' OR
+            lower(f.member_path) LIKE '%.srt' OR lower(f.member_path) LIKE '%.smi' OR
+            lower(f.member_path) LIKE '%.vtt' OR lower(f.member_path) LIKE '%.sub' OR
+            lower(f.original_path) LIKE '%.ass' OR lower(f.original_path) LIKE '%.ssa' OR
+            lower(f.original_path) LIKE '%.srt' OR lower(f.original_path) LIKE '%.smi' OR
+            lower(f.original_path) LIKE '%.vtt' OR lower(f.original_path) LIKE '%.sub')"""
         ).fetchone()[0]
         episodes = db.execute(
             'SELECT COUNT(*) FROM subtitle_confirmed_episodes'
@@ -264,7 +236,6 @@ def split_release(source_zip, output_dir):
             try:
                 for name in REGISTRY_TABLES:
                     copy_table(before, reg, name)
-                materialize_runtime_export(before, reg)
                 reg.execute(
                     "INSERT OR REPLACE INTO subtitle_runtime_metadata VALUES ('asset_role',?)",
                     (json.dumps('reviewed_subtitle_registry'),),
