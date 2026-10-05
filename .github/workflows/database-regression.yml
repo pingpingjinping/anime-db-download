@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Download current db-v1 layout
         env:
-          GH_TOKEN: \${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p "$RUNNER_TEMP/current" "$RUNNER_TEMP/split"
           gh release download db-v1 --repo "$GITHUB_REPOSITORY" \
