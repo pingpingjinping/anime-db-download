@@ -1,0 +1,104 @@
+name: Split db-v1 release assets
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Preview/apply the split or restore the saved combined asset
+        type: choice
+        options: [migrate, rollback]
+        default: migrate
+        required: true
+      publish:
+        description: Actually change db-v1 assets (false = validate only)
+        type: boolean
+        default: false
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: anime-db-refresh
+  cancel-in-progress: false
+
+jobs:
+  split:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify splitter
+        run: python -m unittest -v scripts/test_split_db_v1_release.py
+      - name: Download current db-v1 assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/current" "$RUNNER_TEMP/output"
+          gh release download db-v1 --repo "$GITHUB_REPOSITORY"             --pattern anime_four_sources_multilingual_prepared.zip             --dir "$RUNNER_TEMP/current"
+          gh release download db-v1 --repo "$GITHUB_REPOSITORY"             --pattern anime_reviewed_subtitle_registry_v1.zip             --dir "$RUNNER_TEMP/current" || true
+          gh release download db-v1 --repo "$GITHUB_REPOSITORY"             --pattern anime_four_sources_multilingual_prepared_combined_rollback.zip             --dir "$RUNNER_TEMP/current" || true
+
+      - name: Preview or apply split
+        if: ${{ inputs.mode == 'migrate' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUBLISH: ${{ inputs.publish }}
+        run: |
+          if [[ -f "$RUNNER_TEMP/current/anime_reviewed_subtitle_registry_v1.zip" ]]; then
+            python scripts/split_db_v1_release.py validate               --catalog "$RUNNER_TEMP/current/anime_four_sources_multilingual_prepared.zip"               --registry "$RUNNER_TEMP/current/anime_reviewed_subtitle_registry_v1.zip"               | tee "$RUNNER_TEMP/output/db-v1-split-validation.json"
+            echo "db-v1 is already split."
+            exit 0
+          fi
+
+          python scripts/split_db_v1_release.py split             --source "$RUNNER_TEMP/current/anime_four_sources_multilingual_prepared.zip"             --output "$RUNNER_TEMP/output"
+
+          if [[ "$PUBLISH" != "true" ]]; then
+            echo "Preview only; release assets were not changed."
+            exit 0
+          fi
+
+          if [[ ! -f "$RUNNER_TEMP/current/anime_four_sources_multilingual_prepared_combined_rollback.zip" ]]; then
+            cp "$RUNNER_TEMP/current/anime_four_sources_multilingual_prepared.zip"               "$RUNNER_TEMP/output/anime_four_sources_multilingual_prepared_combined_rollback.zip"
+            gh release upload db-v1               "$RUNNER_TEMP/output/anime_four_sources_multilingual_prepared_combined_rollback.zip"               --repo "$GITHUB_REPOSITORY"
+          fi
+
+          gh release upload db-v1             "$RUNNER_TEMP/output/anime_four_sources_multilingual_prepared.zip"             "$RUNNER_TEMP/output/anime_reviewed_subtitle_registry_v1.zip"             "$RUNNER_TEMP/output/db-v1-split-validation.json"             --repo "$GITHUB_REPOSITORY" --clobber
+
+      - name: Preview or apply rollback
+        if: ${{ inputs.mode == 'rollback' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUBLISH: ${{ inputs.publish }}
+        run: |
+          rollback="$RUNNER_TEMP/current/anime_four_sources_multilingual_prepared_combined_rollback.zip"
+          if [[ ! -f "$rollback" ]]; then
+            echo "Rollback asset is missing; refusing rollback." >&2
+            exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/rollback"
+          cp "$rollback" "$RUNNER_TEMP/rollback/anime_four_sources_multilingual_prepared.zip"
+          echo "Rollback source SHA256: $(sha256sum "$rollback" | cut -d ' ' -f 1)"
+          if [[ "$PUBLISH" != "true" ]]; then
+            echo "Preview only; release assets were not changed."
+            exit 0
+          fi
+          gh release upload db-v1             "$RUNNER_TEMP/rollback/anime_four_sources_multilingual_prepared.zip"             --repo "$GITHUB_REPOSITORY" --clobber
+          for name in anime_reviewed_subtitle_registry_v1.zip db-v1-split-validation.json; do
+            asset_id="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/db-v1"               --jq ".assets[] | select(.name == \"$name\") | .id" | head -n 1)"
+            if [[ -n "$asset_id" ]]; then
+              gh api --method DELETE "repos/$GITHUB_REPOSITORY/releases/assets/$asset_id"
+            fi
+          done
+          echo "Restored the saved combined db-v1 asset."
+
+      - name: Upload preview evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-v1-split-preview
+          path: ${{ runner.temp }}/output/
+          if-no-files-found: ignore
+          retention-days: 30
