@@ -36,6 +36,7 @@ jobs:
             --dir "$RUNNER_TEMP/current" || true
       - name: Validate current release or measure legacy split
         run: |
+          set -euo pipefail
           if [[ -f "$RUNNER_TEMP/current/anime_reviewed_subtitle_registry_v1.zip" ]]; then
             python scripts/split_db_v1_release.py validate \
               --catalog "$RUNNER_TEMP/current/anime_four_sources_multilingual_prepared.zip" \
