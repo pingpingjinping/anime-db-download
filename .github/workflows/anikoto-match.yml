@@ -11,7 +11,10 @@ on:
       - scripts/match_anikoto.py
       - scripts/catalog_corrections.py
       - scripts/package_anikoto_release.py
+      - scripts/apply_anikoto_manual_review.py
       - data/anikoto/catalog-corrections.json
+      - data/anikoto/manual-review-decision-v1.b64.part01
+      - data/anikoto/manual-review-decision-v1.b64.part02
       - .github/workflows/anikoto-match.yml
   workflow_dispatch:
     inputs:
@@ -100,6 +103,14 @@ jobs:
             --catalog output/anikoto-catalog.sqlite --output output/matching \
             --corrections data/anikoto/catalog-corrections.json \
             --corrected-db output/anime_four_sources_multilingual_prepared.db
+      - name: Apply completed Anikoto manual review
+        run: |
+          python scripts/apply_anikoto_manual_review.py \
+            --database output/anime_four_sources_multilingual_prepared.db \
+            --catalog output/anikoto-catalog.sqlite \
+            --decision-asset data/anikoto/manual-review-decision-v1.b64 \
+            --review-queue output/matching/anikoto-match-review.jsonl \
+            --report output/matching/anikoto-match-report.json
       - name: Verify protected rows and package separate runtime and crawl assets
         run: |
           python scripts/package_anikoto_release.py --baseline "$RUNNER_TEMP/baseline.db" \
