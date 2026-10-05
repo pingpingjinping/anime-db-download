@@ -6,7 +6,7 @@ The reviewed v6 subtitle registry is distributed independently from the monthly 
 - Registry asset: `db-v1/anime_reviewed_subtitle_registry_v1.zip`
 - Rollback asset created by the migration workflow: `anime_four_sources_multilingual_prepared_combined_rollback.zip`
 
-The catalog asset keeps the four-source reviewed catalog and Anikoto runtime tables. It does not contain the large reviewed subtitle file registry after migration. The registry asset contains the completed v6 file/archive/review/episode tables plus a materialized `subtitle_runtime_files_export` so it can be imported without embedding the catalog again.
+The catalog asset keeps the four-source reviewed catalog and Anikoto runtime tables. It does not contain the large reviewed subtitle file registry after migration. The registry asset keeps the completed v6 file/archive/review/episode tables in their normalized form. The Pi importer reconstructs the runtime rows from those tables and fills only missing catalog-derived title/format/ReAnime fields from PostgreSQL, so the catalog is not duplicated inside the registry asset.
 
 AniAll review scope: 771 bundles / 9,983 subtitle files. 9,928 files have confirmed work and ReAnime links; 55 remain unlinked. Archive outcomes: 756 confirmed, 9 partially confirmed, 6 held. The physical `aniall/미확정/` path is deliberately retained even for newly confirmed files. Review status is data, not the folder name.
 
