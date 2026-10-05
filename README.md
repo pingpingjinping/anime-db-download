@@ -4,7 +4,7 @@
 
 주간 신규 자막은 애니시아 `제목/회차/제작자`, 애니올 `제목`으로 저장하며, 같은 작품명 폴더가 있으면 이어서 사용합니다. 번호를 새 폴더명에 붙이지 않고 파일별 작품번호·게시글번호·원본 SHA-256을 `subtitle-data/.weekly-subtitle-sources.json`에 기록합니다. 동일 제목의 다른 출처 항목은 파일별 번호로 구분하며, 같은 파일명의 다른 내용은 덮어쓰지 않고 별도 버전으로 보존합니다. 기존 번호 폴더만 있다면 그 폴더를 재사용하고, 기존 작품명 폴더·검수 ZIP·등록된 경로는 이동하거나 이름을 바꾸지 않습니다. 애니시아 과거 회차와 Erulabo 다운로드에도 같은 저장 규칙을 적용합니다. 애니올 다운로드가 끝나면 공개된 매칭 Release를 가져오고, streaming-project의 `scripts/match-weekly-aniall.py`로 새로 성공한 게시글만 현재 DB와 대조합니다. 확실한 제목·별칭 및 시즌·연도·형식 일치만 자동 연결하고, 애매한 후보는 검토 대상으로 기록합니다. 기존 수동 판정과 확정 회차는 수정하지 않습니다. 두 저장소를 모두 업데이트한 뒤 주간 서비스를 실행해야 합니다.
 
-AniList, ReAnime, Onnada, Anissia 네 출처의 애니메이션 DB를 비공개 GitHub Release에 보관하고, 신규 항목만 월별로 추가합니다. AniAll은 네 출처 작품 목록의 별도 출처 행으로 추가하지 않고, 별도 매칭 작업에서 참조합니다. 검수 완료된 자막 파일 목록·작품 연결·확정 회차는 `db-v1`의 별도 자막 테이블/뷰에 포함돼 있습니다. 자막 파일 본체는 DB에 넣지 않고 Pi의 `subtitle-data`에 보관합니다. streaming-project Release updater가 작품 목록과 검수 자막 레지스트리를 함께 가져옵니다.
+AniList, ReAnime, Onnada, Anissia 네 출처의 애니메이션 DB를 비공개 GitHub Release에 보관하고, 신규 항목만 월별로 추가합니다. AniAll은 네 출처 작품 목록의 별도 출처 행으로 추가하지 않고, 별도 매칭 작업에서 참조합니다. `db-v1`은 작품 DB `anime_four_sources_multilingual_prepared.zip`과 검수 자막 registry `anime_reviewed_subtitle_registry_v1.zip` 두 자산으로 분리합니다. 자막 파일 본체는 DB에 넣지 않고 Pi의 `subtitle-data`에 보관합니다. streaming-project Release updater는 두 자산의 SHA-256과 import 상태를 독립적으로 관리하며, 필요하면 `--catalog-only` 또는 `--registry-only`로 각각만 반영할 수 있습니다.
 
 ## 기준 DB 월별 갱신
 
@@ -67,7 +67,7 @@ python3 scripts/match_anikoto.py --baseline /path/to/reviewed-baseline.db \
   --corrected-db output/anime_four_sources_multilingual_prepared.db
 ```
 
-새 DB는 기존 자막 파일·ZIP·검수·확정 회차를 보존하고 `anikoto_catalog`, `anikoto_work_links`, `anikoto_match_metadata`를 추가합니다. Anikoto는 기존 네 출처의 `entries`에 섞지 않습니다. **runtime 형식 2**는 연결된 작품만 저장하며 기본 제목·매칭된 연도·장르·형식·포스터·회차 수와 정확한 출처 ID만 유지합니다. 중복 URL·점수·수집 추적 필드·긴 자동 매칭 근거는 빼고 SQLite `VACUUM` 후 압축합니다. 초기 수집본에서 Anikoto 표·인덱스는 약 14.8MB에서 3.2MB로 줄고, 기존 기준 DB ZIP 33.17MB에 약 1.21MB가 추가됩니다(십진 MB 기준). 기준 DB의 자막 검수 표를 삭제해서 줄이지 않습니다.
+새 DB는 작품 카탈로그와 Anikoto 연결만 다루며 `anikoto_catalog`, `anikoto_work_links`, `anikoto_match_metadata`를 추가합니다. Anikoto는 기존 네 출처의 `entries`에 섞지 않습니다. **runtime 형식 2**는 연결된 작품만 저장하며 기본 제목·매칭된 연도·장르·형식·포스터·회차 수와 정확한 출처 ID만 유지합니다. 중복 URL·점수·수집 추적 필드·긴 자동 매칭 근거는 빼고 SQLite `VACUUM` 후 압축합니다. 검수 자막 파일·확정 회차 registry는 별도 Release 자산에 있으므로 Anikoto 월간 배포가 registry를 다시 압축하거나 덮어쓰지 않습니다.
 
 이 DB를 소비하는 앱은 `anikoto_work_links.payload_json`의 `source_refs`로 정확한 출처 ID를 조회해야 하며, 기존 importer가 이 표를 읽지 않으면 플레이어 동작은 아직 바뀌지 않습니다. 기존 DB의 `reviewed`·`rejected` 연결은 후보 선택과 다음 DB 생성에서 유지합니다. 자동 제안은 수동으로 확정한 작품을 중복으로 차지할 수 없습니다.
 
@@ -81,7 +81,7 @@ AniAll은 기준 DB의 출처 행으로 저장하지 않습니다. 매월 1일 1
 
 ## Pi에 기준 DB 반영
 
-갱신된 Release ZIP을 내려받아 SQLite 파일을 압축 해제한 다음, Pi의 `streaming-project`에서 가져옵니다.
+Pi의 기본 updater는 `db-v1`의 작품 DB와 검수 registry를 각각 확인해 바뀐 자산만 내려받고 import합니다. 작품 DB import 뒤에는 기존 자막 행을 변경하지 않은 채 catalog-derived ReAnime lookup만 보충합니다. 검수 registry import는 `is_manual=true`인 수동 수정 행을 덮어쓰지 않으며 기존 확정 회차 행도 삭제하지 않습니다.
 
 ```bash
 cd ~/streaming-project
@@ -94,7 +94,9 @@ docker compose ps
 
 Pi의 자동 반영은 매월 3일 02:00 KST에 실행됩니다. GitHub의 DB Release 갱신이 성공하면 AniAll audit가 바로 이어서 실행되므로, Pi는 준비된 최신 자산을 3일 새벽에 받아옵니다.
 
-Pi importer는 고정 행 수가 아닌 네 출처가 모두 있는지 확인하므로 월별 DB 증가분을 받아들입니다. 기존 스트리밍 링크와 기준 DB의 검토 연결은 importer가 다시 계산하거나 덮어쓰지 않습니다. AniAll 매칭 후보는 이 기준 DB 파일에 병합하지 않습니다.
+Pi importer는 고정 행 수가 아닌 네 출처가 모두 있는지 확인하므로 월별 DB 증가분을 받아들입니다. 기존 스트리밍 링크와 기준 DB의 검토 연결은 importer가 다시 계산하거나 덮어쓰지 않습니다. 검수 registry는 별도 digest로 관리하므로 월간 작품 DB 갱신만 있을 때 대용량 registry를 다시 다운로드하지 않습니다. AniAll 매칭 후보는 기준 DB 파일에 병합하지 않습니다.
+
+수동으로 자산 하나만 확인/반영할 때는 `python3 scripts/update-anime-db-release.py --catalog-only` 또는 `--registry-only`를 사용합니다. 기존 합본 `db-v1`도 registry 자산이 아직 없으면 자동으로 감지해 호환 import하며, 분리 마이그레이션 전후 어느 쪽에서도 월간 timer가 동작합니다.
 
 ## 주간 자막 발견 + Pi 다운로드
 
