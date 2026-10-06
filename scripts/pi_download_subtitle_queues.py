@@ -1183,6 +1183,20 @@ def download_tistory_winpng(session: requests.Session, page_url: str,
                 "Tistory WinPNG JMK extracted but conversion failed: " + detail
             )
 
+        converted_stems = {
+            path.stem.casefold()
+            for path in playable
+            if path.suffix.lower() in {".ass", ".smi", ".srt", ".ssa", ".vtt"}
+        }
+        for jmk_path in jmk_files:
+            if jmk_path.stem.casefold() not in converted_stems:
+                continue
+            jmk_path.unlink(missing_ok=True)
+        files = [
+            path for path in files
+            if path.exists() and path.suffix.lower() != ".jmk"
+        ]
+
     if files:
         return files
     if errors:
