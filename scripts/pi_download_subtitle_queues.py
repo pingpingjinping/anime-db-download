@@ -30,6 +30,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from subtitle_work_storage import safe_name, work_directory, register_sources, preserve_download
+from winpng_decode import decode_winpng_bytes
 
 from subtitle_queue_metadata import (
     aniall_folder_identity,
@@ -57,6 +58,7 @@ BACKFILL_BASELINE_DATE = dt.date(2026, 9, 28)
 HISTORY_SEARCH_MAX_PAGES = 4
 HISTORY_SEARCH_MAX_RESULTS = 60
 ALLOWED_EXTENSIONS = {".zip", ".7z", ".rar", ".smi", ".srt", ".ass", ".ssa", ".vtt"}
+WINPNG_EXTENSIONS = ALLOWED_EXTENSIONS | {".jmk"}
 MAX_DOWNLOAD_BYTES = 100 * 1024 * 1024
 UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -1072,6 +1074,97 @@ def tistory_attachment_candidates(page_url: str, html_text: str) -> list[dict]:
     return out
 
 
+def tistory_winpng_image_urls(page_url: str, container) -> list[str]:
+    """Return original Tistory/Kakao PNG URLs, never resized thumbnail URLs."""
+    out: list[str] = []
+    seen: set[str] = set()
+    for node in container.find_all(True):
+        for attr in ("data-url", "data-phocus", "src"):
+            raw = str(node.get(attr) or "").strip()
+            if not raw:
+                continue
+            url = urljoin(page_url, unescape(raw).replace("&amp;", "&"))
+            parsed = urlparse(url)
+            host = (parsed.hostname or "").lower()
+            if not (host == "blog.kakaocdn.net" or host.endswith(".kakaocdn.net")):
+                continue
+            if Path(unquote(parsed.path)).suffix.lower() != ".png":
+                continue
+            if url in seen:
+                continue
+            seen.add(url)
+            out.append(url)
+    return out
+
+
+def response_bytes(response: requests.Response, max_bytes: int = MAX_DOWNLOAD_BYTES) -> bytes:
+    declared = str(response.headers.get("Content-Length") or "").strip()
+    if declared.isdigit() and int(declared) > max_bytes:
+        raise RuntimeError("WinPNG image exceeded size limit")
+
+    payload = bytearray()
+    for chunk in response.iter_content(1024 * 1024):
+        if not chunk:
+            continue
+        payload.extend(chunk)
+        if len(payload) > max_bytes:
+            raise RuntimeError("WinPNG image exceeded size limit")
+    return bytes(payload)
+
+
+def preserve_winpng_files(embedded, destination: Path) -> list[Path]:
+    files: list[Path] = []
+    for item in embedded:
+        relative = Path(item.path)
+        if relative.suffix.lower() not in WINPNG_EXTENSIONS:
+            continue
+
+        target = destination.joinpath(*relative.parts)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        temporary = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                dir=target.parent,
+                prefix=".winpng-",
+                delete=False,
+            ) as handle:
+                handle.write(item.data)
+                temporary = Path(handle.name)
+            files.append(preserve_download(temporary, target))
+            temporary = None
+        finally:
+            if temporary is not None:
+                temporary.unlink(missing_ok=True)
+    return files
+
+
+def download_tistory_winpng(session: requests.Session, page_url: str,
+                            container, destination: Path) -> list[Path]:
+    """Decode files embedded in original Kakao PNGs by WinPNG."""
+    files: list[Path] = []
+    errors: list[str] = []
+    for image_url in tistory_winpng_image_urls(page_url, container):
+        try:
+            response = request(session, image_url, referer=page_url, stream=True)
+            try:
+                payload = response_bytes(response)
+            finally:
+                response.close()
+            embedded = decode_winpng_bytes(payload)
+            if not embedded:
+                continue
+            files.extend(preserve_winpng_files(embedded, destination))
+        except Exception as exc:
+            errors.append(f"{image_url}: {exc}")
+
+    files = unique_paths(files)
+    if files:
+        return files
+    if errors:
+        raise RuntimeError("Tistory WinPNG decode failed: " + " | ".join(errors[:3]))
+    return []
+
+
 def download_tistory_gui(session: requests.Session, source_url: str, destination: Path) -> list[Path]:
     response = request(session, source_url)
     page_url = response.url
@@ -1087,10 +1180,22 @@ def download_tistory_gui(session: requests.Session, source_url: str, destination
         or soup.find("div", class_="contents_style")
         or soup
     )
-    files = anchor_downloads(session, container.find_all("a", href=True), destination, page_url)
-    if not files:
-        raise RuntimeError("Tistory subtitle attachment not found")
-    return files
+    anchor_error = None
+    try:
+        files = anchor_downloads(session, container.find_all("a", href=True), destination, page_url)
+    except RuntimeError as exc:
+        anchor_error = exc
+        files = []
+    if files:
+        return files
+
+    files = download_tistory_winpng(session, page_url, container, destination)
+    if files:
+        return files
+
+    if anchor_error is not None:
+        raise RuntimeError(f"Tistory subtitle attachment not found: {anchor_error}")
+    raise RuntimeError("Tistory subtitle attachment not found")
 
 
 def extract_csrf_token(html_text: str) -> str | None:
