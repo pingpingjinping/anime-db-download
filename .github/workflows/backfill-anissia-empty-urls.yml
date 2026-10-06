@@ -1,0 +1,101 @@
+name: Backfill Anissia URL waiting
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: anissia-empty-url-backfill
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependency
+        run: python -m pip install requests
+
+      - name: Scan all Anissia captions with no URL
+        shell: bash
+        run: |
+          python scripts/backfill_anissia_empty_urls.py \
+            --out "$RUNNER_TEMP/anissia-empty-url-backfill"
+
+      - name: Read backfill summary
+        id: summary
+        shell: bash
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          from pathlib import Path
+          p = Path(os.environ["RUNNER_TEMP"]) / "anissia-empty-url-backfill" / "summary.json"
+          summary = json.loads(p.read_text())
+          for key in ("scanned_works", "scanned_captions", "queue_count", "api_failures"):
+              print(f"{key}={int(summary.get(key, 0))}")
+          print(f"should_release={str(int(summary.get('queue_count', 0)) > 0).lower()}")
+          PY
+
+      - name: Publish Pi waiting-URL queue
+        if: steps.summary.outputs.should_release == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QUEUE_COUNT: ${{ steps.summary.outputs.queue_count }}
+          SCANNED_WORKS: ${{ steps.summary.outputs.scanned_works }}
+          SCANNED_CAPTIONS: ${{ steps.summary.outputs.scanned_captions }}
+          API_FAILURES: ${{ steps.summary.outputs.api_failures }}
+        run: |
+          set -euo pipefail
+          day="$(TZ=Asia/Seoul date +%Y-%m-%d)"
+          tag="subs-queue-${day}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          notes="$RUNNER_TEMP/anissia-empty-url-backfill-notes.txt"
+          {
+            echo "One-time Anissia empty-URL backfill queue"
+            echo
+            echo "- queued empty URLs: ${QUEUE_COUNT}"
+            echo "- scanned works: ${SCANNED_WORKS}"
+            echo "- scanned captions: ${SCANNED_CAPTIONS}"
+            echo "- Anissia API failures: ${API_FAILURES}"
+            echo
+            echo "This queue intentionally ignores the normal 2026-09-25 bootstrap cutoff."
+            echo "The Pi will place these entries in waiting_url; no source page can be downloaded until a URL appears."
+          } > "$notes"
+
+          gh release create "$tag" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Anissia URL waiting backfill ${day}" \
+            --notes-file "$notes"
+          gh release upload "$tag" \
+            "$RUNNER_TEMP/anissia-empty-url-backfill/subtitle-queue.json" \
+            --repo "$GITHUB_REPOSITORY"
+
+          if [[ -s "$RUNNER_TEMP/anissia-empty-url-backfill/backfill-failed.jsonl" ]]; then
+            gh release upload "$tag" \
+              "$RUNNER_TEMP/anissia-empty-url-backfill/backfill-failed.jsonl" \
+              --repo "$GITHUB_REPOSITORY"
+          fi
+
+      - name: Add run summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## Anissia URL waiting backfill"
+            echo
+            echo "- scanned works: ${{ steps.summary.outputs.scanned_works || 'n/a' }}"
+            echo "- scanned captions: ${{ steps.summary.outputs.scanned_captions || 'n/a' }}"
+            echo "- queued empty URLs: ${{ steps.summary.outputs.queue_count || 'n/a' }}"
+            echo "- API failures: ${{ steps.summary.outputs.api_failures || 'n/a' }}"
+            echo
+            echo "After this workflow succeeds, run anime-weekly-subtitles.service on the Pi once."
+          } >> "$GITHUB_STEP_SUMMARY"
