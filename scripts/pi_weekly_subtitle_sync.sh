@@ -28,7 +28,7 @@ fi
 if [[ ! -x "$PI_PYTHON" ]]; then
   PI_PYTHON="/usr/bin/python3"
 fi
-if ! "$PI_PYTHON" -c 'import requests, bs4, playwright' >/dev/null 2>&1; then
+if ! "$PI_PYTHON" -c 'import requests, bs4, playwright, PIL' >/dev/null 2>&1; then
   echo "Missing Pi subtitle Python dependencies." >&2
   echo "Run: python3 -m venv ~/.local/share/anime-db-download/venv && ~/.local/share/anime-db-download/venv/bin/pip install -r ~/anime-db-download/requirements-pi-subtitles.txt" >&2
   exit 1
