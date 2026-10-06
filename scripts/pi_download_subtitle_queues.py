@@ -31,6 +31,7 @@ from bs4 import BeautifulSoup
 
 from subtitle_work_storage import safe_name, work_directory, register_sources, preserve_download
 from winpng_decode import decode_winpng_bytes
+from tistory_winpng_jamaker import convert_tistory_jmks
 
 from subtitle_queue_metadata import (
     aniall_folder_identity,
@@ -1158,6 +1159,30 @@ def download_tistory_winpng(session: requests.Session, page_url: str,
             errors.append(f"{image_url}: {exc}")
 
     files = unique_paths(files)
+
+    jmk_files = [path for path in files if path.suffix.lower() == ".jmk"]
+    if jmk_files:
+        try:
+            converted = convert_tistory_jmks(
+                page_url,
+                {path.name for path in jmk_files},
+            )
+            files.extend(preserve_winpng_files(converted, destination))
+            files = unique_paths(files)
+        except Exception as exc:
+            errors.append(f"Jamaker conversion: {exc}")
+
+        playable = [
+            path for path in files
+            if path.suffix.lower() in ALLOWED_EXTENSIONS
+            and path.suffix.lower() not in {".zip", ".7z", ".rar"}
+        ]
+        if not playable:
+            detail = " | ".join(errors[:3]) if errors else "no ASS/SMI output"
+            raise RuntimeError(
+                "Tistory WinPNG JMK extracted but conversion failed: " + detail
+            )
+
     if files:
         return files
     if errors:
