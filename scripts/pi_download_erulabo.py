@@ -21,7 +21,7 @@ from pathlib import Path
 import subprocess
 
 # 기존 프로젝트 모듈 import
-from pi_download_subtitle_queues import safe_name, save_state
+from pi_download_subtitle_queues import append_failure, safe_name, save_state
 from subtitle_queue_metadata import build_download_metadata, queue_cache_cleanup
 from subtitle_work_storage import work_directory, register_sources
 
@@ -346,6 +346,11 @@ def main() -> None:
                 print(f"    파일: {final_path}")
                 print(f"    상태: success 기록 + erulabo_pending 삭제")
             else:
+                append_failure(
+                    item,
+                    "Erulabo download failed or timed out",
+                    "erulabo_download_failed",
+                )
                 print(f"[!] {item_id} 다운로드 실패: 큐에 그대로 보존합니다.")
 
             # 다음 항목으로 넘어가기 전 안전 쿨타임
