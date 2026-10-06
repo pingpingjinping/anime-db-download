@@ -7,6 +7,9 @@ PI_PYTHON="${PI_PYTHON:-/home/pi/.local/share/anime-db-download/venv/bin/python}
 STATE_FILE="${SUBTITLE_STATE_FILE:-$HOME/.local/state/anime-db-download/subtitle-queue-state.json}"
 FAIL_LOG="${SUBTITLE_FAIL_LOG:-$HOME/.local/state/anime-db-download/subtitle-download-failed.jsonl}"
 REPORT_OUTPUT="${SUBTITLE_DASHBOARD_REPORT:-$STREAMING_REPO/subtitle-data/.weekly-subtitle-dashboard.json}"
+ERULABO_PROFILE="${ERULABO_BROWSER_PROFILE:-$HOME/.local/share/anime-db-download/erulabo-browser-profile}"
+ERULABO_CDP_PORT="${ERULABO_CDP_PORT:-9222}"
+ERULABO_BROWSER_GRACE_SECONDS="${ERULABO_BROWSER_GRACE_SECONDS:-300}"
 
 if [[ ! -f "$ARCHIVE_REPO/scripts/pi_download_subtitle_queues.py" ]]; then
   echo "Missing Pi subtitle queue downloader: $ARCHIVE_REPO/scripts/pi_download_subtitle_queues.py" >&2
@@ -61,7 +64,46 @@ write_dashboard_report() {
     echo "Failed to write weekly subtitle dashboard report (exit $report_status)." >&2
   fi
 }
-trap 'write_dashboard_report "$?"' EXIT
+
+erulabo_chromium_pids() {
+  pgrep -f -- "--user-data-dir=$ERULABO_PROFILE" 2>/dev/null || true
+}
+
+close_erulabo_chromium_after_grace() {
+  local -a pids=()
+  mapfile -t pids < <(erulabo_chromium_pids)
+  if (( ${#pids[@]} == 0 )); then
+    return
+  fi
+
+  echo
+  echo "Erulabo Chromium is still running; closing it in $ERULABO_BROWSER_GRACE_SECONDS second(s)."
+  sleep "$ERULABO_BROWSER_GRACE_SECONDS"
+
+  mapfile -t pids < <(erulabo_chromium_pids)
+  if (( ${#pids[@]} == 0 )); then
+    echo "Erulabo Chromium already exited."
+    return
+  fi
+
+  kill -TERM "${pids[@]}" 2>/dev/null || true
+  sleep 3
+
+  mapfile -t pids < <(erulabo_chromium_pids)
+  if (( ${#pids[@]} > 0 )); then
+    kill -KILL "${pids[@]}" 2>/dev/null || true
+  fi
+  echo "Erulabo Chromium closed."
+}
+
+finish_run() {
+  local run_status="$?"
+  trap - EXIT
+  write_dashboard_report "$run_status"
+  close_erulabo_chromium_after_grace
+  exit "$run_status"
+}
+trap finish_run EXIT
 
 echo "=== [1/5] Download queued subtitles from Pi/home IP ==="
 if command -v ionice >/dev/null 2>&1; then
@@ -76,7 +118,9 @@ echo
 echo "=== [2/5] Process pending Erulabo subtitles ==="
 erulabo_status=0
 "$PI_PYTHON" "$ARCHIVE_REPO/scripts/pi_download_erulabo.py" \
-  --target "$STREAMING_REPO/subtitle-data" || erulabo_status=$?
+  --target "$STREAMING_REPO/subtitle-data" \
+  --profile "$ERULABO_PROFILE" \
+  --cdp-port "$ERULABO_CDP_PORT" || erulabo_status=$?
 if (( erulabo_status != 0 )); then
   echo "Erulabo step failed (exit $erulabo_status); continuing AniAll mapping and cache cleanup. Pending entries can be retried." >&2
 fi
