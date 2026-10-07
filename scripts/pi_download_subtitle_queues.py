@@ -1188,13 +1188,24 @@ def download_tistory_winpng(session: requests.Session, page_url: str,
             for path in playable
             if path.suffix.lower() in {".ass", ".smi", ".srt", ".ssa", ".vtt"}
         }
+        missing_conversions = [
+            path for path in jmk_files
+            if path.stem.casefold() not in converted_stems
+        ]
+        if missing_conversions:
+            raise RuntimeError(
+                "Tistory WinPNG JMK conversion incomplete: "
+                + ", ".join(path.name for path in missing_conversions[:5])
+            )
+
+        # WinPNG source PNG bytes are never persisted. Once every extracted JMK
+        # has a playable conversion, remove all raw JMK inputs as well so only
+        # ASS/SMI/SRT/SSA/VTT (or archive outputs) remain in subtitle-data.
         for jmk_path in jmk_files:
-            if jmk_path.stem.casefold() not in converted_stems:
-                continue
             jmk_path.unlink(missing_ok=True)
         files = [
             path for path in files
-            if path.exists() and path.suffix.lower() != ".jmk"
+            if path.exists() and path.suffix.lower() not in {".jmk", ".png"}
         ]
 
     if files:
