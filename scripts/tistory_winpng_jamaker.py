@@ -117,10 +117,10 @@ def _wait_state(page, timeout_seconds: float) -> str:
 
 def _decode_result(row: dict, expected_names: set[str]) -> list[EmbeddedFile]:
     raw_name = str(row.get("name") or "")
-    if raw_name.casefold() not in expected_names:
-        return []
-
     directory = str(row.get("dir") or "")
+    original = _safe_relative(directory + raw_name)
+    if original is None or original.casefold() not in expected_names:
+        return []
     out: list[EmbeddedFile] = []
     for key, name_key in (("ass", "assName"), ("smi", "smiName")):
         payload = row.get(key)
@@ -128,7 +128,9 @@ def _decode_result(row: dict, expected_names: set[str]) -> list[EmbeddedFile]:
         if not payload or not name:
             continue
         relative = _safe_relative(directory + name)
-        if relative is None:
+        if relative is None or PurePosixPath(relative).suffix.lower() not in (".ass", ".smi"):
+            continue
+        if PurePosixPath(relative).with_suffix(".jmk").as_posix().casefold() != original.casefold():
             continue
         try:
             data = base64.b64decode(payload, validate=True)
@@ -142,7 +144,8 @@ def _decode_result(row: dict, expected_names: set[str]) -> list[EmbeddedFile]:
 def convert_tistory_jmks(page_url: str, jmk_names: set[str],
                          timeout_seconds: float = 60) -> list[EmbeddedFile]:
     """Use the author's own Tistory/Jamaker viewer to turn JMK into ASS/SMI."""
-    expected_names = {name.casefold() for name in jmk_names if name}
+    expected_names = {relative.casefold() for name in jmk_names
+                      if (relative := _safe_relative(name)) is not None}
     if not expected_names:
         return []
 
@@ -193,15 +196,11 @@ def convert_tistory_jmks(page_url: str, jmk_names: set[str],
                         seen.add(key)
                         results.append(item)
 
-                converted_stems = {
-                    PurePosixPath(item.path).stem.casefold()
+                converted_sources = {
+                    PurePosixPath(item.path).with_suffix(".jmk").as_posix().casefold()
                     for item in results
                 }
-                expected_stems = {
-                    PurePosixPath(name).stem.casefold()
-                    for name in expected_names
-                }
-                if expected_stems.issubset(converted_stems):
+                if expected_names.issubset(converted_sources):
                     break
         finally:
             browser.close()
