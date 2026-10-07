@@ -1113,7 +1113,8 @@ def response_bytes(response: requests.Response, max_bytes: int = MAX_DOWNLOAD_BY
     return bytes(payload)
 
 
-def preserve_winpng_files(embedded, destination: Path) -> list[Path]:
+def preserve_winpng_files(embedded, destination: Path,
+                          preserved: dict[str, set[Path]] | None = None) -> list[Path]:
     files: list[Path] = []
     for item in embedded:
         relative = Path(item.path)
@@ -1131,7 +1132,10 @@ def preserve_winpng_files(embedded, destination: Path) -> list[Path]:
             ) as handle:
                 handle.write(item.data)
                 temporary = Path(handle.name)
-            files.append(preserve_download(temporary, target))
+            saved = preserve_download(temporary, target)
+            files.append(saved)
+            if preserved is not None:
+                preserved.setdefault(relative.as_posix().casefold(), set()).add(saved)
             temporary = None
         finally:
             if temporary is not None:
@@ -1144,6 +1148,7 @@ def download_tistory_winpng(session: requests.Session, page_url: str,
     """Decode files embedded in original Kakao PNGs by WinPNG."""
     files: list[Path] = []
     errors: list[str] = []
+    preserved: dict[str, set[Path]] = {}
     for image_url in tistory_winpng_image_urls(page_url, container):
         try:
             response = request(session, image_url, referer=page_url, stream=True)
@@ -1154,7 +1159,7 @@ def download_tistory_winpng(session: requests.Session, page_url: str,
             embedded = decode_winpng_bytes(payload)
             if not embedded:
                 continue
-            files.extend(preserve_winpng_files(embedded, destination))
+            files.extend(preserve_winpng_files(embedded, destination, preserved))
         except Exception as exc:
             errors.append(f"{image_url}: {exc}")
 
@@ -1162,12 +1167,16 @@ def download_tistory_winpng(session: requests.Session, page_url: str,
 
     jmk_files = [path for path in files if path.suffix.lower() == ".jmk"]
     if jmk_files:
+        jmk_sources = {name: paths for name, paths in preserved.items() if name.endswith(".jmk")}
+        if any(len(paths) != 1 for paths in jmk_sources.values()):
+            raise RuntimeError("Tistory WinPNG has conflicting JMK inputs at the same relative path")
+        converted_saved: dict[str, set[Path]] = {}
         try:
             converted = convert_tistory_jmks(
                 page_url,
-                {path.name for path in jmk_files},
+                set(jmk_sources),
             )
-            files.extend(preserve_winpng_files(converted, destination))
+            files.extend(preserve_winpng_files(converted, destination, converted_saved))
             files = unique_paths(files)
         except Exception as exc:
             errors.append(f"Jamaker conversion: {exc}")
@@ -1183,19 +1192,23 @@ def download_tistory_winpng(session: requests.Session, page_url: str,
                 "Tistory WinPNG JMK extracted but conversion failed: " + detail
             )
 
-        converted_stems = {
-            path.stem.casefold()
-            for path in playable
-            if path.suffix.lower() in {".ass", ".smi", ".srt", ".ssa", ".vtt"}
+        # Compare the original relative paths before preserve_download adds a
+        # digest to a corrected same-name file. A different episode folder is
+        # never evidence that this JMK was converted.
+        converted_sources = {
+            Path(name).with_suffix(".jmk").as_posix().casefold()
+            for name, paths in converted_saved.items()
+            if Path(name).suffix.lower() in {".ass", ".smi", ".srt", ".ssa", ".vtt"}
+            and any(path in files and path.exists() for path in paths)
         }
         missing_conversions = [
-            path for path in jmk_files
-            if path.stem.casefold() not in converted_stems
+            name for name in jmk_sources
+            if name not in converted_sources
         ]
         if missing_conversions:
             raise RuntimeError(
                 "Tistory WinPNG JMK conversion incomplete: "
-                + ", ".join(path.name for path in missing_conversions[:5])
+                + ", ".join(missing_conversions[:5])
             )
 
         # WinPNG source PNG bytes are never persisted. Once every extracted JMK
