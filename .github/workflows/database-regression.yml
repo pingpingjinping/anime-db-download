@@ -58,3 +58,43 @@ jobs:
               out.write('## db-v1 release layout\n\n')
               out.write(json.dumps(data,ensure_ascii=False,indent=2)+'\n')
           PY
+      - name: Replay Anikoto refresh against the current Release without publishing
+        run: |
+          python -m pip install requests beautifulsoup4
+          python - <<'PY'
+          import json, os, pathlib, sqlite3, sys
+          sys.path.insert(0, 'scripts')
+          from split_db_v1_release import extract_database
+          from prepare_anikoto_catalog import prepare
+          from crawl_anikoto import export
+          from match_anikoto import match, create_matched_database, sha256
+          from apply_anikoto_manual_review import apply
+          from package_anikoto_release import package
+
+          root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'anikoto-replay'
+          root.mkdir()
+          baseline, catalog, runtime = [root / name for name in ('baseline.db', 'catalog.sqlite', 'runtime.db')]
+          extract_database(pathlib.Path(os.environ['RUNNER_TEMP']) / 'current' / 'anime_four_sources_multilingual_prepared.zip', baseline)
+          prepare(catalog)
+          export(catalog, root / 'catalog')
+          before = (sha256(baseline), sha256(catalog))
+          corrections = json.loads(pathlib.Path('data/anikoto/catalog-corrections.json').read_text())
+          match(baseline, catalog, root / 'matching', corrections=corrections)
+          create_matched_database(baseline, catalog, root / 'matching' / 'anikoto-matches.json', runtime, corrections)
+          report = apply(runtime, catalog, pathlib.Path('data/anikoto/manual-review-decision-v1.b64'),
+                         root / 'matching' / 'anikoto-match-review.jsonl', root / 'matching' / 'anikoto-match-report.json')
+          validation = package(baseline, runtime, catalog, root / 'matching', root / 'catalog', root / 'release', corrections)
+          with sqlite3.connect(baseline) as old, sqlite3.connect(runtime) as new:
+              query = "SELECT anikoto_id,target_source,target_id,status FROM anikoto_work_links WHERE status='reviewed' ORDER BY anikoto_id"
+              if old.execute(query).fetchall() != new.execute(query).fetchall():
+                  raise ValueError('Existing reviewed source targets changed during replay')
+              query = "SELECT * FROM anikoto_work_link_targets WHERE link_status='multi_reviewed' ORDER BY anikoto_id,target_order"
+              if old.execute(query).fetchall() != new.execute(query).fetchall():
+                  raise ValueError('Existing multi-target episode mappings changed during replay')
+          if before != (sha256(baseline), sha256(catalog)):
+              raise ValueError('Replay modified a source database')
+          print(json.dumps({'runtime_works': validation['runtime_works'],
+                            'reviewed': report['reviewed'], 'multi_reviewed': report['multi_reviewed'],
+                            'source_databases_unchanged': True}, indent=2))
+          PY
+

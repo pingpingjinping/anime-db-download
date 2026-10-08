@@ -122,6 +122,63 @@ class MatchingTests(unittest.TestCase):
         self.assertEqual([link['anikoto_id'] for link in links],['manual'])
         self.assertEqual(next(o for o in outcomes if o['anikoto_id']=='automatic')['reason'],'reviewed_target_already_linked')
 
+    def test_reviewed_reanime_member_keeps_source_identity_and_reserves_canonical_group(self):
+        decisions={'manual':{'status':'accepted','target':'ReAnime:edition','reason':'Reviewed source'}}
+        rows=[row(), row('ReAnime','edition',cross_source_ids_json='{"anilist_ids":["1"]}')]
+        links,outcomes,_=matcher.compare([listing('manual',count=13),listing('automatic')],rows,decisions)
+        self.assertEqual([(l['anikoto_id'],l['target_source'],l['target_id']) for l in links],
+                         [('manual','ReAnime','edition')])
+        self.assertEqual(links[0]['source_refs'], [{'source':'AniList','id':'1'},{'source':'ReAnime','id':'edition'}])
+        self.assertEqual(next(o for o in outcomes if o['anikoto_id']=='automatic')['reason'],
+                         'reviewed_target_already_linked')
+
+    def test_reviewed_onnada_or_anissia_target_does_not_require_automatic_group(self):
+        for source in ('Onnada','Anissia'):
+            with self.subTest(source=source):
+                decisions={'example-slug':{'status':'accepted','target':source+':manual',
+                                          'reason':'Reviewed standalone source'}}
+                links,_,_=matcher.compare([listing()], [row(source,'manual',year=None,count=None)], decisions)
+                self.assertEqual((links[0]['target_source'],links[0]['target_id']), (source,'manual'))
+                self.assertEqual(links[0]['source_refs'], [{'source':source,'id':'manual'}])
+
+    def test_reviewed_nonexistent_source_identity_still_fails(self):
+        decisions={'example-slug':{'status':'accepted','target':'Onnada:missing','reason':'Invalid source'}}
+        with self.assertRaisesRegex(ValueError, 'Invalid reviewed status or target for example-slug'):
+            matcher.compare([listing()], [row()], decisions)
+
+    def test_retained_reviewed_source_targets_survive_match_and_database_copy(self):
+        import crawl_anikoto as crawler
+        from test_crawl_anikoto import BASE, page_html
+        from test_match_new_sources import catalog as baseline_catalog, add
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            baseline,raw,runtime=root/'baseline.db',root/'raw.sqlite',root/'runtime.db'
+            db=baseline_catalog()
+            add(db,'AniList','canonical',native='',romaji='Hidamari Sketch manual-reanime',meta={'episodes':12})
+            add(db,'ReAnime','edition',native='',romaji='Hidamari Sketch manual-reanime',
+                ids=['canonical'],meta={'episodes':12})
+            add(db,'Onnada','standalone',native='',romaji='Unindexed reviewed work')
+            add(db,'Anissia','other',native='',romaji='Unrelated work')
+            db.execute('CREATE TABLE anikoto_work_links(anikoto_id TEXT PRIMARY KEY,target_source TEXT,target_id TEXT,status TEXT,payload_json TEXT)')
+            expected=[('manual-reanime','ReAnime','edition','reviewed'),
+                      ('manual-onnada','Onnada','standalone','reviewed')]
+            db.executemany('INSERT INTO anikoto_work_links VALUES (?,?,?,?,?)',
+                           [(*r,'{"reason":"Existing manual review"}') for r in expected])
+            db.commit()
+            with sqlite3.connect(baseline) as disk:
+                db.backup(disk)
+            db.close()
+            with contextlib.redirect_stdout(io.StringIO()):
+                crawler.crawl(raw,BASE,fetch=lambda url:page_html(['manual-reanime','manual-onnada'],1))
+            before=(matcher.sha256(baseline),matcher.sha256(raw))
+            report=matcher.match(baseline,raw,root/'matching')
+            self.assertEqual(report['reviewed'],2)
+            matcher.create_matched_database(baseline,raw,root/'matching/anikoto-matches.json',runtime)
+            with sqlite3.connect(runtime) as db:
+                actual=db.execute('SELECT anikoto_id,target_source,target_id,status FROM anikoto_work_links ORDER BY anikoto_id DESC').fetchall()
+            self.assertEqual(actual,expected)
+            self.assertEqual(before,(matcher.sha256(baseline),matcher.sha256(raw)))
+
     def test_correction_has_identity_guards_and_keeps_unrelated_source_fields(self):
         original = row(title_ko='Example', cross_source_ids_json='{"mal_ids":["99"]}')
         change = {'source': 'AniList', 'id': '1', 'expected': {'title_ko': 'Example', 'year': 2020},
