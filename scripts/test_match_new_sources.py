@@ -82,6 +82,30 @@ class NewSourceMatchingTests(unittest.TestCase):
     def reasons(self):
         return {r[0] for r in self.db.execute('SELECT reason FROM monthly_match_candidates')}
 
+    def test_bracketed_short_kanji_reading_is_review_only(self):
+        self.source(native='神統記 〈テオゴニア〉', ko='신통기〈테오고니아〉', year=2025)
+        add(self.db, 'ReAnime', 'teogonia', native='神統記', year=2025)
+        matcher.refresh_auto_matches(self.db)
+        self.assertEqual(self.auto(), [])
+        row = self.db.execute("SELECT evidence_json FROM monthly_match_candidates WHERE reanime_id='teogonia'").fetchone()
+        self.assertIn('bracket_reading_alias', json.loads(row[0])['evidence'])
+
+    def test_ova_bonus_subtitle_recalled_even_when_tv_exact_exists(self):
+        self.source(native='この素晴らしい世界に祝福を！３ OVA', ko='축복 3 OVA', year=2025)
+        add(self.db, 'ReAnime', 'tv', native='この素晴らしい世界に祝福を！３', year=2024)
+        add(self.db, 'ReAnime', 'bonus', native='この素晴らしい世界に祝福を！３ーBONUS STAGEー', year=2025, fmt='OVA')
+        matcher.refresh_auto_matches(self.db)
+        self.assertEqual(self.auto(), [])
+        rows = {r[0]:json.loads(r[1]) for r in self.db.execute('SELECT reanime_id,evidence_json FROM monthly_match_candidates')}
+        self.assertIn('special_subtitle_alias', rows['bonus']['evidence'])
+        self.assertIn('format_conflict', rows['tv']['conflicts'])
+
+    def test_bonus_alias_does_not_erase_literal_digits(self):
+        self.source(native='検証アニメーション3 OVA', ko='검증 3 OVA')
+        add(self.db, 'ReAnime', 'wrong', native='検証アニメーション30 BONUS', fmt='OVA')
+        matcher.refresh_auto_matches(self.db)
+        self.assertNotIn('wrong', [r[0] for r in self.db.execute('SELECT reanime_id FROM monthly_match_candidates')])
+
     def test_unique_native_exact_same_year(self):
         self.source()
         add(self.db, 'ReAnime', 'correct')
@@ -311,6 +335,8 @@ class RecentSampleRegressionTests(unittest.TestCase):
         self.assertEqual(result['summary']['review_works'],4)
         for sample in result['samples']:
             self.assertEqual(sample['reanime_id'],fixture['expected_automatic'].get(str(sample['anissia_no'])))
+            if expected := fixture['expected_provisional_candidates'].get(str(sample['anissia_no'])):
+                self.assertIn(expected, [c['reanime_id'] for c in sample['candidates']])
 
 
     def test_fifty_recent_samples_preserve_verified_targets_and_six_holds(self):

@@ -142,3 +142,26 @@ Run the regression suite with:
 ```sh
 python -m unittest discover -s scripts -p 'test_*.py' -v
 ```
+
+## V4 candidate playback evidence
+
+Review-only recall includes bracketed readings accompanying short kanji titles
+and same-year/same-medium OVA bonus subtitles. These hints never satisfy automatic
+title equality. Literal digits are retained, including in containment hints.
+V4 candidate evidence additionally records source/target seasons and parts plus
+complete native-title equality. Consumers can distinguish unknown source seasons
+from a numbered sequel pointing to an unnumbered original.
+
+The streaming consumer reserves confirmed links first and globally allocates
+remaining compatible candidates as provisional links. It maximizes coverage,
+then summed evidence scores, and marks every provisional connection in the UI.
+Explicit season/part/type/episode-count conflicts and reviewed reservations are
+excluded; year disagreements may remain visibly provisional. A numbered source
+with an unnumbered target additionally needs complete same-year native evidence.
+Candidate allocation does not rewrite reviewed links or `monthly_auto_matches`.
+
+Full-catalog replay retains the same automatic targets. The 2025 50-work sample
+now has 46 confirmed + 4 provisional links; 2026 has 44 + 6; the additional
+50 have 21 + 28 with one numbered-sequel/original fallback withheld. These are
+new-ingestion replay coverage counts, not operating-catalog accuracy or stream
+availability measurements. Actual historical reservations remain protected.

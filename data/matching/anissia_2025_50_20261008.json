@@ -3745,6 +3745,74 @@
       "cross_source_ids_json": "{\"anilist_ids\":[\"8208\"],\"mal_ids\":[\"8208\"]}",
       "existing_match_status": "",
       "source_metadata_json": "{\"idMal\":8208,\"startDate\":{\"year\":1996,\"month\":7,\"day\":6},\"endDate\":{\"year\":1996,\"month\":7,\"day\":6},\"season\":\"SUMMER\",\"seasonYear\":1996,\"episodes\":1,\"averageScore\":61,\"popularity\":1060}"
+    },
+    {
+      "source": "ReAnime",
+      "source_record_id": "konosuba-god-s-blessing-on-this-wonderful-world-3-bonus-stage-yhxrzu",
+      "year": 2025,
+      "year_basis": "season_year",
+      "source_year_raw": "2025",
+      "title_ko": "",
+      "title_native": "この素晴らしい世界に祝福を！３ーBONUS STAGEー",
+      "title_romaji": "Kono Subarashii Sekai ni Shukufuku wo! 3: BONUS STAGE",
+      "title_english": "KONOSUBA -God's Blessing on This Wonderful World! 3 -BONUS STAGE-",
+      "format": "OVA",
+      "status": "Finished",
+      "genres": "Action | Adventure | Comedy | Ecchi | Fantasy",
+      "cross_source_ids_json": "{\"anilist_ids\":[\"181244\"],\"reanime_ids\":[\"konosuba-god-s-blessing-on-this-wonderful-world-3-bonus-stage-yhxrzu\"]}",
+      "existing_match_status": "",
+      "source_metadata_json": "{\"season\":\"SPRING\",\"season_year\":\"2025\",\"episodes_total\":\"2\",\"episodes_subbed\":\"2\",\"episodes_dubbed\":\"2\",\"average_score\":\"80\",\"popularity\":\"39726\",\"can_watch\":\"False\",\"can_request\":\"False\",\"reanime_url\":\"https://reanime.to/watch/konosuba-god-s-blessing-on-this-wonderful-world-3-bonus-stage-yhxrzu\"}"
+    },
+    {
+      "source": "AniList",
+      "source_record_id": "181244",
+      "year": 2025,
+      "year_basis": "startDate.year",
+      "source_year_raw": "2025",
+      "title_ko": "",
+      "title_native": "この素晴らしい世界に祝福を！３ーBONUS STAGEー",
+      "title_romaji": "Kono Subarashii Sekai ni Shukufuku wo! 3: BONUS STAGE",
+      "title_english": "KONOSUBA -God's Blessing on This Wonderful World! 3 -BONUS STAGE-",
+      "format": "OVA",
+      "status": "FINISHED",
+      "genres": "Action,Adventure,Comedy,Ecchi,Fantasy",
+      "cross_source_ids_json": "{\"anilist_ids\":[\"181244\"],\"mal_ids\":[\"59833\"]}",
+      "existing_match_status": "",
+      "source_metadata_json": "{\"idMal\":59833,\"startDate\":{\"year\":2025,\"month\":3,\"day\":14},\"endDate\":{\"year\":2025,\"month\":3,\"day\":14},\"season\":\"SPRING\",\"seasonYear\":2025,\"episodes\":2,\"averageScore\":80,\"popularity\":42644}"
+    },
+    {
+      "source": "ReAnime",
+      "source_record_id": "teogonia-gqande",
+      "year": 2025,
+      "year_basis": "season_year",
+      "source_year_raw": "2025",
+      "title_ko": "",
+      "title_native": "神統記",
+      "title_romaji": "Teogonia",
+      "title_english": "Teogonia",
+      "format": "TV",
+      "status": "Finished",
+      "genres": "Action,Fantasy",
+      "cross_source_ids_json": "{\"anilist_ids\": [\"176702\"], \"reanime_ids\": [\"teogonia-gqande\"]}",
+      "existing_match_status": "",
+      "source_metadata_json": "{\"season\": \"SPRING\", \"season_year\": 2025, \"episodes_total\": \"12\", \"episodes_subbed\": \"12\", \"episodes_dubbed\": \"12\", \"average_score\": 67, \"popularity\": 14923, \"can_watch\": false, \"can_request\": false, \"reanime_url\": \"https://reanime.to/watch/teogonia-gqande\", \"anime_id\": \"teogonia-gqande\", \"anilist_id\": 176702, \"cover_image\": {\"color\": \"\", \"extra_large\": \"https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx176702-sD5AnHf8g4zi.jpg\", \"large\": \"https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx176702-sD5AnHf8g4zi.jpg\", \"medium\": \"https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx176702-sD5AnHf8g4zi.jpg\"}, \"format\": \"TV\", \"status\": \"Finished\", \"episodes\": 12, \"duration\": \"24m\", \"subbed\": 12, \"dubbed\": 12, \"rating\": \"\"}"
+    },
+    {
+      "source": "AniList",
+      "source_record_id": "176702",
+      "year": 2025,
+      "year_basis": "startDate.year",
+      "source_year_raw": "2025",
+      "title_ko": "",
+      "title_native": "神統記",
+      "title_romaji": "Teogonia",
+      "title_english": "Teogonia",
+      "format": "TV",
+      "status": "FINISHED",
+      "genres": "Action,Fantasy",
+      "cross_source_ids_json": "{\"anilist_ids\":[\"176702\"],\"mal_ids\":[\"58614\"]}",
+      "existing_match_status": "",
+      "source_metadata_json": "{\"idMal\":58614,\"startDate\":{\"year\":2025,\"month\":4,\"day\":12},\"endDate\":{\"year\":2025,\"month\":6,\"day\":27},\"season\":\"SPRING\",\"seasonYear\":2025,\"episodes\":12,\"averageScore\":67,\"popularity\":17489}"
     }
   ],
   "expected_automatic": {
@@ -3794,5 +3862,11 @@
     "2885": "nukitashi-the-animation-wjrums",
     "3226": "yano-kun-s-ordinary-days-fwyr7s",
     "3071": "apocalypse-hotel-6e2mtw"
+  },
+  "expected_provisional_candidates": {
+    "3089": "konosuba-god-s-blessing-on-this-wonderful-world-3-bonus-stage-yhxrzu",
+    "2955": "teogonia-gqande",
+    "3158": "himitsu-no-aipri-ring-hen-nkrsaq",
+    "2932": "my-oni-girl-ncajtd"
   }
 }

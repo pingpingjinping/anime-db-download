@@ -13,7 +13,29 @@ from work_identity import (
 
 MIN_CANDIDATE_SCORE = 70
 MIN_AUTOMATIC_SCORE = 95
-RULE_VERSION = 3
+RULE_VERSION = 4
+
+
+def reading_head(row):
+    """A bracketed reading may accompany a short kanji title; review only."""
+    value = row.get('title_native') or ''
+    match = re.fullmatch(r'\s*(.+?)\s*[〈《<（(【]\s*[^〉》>）)】]+[〉》>）)】]\s*', value)
+    if match:
+        head = identity(match.group(1))
+        if len(head) >= 3 and re.search(r'[\u3400-\u9fff]', head):
+            return head
+    return None
+
+
+def contains_title(left, right):
+    short, long = sorted((left, right), key=len)
+    start = long.find(short)
+    if start < 0:
+        return False
+    end = start + len(short)
+    # Do not find installment 3 inside 30 (or an embedded title digit).
+    return not (short[0].isdigit() and start and long[start - 1].isdigit()
+                or short[-1].isdigit() and end < len(long) and long[end].isdigit())
 
 
 def metadata_compatible(a, b):
@@ -111,6 +133,15 @@ def refresh_auto_matches(db):
     for row in onnada.values():
         if row.get('title_ko'):
             on_by_ko[identity(row['title_ko'])].append(row)
+    # These aliases expand review recall only, never automatic title equality.
+    short_native = defaultdict(set)
+    for rid, rows in aliases.items():
+        for row in rows:
+            key = identity(row.get('title_native'))
+            if key:
+                short_native[key].add(rid)
+            if head := reading_head(row):
+                short_native[head].add(rid)
 
     possible = defaultdict(dict)
     no_candidates = set()
@@ -124,6 +155,24 @@ def refresh_auto_matches(db):
                 evidence_by_re[rid].add('exact_title')
                 if key in source_native and any(key in native_keys(alias) for alias in aliases[rid]):
                     evidence_by_re[rid].add('native_exact')
+        if ('Anissia', aid) in pending:
+            for key in {identity(a.get('title_native')), reading_head(a)} - {None, ''}:
+                for rid in short_native.get(key, ()):
+                    if 'exact_title' not in evidence_by_re[rid]:
+                        evidence_by_re[rid].add('bracket_reading_alias')
+            # Specials often replace OVA with a bonus subtitle. Keep literal
+            # season digits and require the same known type and release year.
+            if medium(a) in ('OVA', 'SPECIAL'):
+                for native in source_native:
+                    if len(native) < 8:
+                        continue
+                    for rid, rows in aliases.items():
+                        if medium(reanime[rid]) != medium(a) or year(a) != year(reanime[rid]):
+                            continue
+                        for row in rows:
+                            for key in native_keys(row):
+                                if key.startswith(native) and key != native and not key[len(native)].isdigit():
+                                    evidence_by_re[rid].add('special_subtitle_alias')
         for on in on_by_ko.get(identity(a.get('title_ko')), ()):
             on_conflicts, on_missing = compatibility(a, on)
             if on_conflicts or any(x in on_missing for x in ('season_missing', 'part_missing', 'year_missing')):
@@ -140,7 +189,7 @@ def refresh_auto_matches(db):
                 if len(native) < 8:
                     continue
                 for key, ids in by_title.items():
-                    if min(len(native), len(key)) >= 8 and (native in key or key in native):
+                    if min(len(native), len(key)) >= 8 and contains_title(native, key):
                         for rid in ids:
                             conflicts, _ = compatibility(a, reanime[rid])
                             if not conflicts:
@@ -179,6 +228,10 @@ def refresh_auto_matches(db):
                         + (5 if not conflicts and not missing else 0)
                         + (5 if medium(a) and medium(a) == medium(r) else 0))
             details = {'rule_version': RULE_VERSION, 'year': year(r), 'anissia_year': year(a),
+                       'source_seasons': sorted(installment(a)[0]), 'target_seasons': sorted(installment(r)[0]),
+                       'source_parts': sorted(installment(a)[1]), 'target_parts': sorted(installment(r)[1]),
+                       'full_native_exact': bool(identity(a.get('title_native'))) and
+                           identity(a.get('title_native')) == identity(r.get('title_native')),
                        'evidence': sorted(evidence), 'conflicts': sorted(set(conflicts)),
                        'missing': sorted(set(missing)), 'work_identity': groups[rid],
                        'validated_anilist_ids': references[rid], 'unverified_anilist_ids': invalid_ids[rid],
