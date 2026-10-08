@@ -177,10 +177,7 @@ def anilist_rows(after_id):
             retry_after = int(response.headers.get("Retry-After", "60"))
             time.sleep(max(1, retry_after))
             continue
-        response.raise_for_status()
-        payload = response.json()
-        if payload.get("errors"):
-            raise ValueError(f"AniList GraphQL error: {payload['errors']}")
+        payload = anilist_payload(response)
         page_data = payload.get("data", {}).get("Page")
         if not isinstance(page_data, dict) or not isinstance(page_data.get("media"), list):
             raise ValueError(f"Unexpected AniList response; refusing incomplete update: {payload}")
@@ -197,12 +194,27 @@ def anilist_rows(after_id):
         f"AniList ID scan exceeded {ANILIST_MAX_PAGES} pages before reaching stored ID {after_id}")
 
 
+def anilist_payload(response):
+    """Keep API validation messages visible even when GraphQL returns HTTP 400."""
+    try:
+        payload = response.json()
+    except ValueError:
+        response.raise_for_status()
+        raise ValueError('AniList returned a non-JSON response')
+    if not isinstance(payload, dict):
+        raise ValueError('Unexpected AniList response object')
+    if payload.get('errors'):
+        raise ValueError(f"AniList GraphQL error: {payload['errors']}")
+    response.raise_for_status()
+    return payload
+
+
 def anilist_selected_rows(ids):
     """Refresh recent/upcoming and pending references even below the ID watermark."""
     query = """query ($ids: [Int], $perPage: Int!) {
       Page(page: 1, perPage: $perPage) {
         pageInfo { hasNextPage }
-        media(id_in: $ids, type: ANIME, countryOfOrigin: JP, sort: [ID_ASC]) {
+        media(id_in: $ids, type: ANIME, countryOfOrigin: JP, sort: [ID]) {
           id idMal updatedAt title { romaji english native } format status
           startDate { year month day } endDate { year month day }
           season seasonYear episodes genres averageScore popularity
@@ -220,8 +232,7 @@ def anilist_selected_rows(ids):
             if response.status_code != 429:
                 break
             time.sleep(max(1, int(response.headers.get('Retry-After', '60'))))
-        response.raise_for_status()
-        payload = response.json()
+        payload = anilist_payload(response)
         data = (payload.get('data') or {}).get('Page')
         if payload.get('errors') or not isinstance(data, dict) or not isinstance(data.get('media'), list):
             raise ValueError('Unexpected AniList selected-ID response; refusing incomplete update')

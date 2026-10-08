@@ -138,6 +138,29 @@ class ListingRefreshTests(unittest.TestCase):
         self.assertEqual([r['id'] for r in rows], [105,42])
         self.assertEqual(post.call_args.kwargs['json']['variables']['ids'], [42])
 
+    @mock.patch.object(update_db.time, 'sleep', return_value=None)
+    def test_anilist_refresh_uses_supported_id_sort_in_both_queries(self, _sleep):
+        def api_post(url, **kwargs):
+            import re
+            # AniList's MediaSort uses ID/ID_DESC, never ID_ASC.
+            modes = re.findall(r'sort:\s*\[([A-Z_]+)\]', kwargs['json']['query'])
+            if not modes or any(mode not in {'ID', 'ID_DESC'} for mode in modes):
+                raise ValueError('Unsupported AniList MediaSort')
+            selected = 'id_in:' in kwargs['json']['query']
+            return FakeResponse([{'id':42 if selected else 105}], False)
+        with mock.patch.object(update_db.requests, 'post', side_effect=api_post):
+            rows = list(update_db.online_rows('AniList', {'100','42'}, 100, {'42'}))
+        self.assertEqual([r['id'] for r in rows], [105,42])
+
+    def test_anilist_http_400_keeps_graphql_validation_reason(self):
+        response = mock.Mock(status_code=400, headers={})
+        response.json.return_value = {'errors':[{'message':'Value ID_ASC does not exist in MediaSort'}]}
+        response.raise_for_status.side_effect = update_db.requests.HTTPError('400 Bad Request')
+        with mock.patch.object(update_db.requests, 'post', return_value=response):
+            with self.assertRaisesRegex(ValueError, 'ID_ASC does not exist in MediaSort'):
+                list(update_db.anilist_selected_rows({'42'}))
+        response.raise_for_status.assert_not_called()
+
     def test_on_refresh_selection_includes_pending_old_title_bridge(self):
         db = catalog()
         self.addCleanup(db.close)
