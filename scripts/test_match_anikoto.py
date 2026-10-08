@@ -1,4 +1,6 @@
 import copy
+import contextlib
+import io
 import json
 import unittest
 import sqlite3
@@ -23,6 +25,41 @@ def listing(identity='example-slug', title='Example Show', format='TV', count=12
 
 
 class MatchingTests(unittest.TestCase):
+    def test_incremental_unvisited_work_survives_matching_runtime_and_release(self):
+        import crawl_anikoto as crawler
+        import package_anikoto_release as packager
+        from test_crawl_anikoto import BASE, page_html
+        from test_match_new_sources import catalog as baseline_catalog, add
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            baseline,raw,runtime=root/'baseline.db',root/'raw.sqlite',root/'runtime.db'
+            db=baseline_catalog()
+            add(db,'AniList','tail-target',native='',romaji='Hidamari Sketch unvisited',meta={'episodes':12})
+            for source in ('Anissia','ReAnime','Onnada'):
+                add(db,source,'other',native='',romaji='Unrelated '+source)
+            db.execute('CREATE TABLE protected_episode(file_id TEXT PRIMARY KEY,episode INTEGER)')
+            db.execute("INSERT INTO protected_episode VALUES ('original',1)")
+            db.commit()
+            with sqlite3.connect(baseline) as disk:
+                db.backup(disk)
+            db.close()
+            with contextlib.redirect_stdout(io.StringIO()):
+                crawler.crawl(raw,BASE,fetch=lambda url:page_html(['one','two','unvisited'],1))
+                pages=iter([page_html(['new'],10),page_html(['one'],10),page_html(['two'],10)])
+                summary=crawler.crawl(raw,BASE,fetch=lambda url:next(pages))
+                crawler.export(raw,root/'export')
+            self.assertEqual((summary['records_in_run'],summary['catalog_records']),(3,4))
+            before=(matcher.sha256(baseline),matcher.sha256(raw))
+            report=matcher.match(baseline,raw,root/'matching')
+            self.assertEqual((report['records'],report['automatic']),(4,1))
+            matcher.create_matched_database(baseline,raw,root/'matching/anikoto-matches.json',runtime)
+            with sqlite3.connect(runtime) as db:
+                self.assertEqual(db.execute('SELECT source_record_id FROM anikoto_catalog').fetchall(),[('unvisited',)])
+                self.assertEqual(db.execute('SELECT * FROM protected_episode').fetchall(),[('original',1)])
+            packaged=packager.package(baseline,runtime,raw,root/'matching',root/'export',root/'release')
+            self.assertEqual(packaged['runtime_works'],1)
+            self.assertEqual(before,(matcher.sha256(baseline),matcher.sha256(raw)))
+
     def test_unique_complete_title_and_metadata_creates_a_link_without_mutating_inputs(self):
         rows, listings = [row()], [listing()]
         before = copy.deepcopy((rows, listings))
@@ -168,3 +205,4 @@ class MatchingTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

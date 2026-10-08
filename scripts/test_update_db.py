@@ -83,15 +83,39 @@ class AniListIdIncrementTests(unittest.TestCase):
 
 class ListingRefreshTests(unittest.TestCase):
     @mock.patch.object(update_db.time, 'sleep', return_value=None)
-    def test_anissia_starts_with_zero_and_refreshes_known_pages(self, _sleep):
+    def test_anissia_starts_with_zero_and_stops_after_two_known_pages(self, _sleep):
         responses = [{'data':{'totalPages':3,'totalElements':5,'content':[{'animeNo':5},{'animeNo':4}]}},
                      {'data':{'content':[{'animeNo':3},{'animeNo':2}]}},
                      {'data':{'content':[{'animeNo':1}]}}]
         with mock.patch.object(update_db, 'fetch_json', side_effect=responses) as fetch:
             rows = list(update_db.online_rows('Anissia', {'1','2','3','4','5'}))
-        self.assertEqual([r['animeNo'] for r in rows], [5,4,3,2,1])
+        self.assertEqual([r['animeNo'] for r in rows], [5,4,3,2])
         self.assertEqual([c.args[0] for c in fetch.call_args_list],
-                         [f'https://api.anissia.net/anime/list/{n}?q=' for n in range(3)])
+                         [f'https://api.anissia.net/anime/list/{n}?q=' for n in range(2)])
+
+    @mock.patch.object(update_db.time, 'sleep', return_value=None)
+    def test_anissia_new_id_anywhere_in_page_resets_known_streak(self, _sleep):
+        pages = [[10,6], [5], [4,9], [3], [2], [1]]
+        responses = [{'data': {'totalPages': len(pages), 'totalElements': 8,
+                               'content': [{'animeNo': aid} for aid in ids]}} for ids in pages]
+        with mock.patch.object(update_db, 'fetch_json', side_effect=responses) as fetch:
+            rows = list(update_db.online_rows('Anissia', {str(n) for n in range(1,7)}))
+        self.assertEqual([r['animeNo'] for r in rows], [10,6,5,4,9,3,2])
+        self.assertEqual(fetch.call_count, 5)
+
+    @mock.patch.object(update_db.time, 'sleep', return_value=None)
+    def test_anissia_without_baseline_scans_to_last_page(self, _sleep):
+        responses = [{'data': {'totalPages': 3, 'totalElements': 3, 'content': [{'animeNo': n}]}} for n in (3,2,1)]
+        with mock.patch.object(update_db, 'fetch_json', side_effect=responses) as fetch:
+            self.assertEqual([r['animeNo'] for r in update_db.anissia_rows()], [3,2,1])
+        self.assertEqual(fetch.call_count, 3)
+
+    @mock.patch.object(update_db.time, 'sleep', return_value=None)
+    def test_anissia_repeated_known_page_cannot_count_as_second_overlap(self, _sleep):
+        response = {'data': {'totalPages': 3, 'totalElements': 6, 'content': [{'animeNo': 3}, {'animeNo': 2}]}}
+        with mock.patch.object(update_db, 'fetch_json', return_value=response):
+            with self.assertRaisesRegex(ValueError, 'repeated IDs'):
+                list(update_db.anissia_rows({'3','2'}))
 
     @mock.patch.object(update_db.time, 'sleep', return_value=None)
     def test_anissia_does_not_depend_on_ascending_or_descending_ids(self, _sleep):

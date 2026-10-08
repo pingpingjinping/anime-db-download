@@ -66,7 +66,7 @@ class ListingTests(unittest.TestCase):
         def fetch(url):
             page = int(crawler.parse_qs(crawler.urlparse(url).query)['page'][0])
             fetched.append(page)
-            self.assertIn('sort=name-az', url)
+            self.assertIn('sort=latest-added', url)
             return page_html([f'work-{page}'])
         first = self.crawl(fetch, max_pages=2)
         self.assertEqual(fetched, [1, 2])
@@ -126,7 +126,7 @@ class ListingTests(unittest.TestCase):
 
     def test_new_scan_retains_absent_rows_but_export_only_contains_its_own_observations(self):
         old = self.crawl(lambda url: page_html(['old'], 1))
-        new = self.crawl(lambda url: page_html(['new'], 1))
+        new = self.crawl(lambda url: page_html(['new'], 1), full=True)
         self.assertNotEqual(old['run_id'], new['run_id'])
         self.assertEqual(new['records_stored'], 2)
         self.assertEqual(new['records_in_run'], 1)
@@ -136,6 +136,131 @@ class ListingTests(unittest.TestCase):
         self.assertEqual(json.loads((output/'anikoto-catalog.jsonl').read_text())['source_record_id'], 'new')
         self.assertEqual(json.loads((output/'anikoto-crawl-report.json').read_text())['work_links_created'], 0)
 
+    def test_incremental_stops_after_two_known_pages_and_exports_unvisited_baseline(self):
+        old = self.crawl(lambda url: page_html(['one','two','unvisited'], 1))
+        with sqlite3.connect(self.db) as db:
+            unvisited_before = db.execute("SELECT * FROM anikoto_catalog WHERE source_record_id='unvisited'").fetchone()
+        fetched = []
+        def fetch(url):
+            page = int(crawler.parse_qs(crawler.urlparse(url).query)['page'][0])
+            fetched.append(page)
+            return page_html({1:['new'], 2:['one'], 3:['two']}[page], 10)
+        new = self.crawl(fetch)
+        self.assertEqual(fetched, [1,2,3])
+        self.assertEqual((new['scan_mode'], new['stop_reason'], new['known_page_streak']), ('incremental','known_pages',2))
+        self.assertEqual((new['records_in_run'],new['catalog_records']), (3,4))
+        self.assertTrue(new['complete'])
+        with sqlite3.connect(self.db) as db:
+            self.assertEqual(db.execute("SELECT * FROM anikoto_catalog WHERE source_record_id='unvisited'").fetchone(), unvisited_before)
+        output = Path(self.temp.name) / 'incremental-export'
+        crawler.export(self.db, output)
+        self.assertEqual({json.loads(line)['source_record_id'] for line in (output/'anikoto-catalog.jsonl').read_text().splitlines()},
+                         {'new','one','two','unvisited'})
+
+    def test_new_id_in_mixed_page_resets_incremental_streak(self):
+        self.crawl(lambda url: page_html(['a','b','c','d','unvisited'], 1))
+        pages = {1:['a'],2:['new','b'],3:['c'],4:['d']}
+        fetched = []
+        def fetch(url):
+            page = int(crawler.parse_qs(crawler.urlparse(url).query)['page'][0])
+            fetched.append(page)
+            return page_html(pages[page], 8)
+        summary = self.crawl(fetch)
+        self.assertEqual(fetched,[1,2,3,4])
+        self.assertEqual(summary['catalog_records'],6)
+        self.assertEqual(summary['stop_reason'],'known_pages')
+
+    def test_incremental_resume_retains_one_known_page_streak(self):
+        self.crawl(lambda url: page_html(['one','two','old'], 1))
+        fetched = []
+        def fetch(url):
+            page = int(crawler.parse_qs(crawler.urlparse(url).query)['page'][0])
+            fetched.append(page)
+            return page_html({1:['new'],2:['one'],3:['two']}[page], 9)
+        paused = self.crawl(fetch,max_pages=2)
+        self.assertEqual((paused['status'],paused['known_page_streak']),('paused',1))
+        completed = self.crawl(fetch)
+        self.assertEqual(fetched,[1,2,3])
+        self.assertEqual(completed['run_id'],paused['run_id'])
+        self.assertEqual(completed['stop_reason'],'known_pages')
+
+    def test_repeated_known_page_does_not_trigger_successful_incremental_stop(self):
+        self.crawl(lambda url: page_html(['one','two'], 1))
+        with self.assertRaisesRegex(ValueError,'repeated'):
+            self.crawl(lambda url: page_html(['one'], 9))
+        with sqlite3.connect(self.db) as db:
+            run = db.execute('SELECT run_id,status FROM anikoto_crawl_runs ORDER BY rowid DESC LIMIT 1').fetchone()
+            self.assertEqual(run[1],'failed')
+            self.assertEqual(crawler.crawl_policy(db,run[0])['known_page_streak'],1)
+
+    def test_incremental_accepts_changed_total_pages_when_front_ids_do_not_overlap(self):
+        self.crawl(lambda url:page_html(['one','two','tail'],1))
+        pages=iter([page_html(['one'],299),page_html(['two'],300)])
+        summary=self.crawl(lambda url:next(pages))
+        self.assertEqual((summary['pages_collected'],summary['stop_reason']),(2,'known_pages'))
+        self.assertEqual(summary['catalog_records'],3)
+
+    def test_incremental_partial_overlap_keeps_original_known_ids_across_resume(self):
+        self.crawl(lambda url:page_html(['one','two','three','four','tail'],1))
+        pages={1:['new','one'],2:['new','two'],3:['three'],4:['four']}
+        fetched=[]
+        def fetch(url):
+            page=int(crawler.parse_qs(crawler.urlparse(url).query)['page'][0])
+            fetched.append(page)
+            return page_html(pages[page],9)
+        paused=self.crawl(fetch,max_pages=1)
+        completed=self.crawl(fetch)
+        self.assertEqual(fetched,[1,2,3,4])
+        self.assertEqual(completed['run_id'],paused['run_id'])
+        self.assertEqual((completed['catalog_records'],completed['stop_reason']),(6,'known_pages'))
+
+    def test_bootstrap_never_stops_early_using_partial_saved_rows(self):
+        self.crawl(lambda url: page_html(['one','two'], 4),max_pages=1)
+        fetched=[]
+        def fetch(url):
+            page=int(crawler.parse_qs(crawler.urlparse(url).query)['page'][0])
+            fetched.append(page)
+            return page_html([f'work-{page}'],4)
+        summary=self.crawl(fetch,fresh=True)
+        self.assertEqual(fetched,[1,2,3,4])
+        self.assertEqual(summary['scan_mode'],'full')
+        self.assertEqual(summary['catalog_records'],4)
+
+    def test_first_two_known_pages_stop_without_needing_a_new_item(self):
+        self.crawl(lambda url: page_html(['one','two','tail'], 1))
+        fetched=[]
+        def fetch(url):
+            page=int(crawler.parse_qs(crawler.urlparse(url).query)['page'][0])
+            fetched.append(page)
+            return page_html(['one' if page==1 else 'two'],99)
+        summary=self.crawl(fetch)
+        self.assertEqual(fetched,[1,2])
+        self.assertEqual(summary['catalog_records'],3)
+
+    def test_legacy_complete_catalog_seeds_incremental_membership_without_schema_rewrite(self):
+        old=self.crawl(lambda url: page_html(['one','two','tail'],1))
+        with sqlite3.connect(self.db) as db:
+            db.execute('DROP TABLE anikoto_catalog_members')
+            db.execute('DROP TABLE anikoto_crawl_policy')
+            db.execute("UPDATE anikoto_crawl_runs SET sort='name-az'")
+        pages=iter([page_html(['one'],5),page_html(['two'],5)])
+        summary=self.crawl(lambda url:next(pages))
+        self.assertEqual(summary['scan_mode'],'incremental')
+        self.assertEqual(summary['catalog_records'],3)
+
+    def test_full_option_ignores_known_checkpoint_and_excludes_absent_snapshot_members(self):
+        self.crawl(lambda url:page_html(['one','two','tail'],1))
+        fetched=[]
+        def fetch(url):
+            page=int(crawler.parse_qs(crawler.urlparse(url).query)['page'][0])
+            fetched.append(page)
+            return page_html({1:['one'],2:['two'],3:['new']}[page],3)
+        summary=self.crawl(fetch,full=True)
+        self.assertEqual(fetched,[1,2,3])
+        self.assertEqual((summary['scan_mode'],summary['stop_reason']),('full','last_page'))
+        self.assertEqual((summary['catalog_records'],summary['records_stored']),(3,4))
+
 
 if __name__ == '__main__':
     unittest.main()
+
