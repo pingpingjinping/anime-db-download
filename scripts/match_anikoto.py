@@ -11,6 +11,7 @@ from pathlib import Path
 
 from match_new_sources import season, part
 from prepare_anikoto_catalog import DEFAULT_DB, ROOT, validate_catalog
+from crawl_anikoto import catalog_rows
 
 RULE_VERSION = 2
 RUNTIME_VERSION = 2
@@ -267,8 +268,7 @@ def create_matched_database(baseline, catalog, matches, destination, corrections
             db.execute("DELETE FROM anikoto_work_links WHERE status NOT IN ('reviewed','rejected')")
             current_run = expected['crawl_run_id']
             new_links = {link['anikoto_id']:link for link in payload['links']}
-            listings = {slug:json.loads(value) for slug,value in src.execute(
-                'SELECT source_record_id,payload_json FROM anikoto_catalog WHERE last_seen_run=?', (current_run,))}
+            listings = {slug:json.loads(value) for slug,value in catalog_rows(src, current_run)}
             for link in payload['links'] + payload.get('rejections', []):
                 if link['anikoto_id'] not in preserved or link['status'] in ('reviewed','rejected'):
                     # Full evidence is exported separately; runtime only needs exact source IDs.
@@ -324,8 +324,7 @@ def match(baseline, catalog, output, decisions=None, corrections=None):
         from catalog_corrections import corrected_rows
         rows = corrected_rows(rows, corrections)
     with sqlite3.connect(catalog.resolve().as_uri() + '?mode=ro', uri=True) as db:
-        listings = [json.loads(row[0]) for row in db.execute(
-            'SELECT payload_json FROM anikoto_catalog WHERE last_seen_run=?', (source_summary['run_id'],))]
+        listings = [json.loads(row[1]) for row in catalog_rows(db, source_summary['run_id'])]
     # Carry manual accept/reject decisions into candidate selection as well as DB writes.
     known = {row['source_record_id'] for row in listings}
     retained = {}
@@ -380,3 +379,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

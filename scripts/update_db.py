@@ -245,8 +245,9 @@ def anilist_selected_rows(ids):
         time.sleep(ANILIST_DELAY_SECONDS)
 
 
-def anissia_rows():
-    """Scan the complete listing, starting with page zero; never assume ID order."""
+def anissia_rows(known=()):
+    """Start at page zero; stop after two consecutive entirely known pages."""
+    known = {n for raw in known if (n := positive_int(raw)) is not None}
     first = fetch_json('https://api.anissia.net/anime/list/0?q=')
     data = first.get('data')
     if not isinstance(data, dict):
@@ -256,6 +257,7 @@ def anissia_rows():
     if not pages or not expected or pages > 1000:
         raise ValueError('Anissia pagination changed; refusing incomplete update')
     seen = set()
+    known_pages = 0
     for page in range(pages):
         if page:
             time.sleep(ANISSIA_DELAY_SECONDS)
@@ -265,14 +267,22 @@ def anissia_rows():
         content = data['content']
         if not content:
             raise ValueError('Empty Anissia page before end of listing')
+        ids = []
         for row in content:
             if not isinstance(row, dict):
                 raise ValueError('Unexpected Anissia record')
             aid = positive_int(row.get('animeNo'))
             if aid is None:
                 raise ValueError('Anissia row had no valid ID')
-            seen.add(aid)
+            ids.append(aid)
+        if len(set(ids)) != len(ids) or seen.intersection(ids):
+            raise ValueError('Anissia listing repeated IDs; refusing an invalid overlap checkpoint')
+        seen.update(ids)
+        known_pages = known_pages + 1 if all(aid in known for aid in ids) else 0
+        for row in content:
             yield row
+        if known_pages >= 2:
+            return
     if expected and len(seen) < expected:
         raise ValueError(f'Incomplete Anissia listing: found {len(seen)}, expected {expected}')
 
@@ -310,7 +320,7 @@ def online_rows(source, known, anilist_after_id=None, refresh_ids=()):
         yield from anilist_rows(anilist_after_id)
         yield from anilist_selected_rows(refresh_ids)
     elif source == "Anissia":
-        yield from anissia_rows()
+        yield from anissia_rows(known)
     elif source == "ReAnime":
         seen = set()
         for page in range(REANIME_MAX_PAGES):

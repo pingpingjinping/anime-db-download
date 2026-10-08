@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: Use the saved DB or explicitly refresh from the website
+        description: Use the saved DB or check newly added website entries
         type: choice
         options:
           - use_existing
@@ -16,13 +16,17 @@ on:
         default: https://anikoto.cz
         required: true
       max_pages:
-        description: Page budget (0 = complete listing)
+        description: Page budget (0 = until two known pages or the last page)
         default: '0'
         required: true
       resume:
         description: Reuse the latest artifact (otherwise use the checked-in initial DB)
         type: boolean
         default: true
+      full_scan:
+        description: Ignore overlap checkpoints and scan every page (refresh mode)
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -63,15 +67,20 @@ jobs:
           fi
       - name: Prepare and export the saved catalog without crawling
         run: python scripts/prepare_anikoto_catalog.py --db output/anikoto-catalog.sqlite --export-dir output
-      - name: Refresh Anikoto listing metadata only when selected
+      - name: Refresh Anikoto additions only when selected
         if: inputs.mode == 'refresh'
         env:
           ANIKOTO_BASE_URL: ${{ inputs.base_url }}
           ANIKOTO_MAX_PAGES: ${{ inputs.max_pages }}
+          ANIKOTO_FULL_SCAN: ${{ inputs.full_scan }}
         run: |
+          scan_options=()
+          if [[ "$ANIKOTO_FULL_SCAN" == true ]]; then
+            scan_options+=(--full --fresh)
+          fi
           python scripts/crawl_anikoto.py --db output/anikoto-catalog.sqlite \
             --base-url "$ANIKOTO_BASE_URL" --max-pages "$ANIKOTO_MAX_PAGES" \
-            --delay 1.2 --export-dir output
+            --delay 1.2 --export-dir output "${scan_options[@]}"
       - name: Preserve completed or partial crawl and resume checkpoint
         if: always()
         uses: actions/upload-artifact@v4
@@ -83,3 +92,4 @@ jobs:
             output/anikoto-crawl-report.json
           if-no-files-found: ignore
           retention-days: 90
+

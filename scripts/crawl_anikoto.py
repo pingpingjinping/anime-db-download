@@ -17,6 +17,7 @@ from bs4 import BeautifulSoup
 DEFAULT_BASE_URL = "https://anikoto.cz"
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DB = ROOT / "state" / "anikoto-catalog.sqlite"
+LISTING_SORT = "latest-added"
 
 
 def now():
@@ -24,7 +25,7 @@ def now():
 
 
 def listing_url(base_url, page):
-    return base_url.rstrip("/") + "/filter?" + urlencode({"sort": "name-az", "page": page})
+    return base_url.rstrip("/") + "/filter?" + urlencode({"sort": LISTING_SORT, "page": page})
 
 
 def text(element):
@@ -114,17 +115,53 @@ def open_db(path):
             item_count INTEGER NOT NULL, source_ids_json TEXT NOT NULL,
             PRIMARY KEY(run_id, page), UNIQUE(run_id, record_fingerprint)
         );
+        CREATE TABLE IF NOT EXISTS anikoto_crawl_policy (
+            run_id TEXT PRIMARY KEY, mode TEXT NOT NULL,
+            known_page_streak INTEGER NOT NULL DEFAULT 0, stop_reason TEXT
+        );
+        CREATE TABLE IF NOT EXISTS anikoto_catalog_members (
+            run_id TEXT NOT NULL, source_record_id TEXT NOT NULL,
+            known_at_start INTEGER NOT NULL DEFAULT 0,
+            PRIMARY KEY(run_id, source_record_id)
+        );
     """)
     return db
 
 
+def crawl_policy(db, run_id):
+    # Read-only consumers must also work with the original checked-in seed and
+    # older Release catalogs without changing their checksums.
+    if db.execute("SELECT 1 FROM sqlite_master WHERE name='anikoto_crawl_policy'").fetchone():
+        row = db.execute("SELECT mode,known_page_streak,stop_reason FROM anikoto_crawl_policy WHERE run_id=?", (run_id,)).fetchone()
+        if row:
+            return {"mode": row[0], "known_page_streak": row[1], "stop_reason": row[2]}
+    return {"mode": "full", "known_page_streak": 0, "stop_reason": None}
+
+
+def catalog_condition(db, run_id):
+    if db.execute("SELECT 1 FROM sqlite_master WHERE name='anikoto_catalog_members'").fetchone() and db.execute(
+            "SELECT 1 FROM anikoto_crawl_policy WHERE run_id=?", (run_id,)).fetchone():
+        return "source_record_id IN (SELECT source_record_id FROM anikoto_catalog_members WHERE run_id=?)"
+    return "last_seen_run=?"
+
+
+def catalog_rows(db, run_id):
+    """Return the effective catalog: saved baseline plus current observations."""
+    return db.execute("SELECT source_record_id,payload_json FROM anikoto_catalog WHERE " +
+                      catalog_condition(db, run_id) + " ORDER BY source_record_id", (run_id,))
+
+
 def report(db, run_id):
     run = dict(db.execute("SELECT * FROM anikoto_crawl_runs WHERE run_id=?", (run_id,)).fetchone())
+    policy = crawl_policy(db, run_id)
     run.update({
         "source": "Anikoto", "scope": "listing_only", "complete": run["status"] == "complete",
         "pages_collected": db.execute("SELECT count(*) FROM anikoto_crawl_pages WHERE run_id=?", (run_id,)).fetchone()[0],
         "records_in_run": db.execute("SELECT count(*) FROM anikoto_catalog WHERE last_seen_run=?", (run_id,)).fetchone()[0],
         "records_stored": db.execute("SELECT count(*) FROM anikoto_catalog").fetchone()[0],
+        "catalog_records": db.execute("SELECT count(*) FROM anikoto_catalog WHERE " + catalog_condition(db, run_id), (run_id,)).fetchone()[0],
+        "scan_mode": policy["mode"], "known_page_streak": policy["known_page_streak"],
+        "stop_reason": policy["stop_reason"],
         "work_links_created": 0, "subtitle_or_video_files_downloaded": 0,
         "sqlite_quick_check": db.execute("PRAGMA quick_check").fetchone()[0],
     })
@@ -155,7 +192,7 @@ class Client:
                 time.sleep(min(30, 2 ** (attempt + 1)))
 
 
-def crawl(db_path, base_url=DEFAULT_BASE_URL, fetch=None, delay=1.2, max_pages=0, fresh=False):
+def crawl(db_path, base_url=DEFAULT_BASE_URL, fetch=None, delay=1.2, max_pages=0, fresh=False, full=False):
     parsed = urlparse(base_url)
     if parsed.scheme not in ("http", "https") or not parsed.netloc or parsed.path not in ("", "/") or parsed.query or parsed.fragment:
         raise ValueError("--base-url must be a website origin")
@@ -164,17 +201,31 @@ def crawl(db_path, base_url=DEFAULT_BASE_URL, fetch=None, delay=1.2, max_pages=0
     db = open_db(Path(db_path))
     try:
         previous = None if fresh else db.execute("""SELECT * FROM anikoto_crawl_runs
-            WHERE base_url=? AND sort='name-az'
-            ORDER BY started_at DESC,rowid DESC LIMIT 1""", (base_url,)).fetchone()
+            WHERE base_url=? AND sort=?
+            ORDER BY started_at DESC,rowid DESC LIMIT 1""", (base_url, LISTING_SORT)).fetchone()
         if previous and previous["status"] == "complete":
+            previous = None
+        if previous and full and crawl_policy(db, previous["run_id"])["mode"] != "full":
             previous = None
         if previous:
             run_id = previous["run_id"]
             db.execute("UPDATE anikoto_crawl_runs SET status='running',last_error=NULL WHERE run_id=?", (run_id,))
         else:
+            baseline = db.execute("""SELECT run_id FROM anikoto_crawl_runs
+                WHERE base_url=? AND status='complete'
+                ORDER BY started_at DESC,rowid DESC LIMIT 1""", (base_url,)).fetchone()
+            incremental = bool(baseline and not full)
             run_id = uuid.uuid4().hex
             db.execute("INSERT INTO anikoto_crawl_runs VALUES (?,?,?, ?,NULL,'running',1,NULL,NULL)",
-                       (run_id, base_url, "name-az", now()))
+                       (run_id, base_url, LISTING_SORT, now()))
+            db.execute("INSERT INTO anikoto_crawl_policy(run_id,mode) VALUES (?,?)",
+                       (run_id, "incremental" if incremental else "full"))
+            if incremental:
+                # Membership is separate from last_seen_run/last_seen_at, so
+                # unvisited old works survive without claiming we fetched them.
+                db.execute("""INSERT INTO anikoto_catalog_members(run_id,source_record_id,known_at_start)
+                    SELECT ?,source_record_id,1 FROM anikoto_catalog WHERE """ + catalog_condition(db, baseline[0]),
+                           (run_id, baseline[0]))
         db.commit()
         fetched = 0
         try:
@@ -183,17 +234,24 @@ def crawl(db_path, base_url=DEFAULT_BASE_URL, fetch=None, delay=1.2, max_pages=0
                 page = run["next_page"]
                 html = fetch(listing_url(base_url, page))
                 records, total_pages = parse_listing(html, base_url, page)
+                policy = crawl_policy(db, run_id)
                 expected = run["total_pages"]
-                if expected is not None and expected != total_pages:
+                if policy["mode"] == "full" and expected is not None and expected != total_pages:
                     raise ValueError(f"Catalog pagination changed during scan: {expected} -> {total_pages}; use --fresh to restart")
                 ids = [r["source_record_id"] for r in records]
                 fingerprint = hashlib.sha256(json.dumps(sorted(ids)).encode()).hexdigest()
                 if db.execute("SELECT 1 FROM anikoto_crawl_pages WHERE run_id=? AND record_fingerprint=?", (run_id, fingerprint)).fetchone():
                     raise ValueError(f"Page {page} repeated an earlier page; pagination may have been ignored")
-                # A shifted listing must not look like a successful full snapshot.
+                # Full scans reject shifted pages. Incremental pages can partly
+                # overlap due to live/cache changes; keep distinct observations
+                # and reject any page which makes no progress at all.
                 overlap = [slug for slug in ids if db.execute("SELECT 1 FROM anikoto_catalog WHERE source_record_id=? AND last_seen_run=?", (slug, run_id)).fetchone()]
-                if overlap:
+                if overlap and (policy["mode"] == "full" or len(overlap) == len(ids)):
                     raise ValueError(f"Page {page} overlapped earlier pages: {overlap[:3]}; use --fresh")
+                all_known = all(db.execute("SELECT 1 FROM anikoto_catalog_members WHERE run_id=? AND source_record_id=? AND known_at_start=1",
+                                           (run_id, slug)).fetchone() for slug in ids)
+                streak = policy["known_page_streak"] + 1 if all_known else 0
+                stop_known = policy["mode"] == "incremental" and streak >= 2
                 timestamp = now()
                 with db:
                     for row in records:
@@ -201,11 +259,14 @@ def crawl(db_path, base_url=DEFAULT_BASE_URL, fetch=None, delay=1.2, max_pages=0
                             ON CONFLICT(source_record_id) DO UPDATE SET payload_json=excluded.payload_json,
                             last_seen_at=excluded.last_seen_at,last_seen_run=excluded.last_seen_run""",
                             (row["source_record_id"], json.dumps(row, ensure_ascii=False, sort_keys=True), timestamp, timestamp, run_id))
+                        db.execute("INSERT OR IGNORE INTO anikoto_catalog_members(run_id,source_record_id) VALUES (?,?)", (run_id, row["source_record_id"]))
                     db.execute("INSERT INTO anikoto_crawl_pages VALUES (?,?,?,?,?,?,?)", (run_id, page, timestamp,
                         hashlib.sha256(html.encode()).hexdigest(), fingerprint, len(ids), json.dumps(ids)))
-                    done = page == total_pages
+                    done = page == total_pages or stop_known
                     db.execute("UPDATE anikoto_crawl_runs SET next_page=?,total_pages=?,status=?,finished_at=? WHERE run_id=?",
                         (page + 1, total_pages, "complete" if done else "running", timestamp if done else None, run_id))
+                    db.execute("UPDATE anikoto_crawl_policy SET known_page_streak=?,stop_reason=? WHERE run_id=?",
+                               (streak, "known_pages" if stop_known else "last_page" if done else None, run_id))
                 fetched += 1
                 print(json.dumps({"page": page, "total_pages": total_pages, "items": len(records), "run_id": run_id}), flush=True)
                 if done:
@@ -233,8 +294,8 @@ def export(db_path, output):
             raise ValueError("No crawl run to export")
         summary = report(db, latest[0])
         with (output / "anikoto-catalog.jsonl").open("w", encoding="utf-8") as out:
-            for row in db.execute("SELECT payload_json FROM anikoto_catalog WHERE last_seen_run=? ORDER BY source_record_id", (latest[0],)):
-                out.write(row[0] + "\n")
+            for row in catalog_rows(db, latest[0]):
+                out.write(row[1] + "\n")
         (output / "anikoto-crawl-report.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         return summary
 
@@ -244,14 +305,15 @@ def main():
     parser.add_argument("--db", type=Path, default=DEFAULT_DB)
     parser.add_argument("--base-url", default=DEFAULT_BASE_URL)
     parser.add_argument("--delay", type=float, default=1.2)
-    parser.add_argument("--max-pages", type=int, default=0, help="Page budget for this invocation; 0 scans to the last page")
-    parser.add_argument("--fresh", action="store_true", help="Start a new full scan instead of resuming an interrupted run")
+    parser.add_argument("--max-pages", type=int, default=0, help="Page budget; 0 runs until the overlap checkpoint or last page")
+    parser.add_argument("--fresh", action="store_true", help="Restart from page one instead of resuming an interrupted run")
+    parser.add_argument("--full", action="store_true", help="Ignore known-page checkpoints and scan the full listing")
     parser.add_argument("--export-dir", type=Path)
     args = parser.parse_args()
     if args.delay < 0 or args.max_pages < 0:
         parser.error("delay and max-pages must be nonnegative")
     try:
-        summary = crawl(args.db, args.base_url, delay=args.delay, max_pages=args.max_pages, fresh=args.fresh)
+        summary = crawl(args.db, args.base_url, delay=args.delay, max_pages=args.max_pages, fresh=args.fresh, full=args.full)
     finally:
         if args.export_dir and args.db.exists():
             export(args.db, args.export_dir)
@@ -260,3 +322,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
