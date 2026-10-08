@@ -234,14 +234,14 @@ class ListingRefreshTests(unittest.TestCase):
                 list(update_db.anilist_selected_rows({'42'}))
         response.raise_for_status.assert_not_called()
 
-    def test_on_refresh_selection_includes_pending_old_title_bridge(self):
+    def test_onnada_does_not_revisit_latest_or_pending_existing_ids(self):
         db = catalog()
         self.addCleanup(db.close)
         add(db, 'Anissia', '1', ko='오래된 작품', pending=True)
         add(db, 'Onnada', '1', ko='오래된작품', year=2000)
         for n in range(2,105):
             add(db, 'Onnada', str(n), ko='다른 작품', year=2000)
-        self.assertIn('1', update_db.refresh_source_ids(db, 'Onnada'))
+        self.assertEqual(update_db.refresh_source_ids(db, 'Onnada'), set())
 
     def test_anilist_selection_includes_missing_special_reference(self):
         db = catalog()
@@ -252,6 +252,136 @@ class ListingRefreshTests(unittest.TestCase):
             today.today.return_value.year = 2026
             ids = update_db.refresh_source_ids(db, 'AniList')
         self.assertIn('42', ids)
+
+
+def onnada_listing(ids, next_page=None):
+    cards = ''.join(f'<a href="/anime/{n}"><h4>작품 {n}</h4></a>' for n in ids)
+    link = f'<a href="/anime?page={next_page}">next</a>' if next_page else ''
+    return f'<p>전체 {len(ids)}개</p>{cards}{link}'
+
+
+def onnada_detail(country='일본', category='TV', native='検証アニメーション', title='검증 작품'):
+    return (f'<h1>{title}</h1><p><span>{native}</span><span>Example Show</span></p>'
+            f'<dl><dt>제작국가</dt><dd>{country}</dd><dt>분류</dt><dd>{category}</dd>'
+            '<dt>방영일</dt><dd>2026-10</dd><dt>총화수</dt><dd>12</dd></dl>')
+
+
+class OnnadaNewIdTests(unittest.TestCase):
+    @mock.patch.object(update_db.time, 'sleep', return_value=None)
+    def test_listing_keeps_scanning_and_only_new_ids_get_details(self, _sleep):
+        first = '<p>전체 3개</p><a href="/anime/1"><h4>old</h4></a><a href="/anime?page=2">next</a>'
+        second = onnada_listing([2,3])
+        observed = []
+        def fetch(url):
+            if url == 'https://onnada.com/anime': return first
+            if url.endswith('?page=2'): return second
+            if url.endswith('/3'): return onnada_detail()
+            raise AssertionError('Existing ID must not be fetched: '+url)
+        with mock.patch.object(update_db,'fetch_html',side_effect=fetch) as get, \
+                contextlib.redirect_stderr(io.StringIO()):
+            rows = list(update_db.online_rows('Onnada', {'1','2'}, refresh_ids={'1','2'},
+                                             onnada_observer=lambda *values: observed.append(values)))
+        self.assertEqual([r['onnada_id'] for r in rows], [3])
+        self.assertEqual(get.call_count,3)
+        self.assertEqual(observed,[(3,'included','japanese_work')])
+
+    @mock.patch.object(update_db.time, 'sleep', return_value=None)
+    def test_exclusions_are_recorded_with_reasons_but_bad_details_are_not(self, _sleep):
+        details=[onnada_detail(country='중국'),onnada_detail(category='특전'),
+                 onnada_detail(country='',native='Unverified Title'),'<html>blocked</html>']
+        observed=[]
+        with mock.patch.object(update_db,'fetch_html',side_effect=[onnada_listing([1,2,3,4]),*details]), \
+                contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaisesRegex(ValueError,'detail 4 had no title'):
+                list(update_db.online_rows('Onnada',set(),onnada_observer=lambda *v:observed.append(v)))
+        self.assertEqual(observed,[(1,'excluded','non_japanese'),(2,'excluded','bonus'),
+                                   (3,'excluded','country_unverified')])
+
+    @mock.patch.object(update_db.time, 'sleep', return_value=None)
+    def test_incomplete_listing_does_not_record_any_details(self, _sleep):
+        observed=[]
+        with mock.patch.object(update_db,'fetch_html',return_value='<p>전체 100개</p><a href="/anime/1"><h4>one</h4></a>') as get, \
+                contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaisesRegex(ValueError,'Incomplete Onnada listing'):
+                list(update_db.online_rows('Onnada',set(),onnada_observer=lambda *v:observed.append(v)))
+        self.assertEqual(get.call_count,1)
+        self.assertEqual(observed,[])
+
+    def make_snapshot(self, root):
+        db=catalog()
+        add(db,'Onnada','1',ko='기존 작품',year=2000)
+        add(db,'Anissia','1',ko='기존 작품',pending=True)
+        db.execute('CREATE TABLE year_summary (year INTEGER,source TEXT,record_count INTEGER)')
+        db.execute('CREATE TABLE metadata (key TEXT PRIMARY KEY,value TEXT)')
+        db.commit()
+        with sqlite3.connect(root/'base.db') as disk:
+            db.backup(disk)
+        db.close()
+        snapshot=root/'snapshot.db.gz'
+        update_db.pack_snapshot(root/'base.db',snapshot)
+        return snapshot
+
+    def run_online(self, snapshot, fetch):
+        real_online=update_db.online_rows
+        def only_onnada(source,*args,**kwargs):
+            return real_online(source,*args,**kwargs) if source=='Onnada' else iter([])
+        with mock.patch('sys.argv',['update_db','--snapshot',str(snapshot),'--online']), \
+                mock.patch.object(update_db,'anilist_id_watermark',return_value=1), \
+                mock.patch.object(update_db,'online_rows',side_effect=only_onnada), \
+                mock.patch.object(update_db,'fetch_html',side_effect=fetch) as get, \
+                contextlib.redirect_stdout(io.StringIO()),contextlib.redirect_stderr(io.StringIO()):
+            update_db.main()
+        return get.call_count
+
+    @mock.patch.object(update_db.time, 'sleep', return_value=None)
+    def test_excluded_only_snapshot_is_saved_and_next_run_skips_all_old_ids(self, _sleep):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp); snapshot=self.make_snapshot(root)
+            before=snapshot.read_bytes()
+            def first_fetch(url):
+                if url=='https://onnada.com/anime': return onnada_listing([1,2])
+                if url.endswith('/2'): return onnada_detail(country='중국')
+                raise AssertionError('Old work fetched')
+            self.assertEqual(self.run_online(snapshot,first_fetch),2)
+            after=snapshot.read_bytes()
+            self.assertNotEqual(before,after)
+            with gzip.open(snapshot,'rb') as src:
+                (root/'after.db').write_bytes(src.read())
+            with sqlite3.connect(root/'after.db') as db:
+                self.assertEqual(db.execute('SELECT source_record_id,outcome,reason FROM onnada_detail_checks').fetchall(),
+                                 [('2','excluded','non_japanese')])
+                self.assertEqual(db.execute("SELECT title_ko,year FROM entries WHERE source='Onnada'").fetchall(),
+                                 [('기존 작품',2000)])
+            def second_fetch(url):
+                self.assertEqual(url,'https://onnada.com/anime')
+                return onnada_listing([1,2])
+            self.assertEqual(self.run_online(snapshot,second_fetch),1)
+            self.assertEqual(snapshot.read_bytes(),after)
+            def new_fetch(url):
+                if url=='https://onnada.com/anime':return onnada_listing([1,2,3])
+                if url.endswith('/3'):return onnada_detail(title='새 작품')
+                raise AssertionError('Old ID fetched again')
+            self.assertEqual(self.run_online(snapshot,new_fetch),2)
+            with gzip.open(snapshot,'rb') as src:
+                (root/'final.db').write_bytes(src.read())
+            with sqlite3.connect(root/'final.db') as db:
+                self.assertEqual(db.execute('SELECT source_record_id,outcome FROM onnada_detail_checks ORDER BY source_record_id').fetchall(),
+                                 [('2','excluded'),('3','included')])
+                self.assertEqual(db.execute("SELECT source_record_id FROM entries WHERE source='Onnada' ORDER BY source_record_id").fetchall(),
+                                 [('1',),('3',)])
+
+    @mock.patch.object(update_db.time, 'sleep', return_value=None)
+    def test_failure_after_an_exclusion_does_not_publish_the_check(self, _sleep):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp); snapshot=self.make_snapshot(root); before=snapshot.read_bytes()
+            def fetch(url):
+                if url=='https://onnada.com/anime':return onnada_listing([1,2,3])
+                if url.endswith('/2'):return onnada_detail(country='중국')
+                if url.endswith('/3'):raise RuntimeError('Detail request failed')
+                raise AssertionError('Old ID fetched')
+            with self.assertRaisesRegex(RuntimeError,'Detail request failed'):
+                self.run_online(snapshot,fetch)
+            self.assertEqual(snapshot.read_bytes(),before)
 
 
 class SnapshotSaveTests(unittest.TestCase):
