@@ -28,6 +28,7 @@ from zoneinfo import ZoneInfo
 
 import requests
 from bs4 import BeautifulSoup
+from anissia_caption_policy import ANISSIA_CAPTION, caption_item
 
 from subtitle_work_storage import safe_name, work_directory, register_sources, preserve_download
 from winpng_decode import decode_winpng_bytes
@@ -169,6 +170,7 @@ def load_state(path: Path) -> dict:
             "success": {},
             "retry": {},
             "waiting_url": {},
+            "anissia_waiting_url_checks": {},
             "erulabo_pending": {},
             "retired": {},
             "backfill_done": {},
@@ -180,6 +182,7 @@ def load_state(path: Path) -> dict:
     state.setdefault("success", {})
     state.setdefault("retry", {})
     state.setdefault("waiting_url", {})
+    state.setdefault("anissia_waiting_url_checks", {})
     state.setdefault("erulabo_pending", {})
     state.setdefault("retired", {})
     state.setdefault("backfill_done", {})
@@ -293,6 +296,69 @@ def migrate_empty_url_retries(state: dict) -> int:
         move_to_waiting_url(state, item_id, item)
         moved += 1
     return moved
+
+
+def refresh_waiting_urls(session: requests.Session, state: dict, state_path: Path,
+                         month: str | None = None) -> list[dict]:
+    """Check only saved Anissia URL waiters once per work/KST calendar month.
+
+    Persist a newly available URL before attempting its download. Keeping it
+    in waiting_url until process_item consumes it also recovers a crash between
+    API discovery and the download without another API request.
+    """
+    month = month or current_month_key()
+    checks = state.setdefault("anissia_waiting_url_checks", {})
+    groups: dict[str, list[dict]] = {}
+    for waiting in state["waiting_url"].values():
+        item = waiting.get("item") or {}
+        anime_no = str(item.get("anime_no") or "")
+        if item.get("source") != "anissia" or source_url(item) or not anime_no:
+            continue
+        if (checks.get(anime_no) or {}).get("month") == month:
+            continue
+        groups.setdefault(anime_no, []).append(waiting)
+
+    for anime_no, waiters in groups.items():
+        check = {"month": month, "attempted_at": dt.datetime.now(KST).isoformat(timespec="seconds")}
+        try:
+            payload = request(session, ANISSIA_CAPTION.format(anime_no=anime_no)).json()
+            captions = payload.get("data") if isinstance(payload, dict) and "data" in payload else payload
+            if not isinstance(captions, list) or not all(isinstance(row, dict) for row in captions):
+                raise RuntimeError("Unexpected Anissia caption response")
+            available: dict[tuple[str, ...], dict[str, dict]] = {}
+            for caption in captions:
+                candidate = caption_item(anime_no, "", caption)
+                if not source_url(candidate):
+                    continue
+                available.setdefault(waiting_identity(candidate), {})[source_url(candidate)] = candidate
+            resolved = 0
+            ambiguous = 0
+            for waiting in waiters:
+                old = waiting["item"]
+                urls = available.get(waiting_identity(old), {})
+                if len(urls) != 1:
+                    ambiguous += int(len(urls) > 1)
+                    continue
+                candidate = dict(next(iter(urls.values())))
+                candidate["anime_title"] = old.get("anime_title") or anime_no
+                candidate["handler"] = classify_source_url(source_url(candidate))
+                waiting["item"] = candidate
+                waiting["url_available_at"] = check["attempted_at"]
+                resolved += 1
+            check.update(resolved=resolved, ambiguous=ambiguous)
+            print(f"[=] Anissia URL check {anime_no}: {resolved} available, {ambiguous} ambiguous")
+        except Exception as exc:
+            # An API failure leaves URL waiters intact and outside the download
+            # retry/retirement policy. HTTP retries happen inside request(); the
+            # next scheduled metadata check is next month.
+            check["error"] = str(exc)
+            print(f"[-] Anissia URL check {anime_no}: {exc}")
+        checks[anime_no] = check
+        save_state(state_path, state)
+
+    return [waiting["item"] for waiting in state["waiting_url"].values()
+            if (waiting.get("item") or {}).get("source") == "anissia"
+            and source_url(waiting["item"])]
 
 
 def append_retired(item_id: str, retry: dict, reason: str) -> None:
@@ -1410,13 +1476,14 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
         return False
     if item_id in state["success"]:
         state["retry"].pop(item_id, None)
-        state["waiting_url"].pop(item_id, None)
+        remove_matching_waiting(state, item)
         state["erulabo_pending"].pop(item_id, None)
+        save_state(state_path, state)
         return True
 
     # Missing source URLs are metadata-incomplete records, not download
-    # failures. Keep them out of the 3-month retry/retire lifecycle and wait
-    # for a later discovery Release to provide a real URL.
+    # failures. Keep them out of the 3-month retry/retire lifecycle. Monthly
+    # targeted API checks or a later discovery Release can supply a real URL.
     if not source_url(item):
         move_to_waiting_url(state, item_id, item)
         save_state(state_path, state)
@@ -1590,6 +1657,22 @@ def main() -> None:
         save_state(args.state, state)
         print(f"[=] {tag}: queue consumed")
 
+    # Check after consuming Releases so new URL waiters, including the one-time
+    # historical backfill, participate in this month's check immediately.
+    # Existing waiters are queried only on the first weekly run of each KST
+    # month; remaining weeks do not repeat these caption API calls.
+    for item in refresh_waiting_urls(session, state, args.state):
+        item_id = str(item.get("id") or "")
+        if item_id in attempted:
+            # Its populated URL was already processed from a Release/retry in
+            # this run; clear a duplicate blank-URL record without downloading
+            # the same item twice.
+            remove_matching_waiting(state, item)
+            save_state(args.state, state)
+            continue
+        attempted.add(item_id)
+        process_item(session, state, args.state, item, args.target)
+
     print(json.dumps({
         "success": len(state["success"]),
         "retry": len(state["retry"]),
@@ -1606,3 +1689,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

@@ -108,9 +108,11 @@ trap finish_run EXIT
 echo "=== [1/5] Download queued subtitles from Pi/home IP ==="
 if command -v ionice >/dev/null 2>&1; then
   nice -n 15 ionice -c3 "$PI_PYTHON" "$ARCHIVE_REPO/scripts/pi_download_subtitle_queues.py" \
+    --state "$STATE_FILE" \
     --target "$STREAMING_REPO/subtitle-data"
 else
   nice -n 15 "$PI_PYTHON" "$ARCHIVE_REPO/scripts/pi_download_subtitle_queues.py" \
+    --state "$STATE_FILE" \
     --target "$STREAMING_REPO/subtitle-data"
 fi
 
@@ -146,3 +148,4 @@ if (( erulabo_status != 0 )); then
   exit "$erulabo_status"
 fi
 echo "Weekly Pi subtitle sync completed."
+

@@ -8,6 +8,8 @@ on:
   pull_request:
     paths:
       - 'scripts/discover_subtitles.py'
+      - 'scripts/anissia_caption_policy.py'
+      - 'scripts/test_anissia_caption_policy.py'
       - 'scripts/pi_download_subtitle_queues.py'
       - 'scripts/subtitle_queue_metadata.py'
       - 'scripts/test_subtitle_queue_metadata.py'
@@ -32,16 +34,20 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Install validation dependencies
+        run: python -m pip install requests beautifulsoup4 Pillow
       - name: Validate scripts
         shell: bash
         run: |
           python -m py_compile \
             scripts/discover_subtitles.py \
+            scripts/anissia_caption_policy.py \
             scripts/pi_download_subtitle_queues.py \
             scripts/subtitle_queue_metadata.py \
             scripts/test_subtitle_queue_metadata.py \
             scripts/pi_download_erulabo.py
           python scripts/test_subtitle_queue_metadata.py
+          python -m unittest discover -s scripts -p 'test_anissia_caption_policy.py' -v
           bash -n scripts/pi_weekly_subtitle_sync.sh
 
   discover:
@@ -85,7 +91,7 @@ jobs:
           from pathlib import Path
           p = Path(os.environ["RUNNER_TEMP"]) / "subtitle-discovery" / "summary.json"
           summary = json.loads(p.read_text())
-          for key in ("queue_count", "aniall", "anissia", "api_failures"):
+          for key in ("queue_count", "aniall", "anissia", "api_failures", "anissia_scanned_works", "anissia_skipped_historical"):
               print(f"{key}={int(summary.get(key, 0))}")
           print(f"should_release={str(int(summary.get('queue_count', 0)) > 0).lower()}")
           PY
@@ -158,6 +164,9 @@ jobs:
             echo "- AniAll: ${{ steps.summary.outputs.aniall || 'n/a' }}"
             echo "- Anissia: ${{ steps.summary.outputs.anissia || 'n/a' }}"
             echo "- API discovery failures: ${{ steps.summary.outputs.api_failures || 'n/a' }}"
+            echo "- Anissia caption APIs checked: ${{ steps.summary.outputs.anissia_scanned_works || 'n/a' }}"
+            echo "- Historical caption APIs skipped: ${{ steps.summary.outputs.anissia_skipped_historical || 'n/a' }}"
             echo
             echo "No subtitle blog/file download happens on the GitHub runner."
           } >> "$GITHUB_STEP_SUMMARY"
+
