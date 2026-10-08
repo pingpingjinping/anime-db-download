@@ -42,6 +42,8 @@ def replay(samples, database=None):
                        [('Anissia',str(row['source_record_id'])) for row in samples['samples']])
         summary = refresh_auto_matches(db)
         automatic = {str(aid):rid for rid,aid in db.execute('SELECT reanime_id,anissia_no FROM monthly_auto_matches')}
+        automatic_evidence = {str(aid):json.loads(evidence) for aid,evidence in db.execute(
+            'SELECT anissia_no,evidence_json FROM monthly_auto_matches')}
         rows = []
         for row in samples['samples']:
             aid = str(row['source_record_id'])
@@ -51,7 +53,8 @@ def replay(samples, database=None):
                               (int(aid),))]
             rows.append({'anissia_no':int(aid), 'title':row.get('title_ko'),
                          'status':'automatic' if aid in automatic else 'review',
-                         'reanime_id':automatic.get(aid), 'candidates':candidates})
+                         'reanime_id':automatic.get(aid), 'candidates':candidates,
+                         'automatic_evidence':automatic_evidence.get(aid)})
         return {'mode':'full_foreign_catalog' if database else 'curated_target_fixture',
                 'scope':'New-ingestion replay; historical reservations disabled in memory only',
                 'summary':summary, 'samples':rows}
