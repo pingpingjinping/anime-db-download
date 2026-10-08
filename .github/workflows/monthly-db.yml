@@ -22,7 +22,7 @@ jobs:
       - name: Install HTML parser dependencies
         run: python3 -m pip install requests beautifulsoup4
       - name: Run updater unit tests
-        run: cd scripts && python3 -m unittest -v test_update_db.py test_reviewed_subtitle_runtime.py
+        run: cd scripts && python3 -m unittest -v test_update_db.py test_match_new_sources.py test_reviewed_subtitle_runtime.py
       - name: Download and unpack current Release snapshot
         env:
           GH_TOKEN: ${{ github.token }}
@@ -54,7 +54,7 @@ jobs:
                   shutil.copyfileobj(src, dst)
           (root / "anime-db-entry.txt").write_text(entry, encoding="utf-8")
           PY
-      - name: Update recent AniList, Anissia, ReAnime and Onnada records
+      - name: Refresh source catalogs and retry pending work matches
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -87,4 +87,5 @@ jobs:
               gh api --method DELETE "repos/$GITHUB_REPOSITORY/releases/assets/$legacy_asset_id"
             fi
           fi
+
 

@@ -16,6 +16,7 @@ from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 from match_new_sources import prepare_tables, refresh_auto_matches
+from work_identity import identity, positive_int
 from reviewed_subtitle_runtime import refresh_runtime_work_links
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,6 +26,9 @@ ANILIST_URL = "https://graphql.anilist.co"
 ANILIST_PAGE_SIZE = 50
 ANILIST_MAX_PAGES = 100
 ANILIST_DELAY_SECONDS = 5.0  # Deliberately gentle: at most 12 requests/minute.
+ANISSIA_DELAY_SECONDS = 0.2
+REANIME_DELAY_SECONDS = 0.2
+REANIME_MAX_PAGES = 1000
 FIELDS = ("year", "year_basis", "source_year_raw", "title_ko", "title_native",
           "title_romaji", "title_english", "format", "status", "genres")
 
@@ -152,7 +156,7 @@ def anilist_rows(after_id):
       Page(page: $page, perPage: $perPage) {
         pageInfo { hasNextPage }
         media(type: ANIME, countryOfOrigin: JP,
-          format_in: [TV, TV_SHORT, MOVIE, OVA, ONA],
+          format_in: [TV, TV_SHORT, MOVIE, OVA, ONA, SPECIAL],
           sort: [ID_DESC]) {
           id idMal updatedAt
           title { romaji english native }
@@ -193,41 +197,126 @@ def anilist_rows(after_id):
         f"AniList ID scan exceeded {ANILIST_MAX_PAGES} pages before reaching stored ID {after_id}")
 
 
-def online_rows(source, known, anilist_after_id=None):
+def anilist_selected_rows(ids):
+    """Refresh recent/upcoming and pending references even below the ID watermark."""
+    query = """query ($ids: [Int], $perPage: Int!) {
+      Page(page: 1, perPage: $perPage) {
+        pageInfo { hasNextPage }
+        media(id_in: $ids, type: ANIME, countryOfOrigin: JP, sort: [ID_ASC]) {
+          id idMal updatedAt title { romaji english native } format status
+          startDate { year month day } endDate { year month day }
+          season seasonYear episodes genres averageScore popularity
+        }
+      }
+    }"""
+    ids = sorted({n for raw in ids if (n := positive_int(raw)) is not None})
+    for offset in range(0, len(ids), ANILIST_PAGE_SIZE):
+        selected = ids[offset:offset + ANILIST_PAGE_SIZE]
+        while True:
+            response = requests.post(ANILIST_URL, json={'query': query, 'variables': {
+                'ids': selected, 'perPage': ANILIST_PAGE_SIZE}},
+                headers={'Content-Type': 'application/json', 'Accept': 'application/json',
+                         'User-Agent': 'anime-db-download/1.0'}, timeout=30)
+            if response.status_code != 429:
+                break
+            time.sleep(max(1, int(response.headers.get('Retry-After', '60'))))
+        response.raise_for_status()
+        payload = response.json()
+        data = (payload.get('data') or {}).get('Page')
+        if payload.get('errors') or not isinstance(data, dict) or not isinstance(data.get('media'), list):
+            raise ValueError('Unexpected AniList selected-ID response; refusing incomplete update')
+        if data.get('pageInfo', {}).get('hasNextPage'):
+            raise ValueError('Incomplete AniList selected-ID page')
+        for row in data['media']:
+            if int(row.get('id') or 0) not in selected:
+                raise ValueError('AniList returned an unrequested ID')
+            yield row
+        time.sleep(ANILIST_DELAY_SECONDS)
+
+
+def anissia_rows():
+    """Scan the complete listing, starting with page zero; never assume ID order."""
+    first = fetch_json('https://api.anissia.net/anime/list/0?q=')
+    data = first.get('data')
+    if not isinstance(data, dict):
+        raise ValueError('Unexpected Anissia response')
+    pages = positive_int(data.get('totalPages'))
+    expected = positive_int(data.get('totalElements'))
+    if not pages or not expected or pages > 1000:
+        raise ValueError('Anissia pagination changed; refusing incomplete update')
+    seen = set()
+    for page in range(pages):
+        if page:
+            time.sleep(ANISSIA_DELAY_SECONDS)
+            data = fetch_json(f'https://api.anissia.net/anime/list/{page}?q=').get('data')
+        if not isinstance(data, dict) or not isinstance(data.get('content'), list):
+            raise ValueError('Unexpected Anissia page')
+        content = data['content']
+        if not content:
+            raise ValueError('Empty Anissia page before end of listing')
+        for row in content:
+            if not isinstance(row, dict):
+                raise ValueError('Unexpected Anissia record')
+            aid = positive_int(row.get('animeNo'))
+            if aid is None:
+                raise ValueError('Anissia row had no valid ID')
+            seen.add(aid)
+            yield row
+    if expected and len(seen) < expected:
+        raise ValueError(f'Incomplete Anissia listing: found {len(seen)}, expected {expected}')
+
+
+def refresh_source_ids(db, source):
+    """Bound routine Onnada details; include all pending Korean-title bridges."""
+    pending_rows = list(db.execute('''SELECT e.source,e.source_record_id,e.title_ko,e.cross_source_ids_json
+      FROM entries e JOIN monthly_match_pending p
+        ON e.source=p.source AND e.source_record_id=p.source_record_id'''))
+    if source == 'AniList':
+        cutoff = dt.date.today().year - 1
+        ids = {str(r[0]) for r in db.execute('''SELECT source_record_id FROM entries WHERE source='AniList'
+          AND (year>=? OR year IS NULL OR status IN ('NOT_YET_RELEASED','RELEASING'))''', (cutoff,))}
+        for _, _, _, cross in pending_rows:
+            ids.update(str(x) for x in json.loads(cross).get('anilist_ids', []) if positive_int(x))
+        # SPECIAL records may be older IDs excluded by the previous collector.
+        for cross in db.execute("SELECT cross_source_ids_json FROM entries WHERE source='ReAnime' AND year>=?", (cutoff,)):
+            ids.update(str(x) for x in json.loads(cross[0]).get('anilist_ids', []) if positive_int(x))
+        return ids
+    if source == 'Onnada':
+        ids = {str(r[0]) for r in db.execute("SELECT source_record_id FROM entries WHERE source='Onnada' ORDER BY CAST(source_record_id AS INTEGER) DESC LIMIT 100")}
+        korean = {identity(r[2]) for r in pending_rows if r[0] == 'Anissia' and r[2]}
+        for _, _, _, cross in pending_rows:
+            ids.update(str(x) for x in json.loads(cross).get('onnada_ids', []) if positive_int(x))
+        ids.update(str(r[0]) for r in db.execute("SELECT source_record_id,title_ko FROM entries WHERE source='Onnada'")
+                   if r[1] and identity(r[1]) in korean)
+        return ids
+    return set()
+
+
+def online_rows(source, known, anilist_after_id=None, refresh_ids=()):
     if source == "AniList":
         if anilist_after_id is None:
             raise ValueError("AniList ID watermark is required")
         yield from anilist_rows(anilist_after_id)
+        yield from anilist_selected_rows(refresh_ids)
     elif source == "Anissia":
-        first = fetch_json("https://api.anissia.net/anime/list/0?q=")
-        data = first.get("data") or {}
-        pages = int(data.get("totalPages") or 0)
-        if not pages:
-            raise ValueError("Anissia pagination changed; refusing incomplete update")
-        # The existing API lists old works first. Inspect the most recent pages only.
-        empty = 0
-        for page in range(pages - 1, max(-1, pages - 21), -1):
-            content = (fetch_json(f"https://api.anissia.net/anime/list/{page}?q=").get("data") or {}).get("content") or []
-            if not isinstance(content, list):
-                raise ValueError("Unexpected Anissia page")
-            empty = empty + 1 if all(str(r.get("animeNo")) in known for r in content) else 0
-            yield from content
-            if empty >= 2:
-                break
+        yield from anissia_rows()
     elif source == "ReAnime":
-        empty = 0
-        for page in range(30):
+        seen = set()
+        for page in range(REANIME_MAX_PAGES):
             url = "https://reanime.to/api/v1/search?sort=year_desc&offset=" + str(page * 100) + "&limit=100"
             data = fetch_json(url)
-            content = data.get("results") or []
+            content = data.get("results")
             if not isinstance(content, list):
                 raise ValueError("Unexpected ReAnime page")
             if not content:
-                break
-            empty = empty + 1 if all(str(r.get("anime_id")) in known for r in content) else 0
+                return
+            ids = {str(r.get('anime_id') or r.get('reanime_id') or '') for r in content}
+            if '' in ids or not ids - seen:
+                raise ValueError('ReAnime pagination made no progress')
+            seen.update(ids)
             yield from content
-            if empty >= 3:
-                break
+            time.sleep(REANIME_DELAY_SECONDS)
+        raise ValueError('ReAnime page limit reached; refusing incomplete update')
     elif source == "Onnada":
         base_list = "https://onnada.com/anime"
         detail_base = "https://onnada.com/anime/"
@@ -258,8 +347,9 @@ def online_rows(source, known, anilist_after_id=None):
         minimum_expected = max(1, expected_total - max(3, int(expected_total * 0.02))) if expected_total else 1
         if not listing_ids or len(listing_ids) < minimum_expected:
             raise ValueError(f"Incomplete Onnada listing: found {len(listing_ids)}, expected {expected_total}")
-        new_ids = sorted(listing_ids - {int(x) for x in known if x.isdigit()})
-        for anime_id in new_ids:
+        detail_ids = (listing_ids - {int(x) for x in known if x.isdigit()}) | {
+            int(x) for x in refresh_ids if str(x).isdigit() and int(x) in listing_ids}
+        for anime_id in sorted(detail_ids):
             detail = BeautifulSoup(fetch_html(detail_base + str(anime_id)), "html.parser")
             h1 = detail.select_one("h1")
             title_ko = h1.get_text(" ", strip=True) if h1 else ""
@@ -335,7 +425,8 @@ def main():
                     print(json.dumps({"anilist_id_watermark": anilist_after_id}))
                 else:
                     anilist_after_id = None
-                rows = online_rows(source, known, anilist_after_id) if filename is None else incoming_rows(source, filename)
+                selected = refresh_source_ids(db, source) if filename is None else set()
+                rows = online_rows(source, known, anilist_after_id, selected) if filename is None else incoming_rows(source, filename)
                 seen = set()
                 added = modified = scanned = 0
                 for row in rows:
@@ -352,12 +443,13 @@ def main():
                         for k, ids in cross.items():
                             old_cross[k] = list(dict.fromkeys([*old_cross.get(k, []), *ids]))
                         cross = old_cross
+                        cross_changed = cross != json.loads(previous["cross_source_ids_json"])
                         old_metadata = json.loads(previous["source_metadata_json"])
                         metadata_changed = any(old_metadata.get(k) != v for k, v in metadata.items())
                         metadata = {**old_metadata, **metadata}
                         values = tuple(old if new in (None, "", []) else new for new, old in zip(values, (previous[f] for f in FIELDS)))
                         field_changed = any(previous[f] != v for f, v in zip(FIELDS, values))
-                        if field_changed or metadata_changed:
+                        if field_changed or metadata_changed or cross_changed:
                             modified += 1
                         review_changed = any(previous[f] != values[FIELDS.index(f)]
                                              for f in ("year", "format", "title_ko", "title_native", "title_romaji", "title_english"))
@@ -414,3 +506,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

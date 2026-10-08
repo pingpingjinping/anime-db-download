@@ -1,8 +1,16 @@
 #!/usr/bin/env python3
 import unittest
 from unittest import mock
+import contextlib
+import gzip
+import io
+import json
+import sqlite3
+import tempfile
+from pathlib import Path
 
 import update_db
+from test_match_new_sources import catalog, add
 
 
 class FakeResponse:
@@ -73,5 +81,141 @@ class AniListIdIncrementTests(unittest.TestCase):
                 list(update_db.anilist_rows(100))
 
 
+class ListingRefreshTests(unittest.TestCase):
+    @mock.patch.object(update_db.time, 'sleep', return_value=None)
+    def test_anissia_starts_with_zero_and_refreshes_known_pages(self, _sleep):
+        responses = [{'data':{'totalPages':3,'totalElements':5,'content':[{'animeNo':5},{'animeNo':4}]}},
+                     {'data':{'content':[{'animeNo':3},{'animeNo':2}]}},
+                     {'data':{'content':[{'animeNo':1}]}}]
+        with mock.patch.object(update_db, 'fetch_json', side_effect=responses) as fetch:
+            rows = list(update_db.online_rows('Anissia', {'1','2','3','4','5'}))
+        self.assertEqual([r['animeNo'] for r in rows], [5,4,3,2,1])
+        self.assertEqual([c.args[0] for c in fetch.call_args_list],
+                         [f'https://api.anissia.net/anime/list/{n}?q=' for n in range(3)])
+
+    @mock.patch.object(update_db.time, 'sleep', return_value=None)
+    def test_anissia_does_not_depend_on_ascending_or_descending_ids(self, _sleep):
+        responses = [{'data':{'totalPages':2,'totalElements':3,'content':[{'animeNo':1},{'animeNo':2}]}},
+                     {'data':{'content':[{'animeNo':3}]}}]
+        with mock.patch.object(update_db, 'fetch_json', side_effect=responses):
+            self.assertEqual([r['animeNo'] for r in update_db.anissia_rows()], [1,2,3])
+
+    @mock.patch.object(update_db.time, 'sleep', return_value=None)
+    def test_anissia_incomplete_and_malformed_listings_fail_closed(self, _sleep):
+        cases = [
+            [{'data':{'totalPages':2,'totalElements':3,'content':[{'animeNo':1}]}}, {'data':{'content':[]}}],
+            [{'data':{'totalPages':2,'totalElements':3,'content':[{'animeNo':1}]}}, {'data':{'content':[{'animeNo':1}]}}],
+            [{'data':{'totalPages':1,'content':'invalid'}}],
+        ]
+        for responses in cases:
+            with self.subTest(responses=responses), mock.patch.object(update_db, 'fetch_json', side_effect=responses):
+                with self.assertRaises(ValueError):
+                    list(update_db.anissia_rows())
+
+    @mock.patch.object(update_db.time, 'sleep', return_value=None)
+    def test_reanime_known_year_sorted_pages_do_not_hide_old_year_new_id(self, _sleep):
+        responses = [{'results':[{'anime_id':f'known-{n}'}]} for n in range(3)]
+        responses += [{'results':[{'anime_id':'new-old-year','season_year':1998}]}, {'results':[]}]
+        with mock.patch.object(update_db, 'fetch_json', side_effect=responses):
+            rows = list(update_db.online_rows('ReAnime', {f'known-{n}' for n in range(3)}))
+        self.assertEqual(rows[-1]['anime_id'], 'new-old-year')
+
+    @mock.patch.object(update_db.time, 'sleep', return_value=None)
+    def test_reanime_page_limit_and_repeated_page_fail_closed(self, _sleep):
+        with mock.patch.object(update_db, 'REANIME_MAX_PAGES', 1), \
+                mock.patch.object(update_db, 'fetch_json', return_value={'results':[{'anime_id':'a'}]}):
+            with self.assertRaisesRegex(ValueError, 'page limit'):
+                list(update_db.online_rows('ReAnime', set()))
+        with mock.patch.object(update_db, 'fetch_json', return_value={'results':[{'anime_id':'a'}]}):
+            with self.assertRaisesRegex(ValueError, 'no progress'):
+                list(update_db.online_rows('ReAnime', set()))
+
+    @mock.patch.object(update_db.time, 'sleep', return_value=None)
+    def test_anilist_refreshes_existing_ids_below_watermark(self, _sleep):
+        with mock.patch.object(update_db, 'anilist_rows', return_value=iter([{'id':105}])), \
+                mock.patch.object(update_db.requests, 'post', return_value=FakeResponse([{'id':42}],False)) as post:
+            rows = list(update_db.online_rows('AniList', {'100','42'}, 100, {'42'}))
+        self.assertEqual([r['id'] for r in rows], [105,42])
+        self.assertEqual(post.call_args.kwargs['json']['variables']['ids'], [42])
+
+    def test_on_refresh_selection_includes_pending_old_title_bridge(self):
+        db = catalog()
+        self.addCleanup(db.close)
+        add(db, 'Anissia', '1', ko='오래된 작품', pending=True)
+        add(db, 'Onnada', '1', ko='오래된작품', year=2000)
+        for n in range(2,105):
+            add(db, 'Onnada', str(n), ko='다른 작품', year=2000)
+        self.assertIn('1', update_db.refresh_source_ids(db, 'Onnada'))
+
+    def test_anilist_selection_includes_missing_special_reference(self):
+        db = catalog()
+        self.addCleanup(db.close)
+        add(db, 'AniList', '100', year=2000)
+        add(db, 'ReAnime', 'special', fmt='SPECIAL', ids=['42'])
+        with mock.patch.object(update_db.dt, 'date') as today:
+            today.today.return_value.year = 2026
+            ids = update_db.refresh_source_ids(db, 'AniList')
+        self.assertIn('42', ids)
+
+
+class SnapshotSaveTests(unittest.TestCase):
+    def test_candidate_only_change_packs_snapshot(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            db = catalog()
+            payload = {'animeNo':1,'subject':'검증 작품','originalSubject':'検証アニメーション',
+                       'startDate':'2026-10-99','status':'','genres':''}
+            rid, values, cross, metadata = update_db.normalize('Anissia', payload)
+            db.execute('INSERT INTO entries VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                       ('Anissia',rid,*values,json.dumps(cross),None,json.dumps(metadata)))
+            db.execute("INSERT INTO monthly_match_pending VALUES ('Anissia','1')")
+            add(db, 'ReAnime', 'target', year=None)
+            db.execute('CREATE TABLE monthly_review (source TEXT,source_record_id TEXT,reason TEXT,observed_at TEXT,PRIMARY KEY(source,source_record_id,reason))')
+            db.execute('CREATE TABLE year_summary (year INTEGER,source TEXT,record_count INTEGER)')
+            db.execute('CREATE TABLE metadata (key TEXT PRIMARY KEY,value TEXT)')
+            db.commit()
+            disk = sqlite3.connect(root/'base.db')
+            db.backup(disk); disk.close(); db.close()
+            snapshot = root/'base.db.gz'
+            update_db.pack_snapshot(root/'base.db', snapshot)
+            before = snapshot.read_bytes()
+            input_path = root/'rows.jsonl'
+            input_path.write_text(json.dumps(payload)+'\n')
+            args = ['update_db','--snapshot',str(snapshot),'--input','Anissia='+str(input_path)]
+            with mock.patch('sys.argv', args), contextlib.redirect_stdout(io.StringIO()) as stdout:
+                update_db.main()
+            result = json.loads(stdout.getvalue())
+            self.assertEqual(result['sources']['Anissia'], {'scanned':1,'added':0,'modified':0})
+            self.assertTrue(result['new_work_matching']['changed'])
+            self.assertNotEqual(snapshot.read_bytes(), before)
+            with gzip.open(snapshot,'rb') as src:
+                (root/'after.db').write_bytes(src.read())
+            check = sqlite3.connect(root/'after.db')
+            self.addCleanup(check.close)
+            self.assertEqual(check.execute('SELECT reason FROM monthly_match_candidates').fetchone()[0], 'year_missing')
+
+    def test_incomplete_online_listing_does_not_replace_snapshot(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path = Path(temp)/'snapshot.db.gz'
+            db = catalog()
+            db.execute('CREATE TABLE year_summary (year INTEGER,source TEXT,record_count INTEGER)')
+            db.execute('CREATE TABLE metadata (key TEXT PRIMARY KEY,value TEXT)')
+            db.commit()
+            disk = sqlite3.connect(Path(temp)/'base.db'); db.backup(disk); disk.close(); db.close()
+            update_db.pack_snapshot(Path(temp)/'base.db', path)
+            before = path.read_bytes()
+            def incomplete(*args):
+                yield {'animeNo':1,'subject':'신작','originalSubject':'新作アニメ','startDate':'2026-10-99'}
+                raise ValueError('Incomplete Anissia listing')
+            with mock.patch('sys.argv',['update_db','--snapshot',str(path),'--online']), \
+                    mock.patch.object(update_db,'anilist_id_watermark',return_value=1), \
+                    mock.patch.object(update_db,'online_rows',side_effect=lambda source,*args: incomplete() if source=='Anissia' else iter([])), \
+                    contextlib.redirect_stdout(io.StringIO()):
+                with self.assertRaisesRegex(ValueError, 'Incomplete Anissia'):
+                    update_db.main()
+            self.assertEqual(path.read_bytes(), before)
+
+
 if __name__ == "__main__":
     unittest.main()
+
