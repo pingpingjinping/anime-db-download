@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
-import hashlib
 import json
 import math
 import re
@@ -24,6 +23,7 @@ from zoneinfo import ZoneInfo
 
 import requests
 from bs4 import BeautifulSoup
+from anissia_caption_policy import ANISSIA_CAPTION, caption_key, caption_item, is_historical_anime
 
 KST = ZoneInfo("Asia/Seoul")
 UTC = dt.timezone.utc
@@ -31,7 +31,6 @@ UA = "Mozilla/5.0 (compatible; anime-db-download subtitle discovery/1.0)"
 ANIALL_BASE = "https://aniall.tistory.com"
 ANIALL_CATEGORY = ANIALL_BASE + "/category/" + quote("자막자료실")
 ANISSIA_LIST = "https://api.anissia.net/anime/list/{page}?q="
-ANISSIA_CAPTION = "https://api.anissia.net/anime/caption/animeNo/{anime_no}"
 OVERLAP = dt.timedelta(days=3)
 
 
@@ -175,17 +174,6 @@ def classify_source_url(url: str) -> str:
     return "website"
 
 
-def caption_key(anime_no: str, caption: dict) -> str:
-    raw = "\n".join([
-        anime_no,
-        str(caption.get("episode") or ""),
-        str(caption.get("name") or ""),
-        str(caption.get("updDt") or ""),
-        str(caption.get("website") or ""),
-    ])
-    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
-
-
 def discover_aniall(session: requests.Session, state: dict, queue: list[dict],
                     scan_floor: dt.datetime, max_pages: int, delay: float) -> None:
     discovered = state["discovered"]["aniall"]
@@ -254,7 +242,8 @@ def anissia_payload(response: requests.Response):
 
 
 def discover_anissia(session: requests.Session, state: dict, queue: list[dict],
-                     failures: list[dict], scan_floor: dt.datetime, delay: float) -> None:
+                     failures: list[dict], scan_floor: dt.datetime, delay: float,
+                     today: dt.date | None = None) -> dict:
     discovered = state["discovered"]["anissia"]
     api_retry = state["retry"]["anissia_api"]
     bootstrap = parse_datetime(state["bootstrap_cutoff_kst"])
@@ -268,7 +257,9 @@ def discover_anissia(session: requests.Session, state: dict, queue: list[dict],
     if pages <= 0:
         raise RuntimeError("Anissia list did not provide totalPages")
 
+    today = today or dt.datetime.now(KST).date()
     scanned = 0
+    skipped_historical = 0
     for page in range(pages):
         payload = first if page == 0 else request(session, ANISSIA_LIST.format(page=page)).json()
         content = ((payload.get("data") or {}) if isinstance(payload, dict) else {}).get("content")
@@ -278,6 +269,9 @@ def discover_anissia(session: requests.Session, state: dict, queue: list[dict],
         for anime in content:
             anime_no = str(anime.get("animeNo") or "")
             if not anime_no:
+                continue
+            if is_historical_anime(anime, today):
+                skipped_historical += 1
                 continue
             title = str(anime.get("subject") or anime_no)
             scanned += 1
@@ -293,16 +287,8 @@ def discover_anissia(session: requests.Session, state: dict, queue: list[dict],
                     key = caption_key(anime_no, caption)
                     if key in discovered:
                         continue
-                    item = {
-                        "id": f"anissia:{key}",
-                        "source": "anissia",
-                        "anime_no": anime_no,
-                        "anime_title": title,
-                        "episode": str(caption.get("episode") or ""),
-                        "creator": str(caption.get("name") or ""),
-                        "updated_at": iso_kst(updated),
-                        "source_url": unquote(str(caption.get("website") or "")).strip(),
-                    }
+                    item = caption_item(anime_no, title, caption)
+                    item["updated_at"] = iso_kst(updated)
                     item["handler"] = classify_source_url(item["source_url"])
                     queue.append(item)
                     discovered[key] = item
@@ -322,7 +308,8 @@ def discover_anissia(session: requests.Session, state: dict, queue: list[dict],
                 time.sleep(delay)
             if scanned % 100 == 0:
                 print(f"[=] Anissia API scanned {scanned:,} works")
-    print(f"[=] Anissia API scan complete: {scanned:,} works")
+    print(f"[=] Anissia API scan complete: {scanned:,} works; skipped {skipped_historical:,} historical works")
+    return {"anissia_scanned_works": scanned, "anissia_skipped_historical": skipped_historical}
 
 
 def main() -> None:
@@ -354,7 +341,7 @@ def main() -> None:
         max_pages=args.aniall_max_pages,
         delay=max(0.0, args.aniall_delay),
     )
-    discover_anissia(
+    anissia_scope = discover_anissia(
         session, state, queue, failures, scan_floor,
         delay=max(0.0, args.anissia_delay),
     )
@@ -382,6 +369,7 @@ def main() -> None:
         "anissia": sum(1 for item in queue if item["source"] == "anissia"),
         "api_failures": len(failures),
         "api_retry": len(state["retry"]["anissia_api"]),
+        **anissia_scope,
     })
 
     print(json.dumps(json.loads((args.out / "summary.json").read_text(encoding="utf-8")), ensure_ascii=False, indent=2))
@@ -389,3 +377,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
