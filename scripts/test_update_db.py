@@ -83,6 +83,55 @@ class AniListIdIncrementTests(unittest.TestCase):
 
 class ListingRefreshTests(unittest.TestCase):
     @mock.patch.object(update_db.time, 'sleep', return_value=None)
+    def test_anilist_full_selected_batch_with_next_flag_stops_at_requested_ids(self, _sleep):
+        ids = list(range(1, 51))
+        with mock.patch.object(update_db.requests, 'post',
+                               return_value=FakeResponse([{'id': n} for n in ids], True)) as post:
+            self.assertEqual([r['id'] for r in update_db.anilist_selected_rows(ids)], ids)
+        self.assertEqual(post.call_count, 1)
+
+    @mock.patch.object(update_db.time, 'sleep', return_value=None)
+    def test_anilist_partial_selected_batch_follows_pages(self, _sleep):
+        responses = [FakeResponse([{'id': 1}], True), FakeResponse([{'id': 2}], False)]
+        with mock.patch.object(update_db.requests, 'post', side_effect=responses) as post:
+            self.assertEqual([r['id'] for r in update_db.anilist_selected_rows([1,2])], [1,2])
+        self.assertEqual([c.kwargs['json']['variables']['page'] for c in post.call_args_list], [1,2])
+        self.assertEqual([c.kwargs['json']['variables']['ids'] for c in post.call_args_list], [[1,2],[1,2]])
+
+    @mock.patch.object(update_db.time, 'sleep', return_value=None)
+    def test_anilist_selected_terminal_page_can_omit_removed_ids(self, _sleep):
+        responses = [FakeResponse([{'id': 1}], True), FakeResponse([], False)]
+        with mock.patch.object(update_db.requests, 'post', side_effect=responses):
+            self.assertEqual([r['id'] for r in update_db.anilist_selected_rows([1,2])], [1])
+
+    @mock.patch.object(update_db.time, 'sleep', return_value=None)
+    def test_anilist_selected_pagination_rejects_repeats_no_progress_and_unknown_ids(self, _sleep):
+        cases = [([FakeResponse([{'id':1}],True), FakeResponse([{'id':1}],False)], 'repeated IDs'),
+                 ([FakeResponse([{'id':1},{'id':1}],False)], 'repeated IDs'),
+                 ([FakeResponse([],True)], 'no progress'),
+                 ([FakeResponse([{'id':3}],False)], 'unrequested ID')]
+        for responses, reason in cases:
+            with self.subTest(reason=reason), mock.patch.object(update_db.requests, 'post', side_effect=responses):
+                with self.assertRaisesRegex(ValueError, reason):
+                    list(update_db.anilist_selected_rows([1,2]))
+
+    def test_anilist_selected_missing_pagination_is_not_silently_terminal(self):
+        response = FakeResponse([{'id':1}], False)
+        response._payload['data']['Page']['pageInfo'] = {}
+        with mock.patch.object(update_db.requests, 'post', return_value=response):
+            with self.assertRaisesRegex(ValueError, 'pagination information'):
+                list(update_db.anilist_selected_rows([1,2]))
+
+    @mock.patch.object(update_db.time, 'sleep', return_value=None)
+    def test_anilist_selected_ids_are_batched_with_independent_page_state(self, _sleep):
+        ids = list(range(1, 52))
+        responses = [FakeResponse([{'id':n} for n in ids[:50]], True), FakeResponse([{'id':51}], False)]
+        with mock.patch.object(update_db.requests, 'post', side_effect=responses) as post:
+            self.assertEqual([r['id'] for r in update_db.anilist_selected_rows(ids)], ids)
+        self.assertEqual([c.kwargs['json']['variables']['page'] for c in post.call_args_list], [1,1])
+        self.assertEqual([len(c.kwargs['json']['variables']['ids']) for c in post.call_args_list], [50,1])
+
+    @mock.patch.object(update_db.time, 'sleep', return_value=None)
     def test_anissia_starts_with_zero_and_stops_after_two_known_pages(self, _sleep):
         responses = [{'data':{'totalPages':3,'totalElements':5,'content':[{'animeNo':5},{'animeNo':4}]}},
                      {'data':{'content':[{'animeNo':3},{'animeNo':2}]}},

@@ -211,8 +211,8 @@ def anilist_payload(response):
 
 def anilist_selected_rows(ids):
     """Refresh recent/upcoming and pending references even below the ID watermark."""
-    query = """query ($ids: [Int], $perPage: Int!) {
-      Page(page: 1, perPage: $perPage) {
+    query = """query ($ids: [Int], $page: Int!, $perPage: Int!) {
+      Page(page: $page, perPage: $perPage) {
         pageInfo { hasNextPage }
         media(id_in: $ids, type: ANIME, countryOfOrigin: JP, sort: [ID]) {
           id idMal updatedAt title { romaji english native } format status
@@ -224,25 +224,38 @@ def anilist_selected_rows(ids):
     ids = sorted({n for raw in ids if (n := positive_int(raw)) is not None})
     for offset in range(0, len(ids), ANILIST_PAGE_SIZE):
         selected = ids[offset:offset + ANILIST_PAGE_SIZE]
-        while True:
-            response = requests.post(ANILIST_URL, json={'query': query, 'variables': {
-                'ids': selected, 'perPage': ANILIST_PAGE_SIZE}},
-                headers={'Content-Type': 'application/json', 'Accept': 'application/json',
-                         'User-Agent': 'anime-db-download/1.0'}, timeout=30)
-            if response.status_code != 429:
-                break
-            time.sleep(max(1, int(response.headers.get('Retry-After', '60'))))
-        payload = anilist_payload(response)
-        data = (payload.get('data') or {}).get('Page')
-        if payload.get('errors') or not isinstance(data, dict) or not isinstance(data.get('media'), list):
-            raise ValueError('Unexpected AniList selected-ID response; refusing incomplete update')
-        if data.get('pageInfo', {}).get('hasNextPage'):
-            raise ValueError('Incomplete AniList selected-ID page')
-        for row in data['media']:
-            if int(row.get('id') or 0) not in selected:
+        seen = set()
+        for page in range(1, len(selected) + 2):
+            while True:
+                response = requests.post(ANILIST_URL, json={'query': query, 'variables': {
+                    'ids': selected, 'page': page, 'perPage': ANILIST_PAGE_SIZE}},
+                    headers={'Content-Type': 'application/json', 'Accept': 'application/json',
+                             'User-Agent': 'anime-db-download/1.0'}, timeout=30)
+                if response.status_code != 429:
+                    break
+                time.sleep(max(1, int(response.headers.get('Retry-After', '60'))))
+            payload = anilist_payload(response)
+            data = (payload.get('data') or {}).get('Page')
+            if not isinstance(data, dict) or not isinstance(data.get('media'), list):
+                raise ValueError('Unexpected AniList selected-ID response; refusing incomplete update')
+            info = data.get('pageInfo')
+            if not isinstance(info, dict) or not isinstance(info.get('hasNextPage'), bool):
+                raise ValueError('Missing AniList selected-ID pagination information')
+            page_ids = [positive_int(row.get('id')) if isinstance(row, dict) else None
+                        for row in data['media']]
+            if any(identity not in selected for identity in page_ids):
                 raise ValueError('AniList returned an unrequested ID')
-            yield row
-        time.sleep(ANILIST_DELAY_SECONDS)
+            if len(set(page_ids)) != len(page_ids) or seen.intersection(page_ids):
+                raise ValueError(f'AniList selected-ID page {page} repeated IDs')
+            if not page_ids and info['hasNextPage']:
+                raise ValueError(f'AniList selected-ID page {page} made no progress')
+            seen.update(page_ids)
+            yield from data['media']
+            time.sleep(ANILIST_DELAY_SECONDS)
+            # A full 50-ID batch can advertise another page even after every
+            # requested identity has arrived. Otherwise, follow real pagination.
+            if seen == set(selected) or not info['hasNextPage']:
+                break
 
 
 def anissia_rows(known=()):

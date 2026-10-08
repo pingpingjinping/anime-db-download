@@ -202,6 +202,12 @@ def compare(listings, rows, decisions=None):
                 continue
             outcome['status'], outcome['target'] = 'automatic', identity
     known = {row['anikoto_id']: row for row in outcomes}
+    entries = {row['source'] + ':' + row['source_record_id']: row for row in rows}
+    memberships = defaultdict(set)
+    for identity, group in groups.items():
+        for member in group['members']:
+            memberships[member['source'] + ':' + member['source_record_id']].add(identity)
+    reviewed_targets = set()
     for slug, decision in (decisions or {}).items():
         if slug not in known or not str(decision.get('reason') or '').strip():
             raise ValueError('Reviewed decision requires an existing Anikoto ID and a reason')
@@ -209,12 +215,22 @@ def compare(listings, rows, decisions=None):
         if decision['status'] == 'rejected':
             outcome['status'] = 'rejected'
             outcome.pop('target', None)
-        elif decision['status'] == 'accepted' and decision.get('target') in groups:
-            outcome['status'], outcome['target'] = 'reviewed', decision['target']
+        elif decision['status'] == 'accepted' and decision.get('target') in entries:
+            target = decision['target']
+            # Manual targets are source identities, not automatic group keys.
+            # A ReAnime member may now live under AniList; an Onnada target
+            # may never have had an automatic group. Keep the reviewed target.
+            if target not in groups:
+                member_groups = memberships[target]
+                canonical = groups[next(iter(member_groups))] if len(member_groups) == 1 else None
+                groups[target] = {'primary': entries[target],
+                                  'members': canonical['members'] if canonical else [entries[target]],
+                                  'keys': canonical['keys'] if canonical else keys(entries[target])}
+            outcome['status'], outcome['target'] = 'reviewed', target
+            reviewed_targets.update(memberships[target] | {target})
         else:
-            raise ValueError('Invalid reviewed status or target')
+            raise ValueError(f'Invalid reviewed status or target for {slug}: {decision}')
         outcome['reason'] = decision['reason']
-    reviewed_targets = {row['target'] for row in outcomes if row['status']=='reviewed'}
     for outcome in outcomes:
         if outcome['status']=='automatic' and outcome['target'] in reviewed_targets:
             outcome['status'],outcome['reason']='needs_review','reviewed_target_already_linked'
