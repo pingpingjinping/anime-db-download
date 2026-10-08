@@ -82,6 +82,30 @@ class NewSourceMatchingTests(unittest.TestCase):
     def reasons(self):
         return {r[0] for r in self.db.execute('SELECT reason FROM monthly_match_candidates')}
 
+    def test_bracketed_short_kanji_reading_is_review_only(self):
+        self.source(native='神統記 〈テオゴニア〉', ko='신통기〈테오고니아〉', year=2025)
+        add(self.db, 'ReAnime', 'teogonia', native='神統記', year=2025)
+        matcher.refresh_auto_matches(self.db)
+        self.assertEqual(self.auto(), [])
+        row = self.db.execute("SELECT evidence_json FROM monthly_match_candidates WHERE reanime_id='teogonia'").fetchone()
+        self.assertIn('bracket_reading_alias', json.loads(row[0])['evidence'])
+
+    def test_ova_bonus_subtitle_recalled_even_when_tv_exact_exists(self):
+        self.source(native='この素晴らしい世界に祝福を！３ OVA', ko='축복 3 OVA', year=2025)
+        add(self.db, 'ReAnime', 'tv', native='この素晴らしい世界に祝福を！３', year=2024)
+        add(self.db, 'ReAnime', 'bonus', native='この素晴らしい世界に祝福を！３ーBONUS STAGEー', year=2025, fmt='OVA')
+        matcher.refresh_auto_matches(self.db)
+        self.assertEqual(self.auto(), [])
+        rows = {r[0]:json.loads(r[1]) for r in self.db.execute('SELECT reanime_id,evidence_json FROM monthly_match_candidates')}
+        self.assertIn('special_subtitle_alias', rows['bonus']['evidence'])
+        self.assertIn('format_conflict', rows['tv']['conflicts'])
+
+    def test_bonus_alias_does_not_erase_literal_digits(self):
+        self.source(native='検証アニメーション3 OVA', ko='검증 3 OVA')
+        add(self.db, 'ReAnime', 'wrong', native='検証アニメーション30 BONUS', fmt='OVA')
+        matcher.refresh_auto_matches(self.db)
+        self.assertNotIn('wrong', [r[0] for r in self.db.execute('SELECT reanime_id FROM monthly_match_candidates')])
+
     def test_unique_native_exact_same_year(self):
         self.source()
         add(self.db, 'ReAnime', 'correct')
@@ -125,7 +149,7 @@ class NewSourceMatchingTests(unittest.TestCase):
         self.assertEqual(self.auto(), [])
         self.assertIn('season_inconsistent', self.reasons())
 
-    def test_known_other_year_does_not_block_but_unknown_year_does(self):
+    def test_same_year_strong_match_beats_unknown_year_candidate(self):
         self.source()
         add(self.db, 'ReAnime', 'correct')
         add(self.db, 'ReAnime', 'old', year=2001)
@@ -133,7 +157,8 @@ class NewSourceMatchingTests(unittest.TestCase):
         self.assertEqual(self.auto(), [('correct', 1)])
         add(self.db, 'ReAnime', 'unknown', year=None)
         matcher.refresh_auto_matches(self.db)
-        self.assertEqual(self.auto(), [])
+        self.assertEqual(self.auto(), [('correct', 1)])
+        self.assertIn('year_missing', self.reasons())
 
     def test_movie_prefix_does_not_merge_tv(self):
         self.source(native='映画 検証アニメーション', ko='영화 검증 작품')
@@ -240,21 +265,93 @@ class NewSourceMatchingTests(unittest.TestCase):
         matcher.refresh_auto_matches(self.db)
         self.assertEqual(self.auto(), [('correct', 1)])
 
+    def test_trailing_digit_needs_multilingual_season_confirmation(self):
+        self.source(native='検証アニメーション 第3期', ko='검증 작품 3기')
+        add(self.db, 'ReAnime', 'correct', native='検証アニメーション３', english='Test Anime Season 3')
+        matcher.refresh_auto_matches(self.db)
+        self.assertEqual(self.auto(), [('correct',1)])
+
+    def test_bare_digit_does_not_imply_season(self):
+        self.source(native='検証アニメーション 第3期')
+        add(self.db, 'ReAnime', 'unknown', native='検証アニメーション3')
+        matcher.refresh_auto_matches(self.db)
+        self.assertEqual(self.auto(), [])
+
+    def test_release_year_suffix_requires_row_year(self):
+        self.source()
+        add(self.db, 'ReAnime', 'correct', native='検証アニメーション (2026)')
+        add(self.db, 'ReAnime', 'wrong', native='検証アニメーション (2025)')
+        matcher.refresh_auto_matches(self.db)
+        self.assertEqual(self.auto(), [('correct',1)])
+
+    def test_native_latin_does_not_veto_exact_title_in_another_field(self):
+        self.source(ko='Test Anime')
+        add(self.db, 'ReAnime', 'correct', native='Test Anime')
+        matcher.refresh_auto_matches(self.db)
+        self.assertEqual(self.auto(), [('correct',1)])
+
+    def test_different_japanese_native_still_needs_alias(self):
+        self.source(ko='Test Anime')
+        add(self.db, 'ReAnime', 'wrong', native='別のアニメーション', english='Test Anime')
+        matcher.refresh_auto_matches(self.db)
+        self.assertEqual(self.auto(), [])
+        self.assertIn('native_alias_needed',self.reasons())
+
+    def test_two_complete_same_year_targets_still_hold(self):
+        self.source()
+        add(self.db, 'ReAnime', 'first')
+        add(self.db, 'ReAnime', 'second')
+        matcher.refresh_auto_matches(self.db)
+        self.assertEqual(self.auto(), [])
+
+    def test_reverse_unknown_year_does_not_veto_complete_source(self):
+        self.source()
+        add(self.db, 'Anissia', '2', ko='연도 미정', year=None)
+        add(self.db, 'ReAnime', 'correct')
+        matcher.refresh_auto_matches(self.db)
+        self.assertEqual(self.auto(), [('correct',1)])
+
+    def test_named_sequel_can_use_exact_full_native_title_with_same_year(self):
+        native='検証アニメーション ～続きの物語～'
+        self.source(native=native)
+        add(self.db, 'ReAnime', 'correct', native=native, english='Test Anime Season 2')
+        matcher.refresh_auto_matches(self.db)
+        self.assertEqual(self.auto(), [('correct',1)])
+
+    def test_unknown_season_is_not_completed_across_different_years(self):
+        self.source()
+        add(self.db, 'ReAnime', 'wrong', english='Test Anime Season 2', year=2027)
+        matcher.refresh_auto_matches(self.db)
+        self.assertEqual(self.auto(), [])
+
 
 class RecentSampleRegressionTests(unittest.TestCase):
-    def test_fifty_recent_samples_preserve_verified_targets_and_seven_holds(self):
+    def test_2025_fifty_preserve_46_targets_and_four_holds(self):
+        from pathlib import Path
+        from audit_new_source_matches import replay
+        fixture = json.loads((Path(__file__).resolve().parents[1] / 'data/matching/anissia_2025_50_20261008.json').read_text())
+        result = replay(fixture)
+        self.assertEqual(result['summary']['auto_matched'],46)
+        self.assertEqual(result['summary']['review_works'],4)
+        for sample in result['samples']:
+            self.assertEqual(sample['reanime_id'],fixture['expected_automatic'].get(str(sample['anissia_no'])))
+            if expected := fixture['expected_provisional_candidates'].get(str(sample['anissia_no'])):
+                self.assertIn(expected, [c['reanime_id'] for c in sample['candidates']])
+
+
+    def test_fifty_recent_samples_preserve_verified_targets_and_six_holds(self):
         from audit_new_source_matches import DEFAULT_SAMPLES, replay
         fixture = json.loads(DEFAULT_SAMPLES.read_text())
         result = replay(fixture)
         self.assertEqual(len(result['samples']), 50)
-        self.assertEqual(result['summary']['auto_matched'], 43)
-        self.assertEqual(result['summary']['review_works'], 7)
-        expected = fixture['expected_automatic']
+        self.assertEqual(result['summary']['auto_matched'], 44)
+        self.assertEqual(result['summary']['review_works'], 6)
+        expected = dict(fixture['expected_automatic'], **{'3479':'the-vermilion-mask-5577y8'})
         for sample in result['samples']:
             with self.subTest(anissia_no=sample['anissia_no']):
                 self.assertEqual(sample['reanime_id'], expected.get(str(sample['anissia_no'])))
         held = {s['anissia_no'] for s in result['samples'] if s['status']=='review'}
-        self.assertEqual(held, {3527,3433,3471,3470,3479,3578,3590})
+        self.assertEqual(held, {3527,3433,3471,3470,3578,3590})
 
 
 if __name__ == '__main__':

@@ -27,7 +27,8 @@ are retried when another source gains a title, year, type, or target record.
 `work_identity.py` keeps raw titles intact and derives title keys, season labels,
 part/cour labels, and medium independently. It normalizes Unicode width and
 case while preserving sequel symbols such as `+` and stars. Numeric title
-content, remake years, and arbitrary subtitles remain in the key.
+content and arbitrary subtitles remain in the key. A trailing `(2025)` release
+year is omitted only when the row itself confirms that same year.
 
 Season equivalents include `2기`, `Season 2`, `2nd Season`, `S02`, `第2期`, and
 trailing roman numerals. Part/cour labels have their own parser; `Part II` and
@@ -42,18 +43,26 @@ is not assigned a default season or part number.
 
 Candidate generation uses exact normalized title keys, validated AniList
 aliases, and corroborated Onnada bridges. A Japanese native-title difference
-requires alias review unless a bridge supplies the missing evidence. Long/short
+requires alias review unless a bridge supplies the missing evidence. Latin titles
+stored in the native field do not veto an exact match in another language.
+A bare trailing digit becomes a season key only when another title language
+explicitly confirms that same season. Numeric title content is preserved. Long/short
 native-title containment can generate a review hint but never an automatic link.
 
 ## Selection and persistence
 
 1. Confirmed season, part, type, episode-count, and year conflicts do not compete
    with an eligible exact candidate. Their reasons remain in the candidate table.
-2. A source with an explicit installment label can select a uniquely confirmed
-   matching installment over series-only candidates that lack that label.
-   Those alternatives remain `series_hint` candidates; they are not called
-   season 1 or confirmed conflicts. Missing year, type, external-ID validation,
-   or title evidence still blocks an automatic choice.
+2. Fully corroborated candidates (exact title, known same year, compatible
+   metadata and verified reference evidence) outrank incomplete alternatives.
+   Unknown-year/season/type/reference candidates remain `weaker_candidate`
+   suggestions rather than vetoing a unique complete candidate. Two equally
+   complete candidates still require review. The same ranking is used for
+   reverse Anissia competitors, including unpending rows.
+   An identical complete native title with the same known year can corroborate
+   a named sequel's explicit season from the target's other title languages
+   when the source has no numeric season. Explicit conflicts remain conflicts;
+   an unlabelled title is never automatically assigned season 1.
 3. Work uniqueness is checked in both directions, including unpending Anissia
    competitors. Historical reviewed targets and validated alternate URLs for
    reviewed works are reserved.
@@ -69,9 +78,9 @@ native-title containment can generate a review hint but never an automatic link.
    automatic link changes. Unchanged candidate evidence keeps its observation
    date, making repeated refreshes stable.
 
-V2 automatic evidence includes `rule_version`, `validated_anilist_ids`,
+V3 automatic evidence includes `rule_version`, `validated_anilist_ids`,
 `work_identity`, conflict/missing reasons, and candidate role. The streaming
-consumer must use the validated ID list when expanding V2 automatic aliases;
+consumer must use the validated ID list when expanding V2+ automatic aliases;
 it must not borrow all IDs from a ReAnime declaration. Older evidence and
 explicit manual review remain compatible.
 
@@ -88,21 +97,26 @@ original title: 25 selected with seed 20261008, then 25 with seed 20261009 from
 the remaining 48 works of a 73-work population. This is a sampled replay, not
 an accuracy estimate and not a 2027/unknown-date benchmark.
 
-With the complete foreign catalog from the frozen release snapshot:
+With the complete foreign catalog and all 3,548 observed Anissia competitors:
 
-| Rule | Automatic | Review works |
-|---|---:|---:|
-| Previous production rule | 37 | 13 |
-| New production rule | 43 | 7 |
+| Sample | V2 automatic | V3 automatic | V3 review |
+|---|---:|---:|---:|
+| 2026 recent 50 | 43 | 44 | 6 |
+| 2025 random 50 | 37 | 46 | 4 |
+| Additional 50 (2026/upcoming/unknown) | 20 | 21 | 29 |
 
-All 37 previous automatic targets are retained. Additional automatic links are
-Ranma season 3, The Ramparts of Ice season 2, the Cheat Skill TV special, Black
-Clover season 2, Kimi to Hanabi to Yakusoku to, and Hell Mode season 2.
+Every V2 automatic target is retained. The Vermilion Mask gains a confirmed
+same-year target while its unknown-year Part 2 alternative remains visible.
+The 2025 gains cover multilingual season digits, Latin native fields, a
+corroborated remake year, an identical full named-sequel title, and incomplete
+future-season alternatives. Remaining holds include known year conflicts,
+missing title/season evidence, and equally strong multiple URLs. There are no
+per-work title exceptions. These are replay coverage counts, not an accuracy
+estimate or playback test. The frozen SQLite input hash is unchanged.
 
-The seven holds are two native-title alias checks, two year conflicts, two
-multiple-URL works, and The Vermilion Mask's unconfirmed Part 2/unknown-year
-competitor. The earlier simplified prototype selected the last case; production
-keeps the uncertainty instead of assuming that an unlabelled row is Part 1.
+The separate 2025 fixture records 50 fresh details observed on 2026-10-08,
+random seed 20261011 from a 233-work population. Its curated targets and exact
+expected links are also checked in for offline regression.
 
 The JSON fixture is a curated target subset for offline regression. To replay
 against the complete foreign catalog without modifying the input SQLite file:
@@ -128,3 +142,26 @@ Run the regression suite with:
 ```sh
 python -m unittest discover -s scripts -p 'test_*.py' -v
 ```
+
+## V4 candidate playback evidence
+
+Review-only recall includes bracketed readings accompanying short kanji titles
+and same-year/same-medium OVA bonus subtitles. These hints never satisfy automatic
+title equality. Literal digits are retained, including in containment hints.
+V4 candidate evidence additionally records source/target seasons and parts plus
+complete native-title equality. Consumers can distinguish unknown source seasons
+from a numbered sequel pointing to an unnumbered original.
+
+The streaming consumer reserves confirmed links first and globally allocates
+remaining compatible candidates as provisional links. It maximizes coverage,
+then summed evidence scores, and marks every provisional connection in the UI.
+Explicit season/part/type/episode-count conflicts and reviewed reservations are
+excluded; year disagreements may remain visibly provisional. A numbered source
+with an unnumbered target additionally needs complete same-year native evidence.
+Candidate allocation does not rewrite reviewed links or `monthly_auto_matches`.
+
+Full-catalog replay retains the same automatic targets. The 2025 50-work sample
+now has 46 confirmed + 4 provisional links; 2026 has 44 + 6; the additional
+50 have 21 + 28 with one numbered-sequel/original fallback withheld. These are
+new-ingestion replay coverage counts, not operating-catalog accuracy or stream
+availability measurements. Actual historical reservations remain protected.
