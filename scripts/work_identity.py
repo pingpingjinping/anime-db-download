@@ -147,13 +147,26 @@ def indexed_keys(row):
     return {identity(t) for t in titles(row) if len(identity(t)) >= 4}
 
 
+def row_title_keys(row, title):
+    """Use row metadata to disambiguate remake years and corroborated digits."""
+    value = normalized(title)
+    # A release-year annotation is removable only when the row confirms it.
+    if year(row):
+        value = re.sub(r"\s*\(" + str(year(row)) + r"\)\s*$", "", value)
+    key = base_identity(value)
+    ss, _ = installment(row)
+    trailing = re.search(r"(?<!\d)([2-9]|[1-9]\d)\s*$", value)
+    if trailing and not parse_title(value)[1] and ss == {int(trailing.group(1))}:
+        key = base_identity(value[:trailing.start()])
+    return {key} if len(key) >= 4 else set()
+
+
 def base_keys(row):
-    return {base_identity(t) for t in titles(row) if len(base_identity(t)) >= 4}
+    return set().union(*(row_title_keys(row, t) for t in titles(row)))
 
 
 def native_keys(row):
-    key = base_identity(row.get("title_native"))
-    return {key} if len(key) >= 4 else set()
+    return row_title_keys(row, row.get("title_native"))
 
 
 def compatibility(a, b):

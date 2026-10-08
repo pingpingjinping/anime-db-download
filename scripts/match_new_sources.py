@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 from collections import defaultdict
 from datetime import date
 
@@ -12,7 +13,7 @@ from work_identity import (
 
 MIN_CANDIDATE_SCORE = 70
 MIN_AUTOMATIC_SCORE = 95
-RULE_VERSION = 2
+RULE_VERSION = 3
 
 
 def metadata_compatible(a, b):
@@ -154,7 +155,20 @@ def refresh_auto_matches(db):
             # Installment labels remain separate from title equality.
             if any(raw in anilist for raw in invalid_ids[rid]):
                 missing.append('external_id_unverified')
-            native_difference = source_native and native_keys(r) and not source_native & native_keys(r)
+            # The native field sometimes contains an English release title.
+            # Only differing Japanese-script titles require a native alias.
+            japanese = lambda t: bool(re.search(r'[\u3040-\u30ff\u3400-\u9fff]', t or ''))
+            native_difference = (japanese(a.get('title_native')) and japanese(r.get('title_native'))
+                                 and source_native and native_keys(r) and not source_native & native_keys(r))
+            # An identical complete native title in the same year can identify
+            # a named sequel whose English alias supplies the season number.
+            # This does not turn a missing season into S1 or erase conflicts.
+            if (year(a) and year(a) == year(r)
+                    and identity(a.get('title_native')) == identity(r.get('title_native'))
+                    and identity(a.get('title_native'))
+                    and not installment(a)[0] and installment(r)[0]):
+                missing = [m for m in missing if m != 'season_missing']
+                evidence.add('full_native_installment')
             bridge = any(x.startswith('onnada_bridge:') for x in evidence)
             title_confirmed = 'exact_title' in evidence or bridge
             if native_difference and not bridge:
@@ -174,30 +188,26 @@ def refresh_auto_matches(db):
         if ('Anissia', aid) in pending and not possible.get(aid):
             no_candidates.add(aid)
 
-    # Only confirmed conflicts are excluded from uniqueness. Unknown evidence
-    # and a second URL for the same validated work still require review.
+    # Rank complete, corroborated candidates above incomplete alternatives.
+    # Weak candidates remain visible, but cannot veto a unique strong match.
     viable = {}
     for aid, options in possible.items():
-        ids = {rid for rid, (_, d) in options.items() if not d['conflicts']}
-        confirmed = any(d['automatic_eligible'] and score >= MIN_AUTOMATIC_SCORE
-                        for score, d in options.values())
-        ss, ps = installment(anissia[aid])
-        for rid in list(ids):
-            details = options[rid][1]
-            missing = set(details['missing'])
-            # An explicitly identified S2/Part2 candidate is stronger evidence
-            # than a series-only title. Keep the hint for review; do not call it
-            # S1 or a confirmed conflict. Unknown year/type/ID still blocks.
-            hint = (confirmed and bool(missing) and missing <= {'season_missing', 'part_missing'}
-                    and all(ss if label == 'season_missing' else ps for label in missing))
-            if hint:
-                ids.remove(rid)
-            details['candidate_role'] = 'series_hint' if hint else 'work_candidate'
-        viable[aid] = ids
+        strong = {rid for rid, (score, d) in options.items()
+                  if d['automatic_eligible'] and score >= MIN_AUTOMATIC_SCORE}
+        viable[aid] = strong or {rid for rid, (_, d) in options.items() if not d['conflicts']}
+        for rid, (_, details) in options.items():
+            details['candidate_role'] = ('work_candidate' if rid in viable[aid] else
+                                         'conflicting' if details['conflicts'] else 'weaker_candidate')
     by_work = defaultdict(set)
+    strong_by_work = defaultdict(set)
     for aid, ids in viable.items():
         for rid in ids:
             by_work[groups[rid]].add(aid)
+            score, d = possible[aid][rid]
+            if d['automatic_eligible'] and score >= MIN_AUTOMATIC_SCORE:
+                strong_by_work[groups[rid]].add(aid)
+    for group, ids in strong_by_work.items():
+        by_work[group] = ids
     accepted, candidates = {}, []
     for aid, options in possible.items():
         ids = viable[aid]
