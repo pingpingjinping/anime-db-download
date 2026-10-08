@@ -7,6 +7,7 @@ import gzip
 import json
 import re
 import sqlite3
+import sys
 import tempfile
 import time
 from urllib.parse import parse_qs, urljoin, urlparse
@@ -16,7 +17,7 @@ from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 from match_new_sources import prepare_tables, refresh_auto_matches
-from work_identity import identity, positive_int
+from work_identity import positive_int
 from reviewed_subtitle_runtime import refresh_runtime_work_links
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -301,7 +302,9 @@ def anissia_rows(known=()):
 
 
 def refresh_source_ids(db, source):
-    """Bound routine Onnada details; include all pending Korean-title bridges."""
+    """Revisit recent AniList metadata; Onnada details are new-ID only."""
+    if source != 'AniList':
+        return set()
     pending_rows = list(db.execute('''SELECT e.source,e.source_record_id,e.title_ko,e.cross_source_ids_json
       FROM entries e JOIN monthly_match_pending p
         ON e.source=p.source AND e.source_record_id=p.source_record_id'''))
@@ -315,18 +318,25 @@ def refresh_source_ids(db, source):
         for cross in db.execute("SELECT cross_source_ids_json FROM entries WHERE source='ReAnime' AND year>=?", (cutoff,)):
             ids.update(str(x) for x in json.loads(cross[0]).get('anilist_ids', []) if positive_int(x))
         return ids
-    if source == 'Onnada':
-        ids = {str(r[0]) for r in db.execute("SELECT source_record_id FROM entries WHERE source='Onnada' ORDER BY CAST(source_record_id AS INTEGER) DESC LIMIT 100")}
-        korean = {identity(r[2]) for r in pending_rows if r[0] == 'Anissia' and r[2]}
-        for _, _, _, cross in pending_rows:
-            ids.update(str(x) for x in json.loads(cross).get('onnada_ids', []) if positive_int(x))
-        ids.update(str(r[0]) for r in db.execute("SELECT source_record_id,title_ko FROM entries WHERE source='Onnada'")
-                   if r[1] and identity(r[1]) in korean)
-        return ids
     return set()
 
 
-def online_rows(source, known, anilist_after_id=None, refresh_ids=()):
+def prepare_onnada_checks(db):
+    db.execute('''CREATE TABLE IF NOT EXISTS onnada_detail_checks (
+      source_record_id TEXT PRIMARY KEY,
+      outcome TEXT NOT NULL CHECK(outcome IN ('included','excluded')),
+      reason TEXT NOT NULL,
+      checked_at TEXT NOT NULL)''')
+
+
+def record_onnada_check(db, anime_id, outcome, reason):
+    if not positive_int(anime_id) or outcome not in ('included', 'excluded') or not reason:
+        raise ValueError('Invalid Onnada detail check')
+    return db.execute('INSERT OR IGNORE INTO onnada_detail_checks VALUES (?,?,?,?)',
+                      (str(anime_id), outcome, reason, dt.date.today().isoformat())).rowcount > 0
+
+
+def online_rows(source, known, anilist_after_id=None, refresh_ids=(), onnada_observer=None):
     if source == "AniList":
         if anilist_after_id is None:
             raise ValueError("AniList ID watermark is required")
@@ -356,6 +366,7 @@ def online_rows(source, known, anilist_after_id=None, refresh_ids=()):
         detail_base = "https://onnada.com/anime/"
         page_queue, visited, listing_ids = [1], set(), set()
         expected_total = None
+        print('Onnada: scanning listing IDs', file=sys.stderr, flush=True)
         while page_queue:
             page = page_queue.pop(0)
             if page in visited:
@@ -378,12 +389,16 @@ def online_rows(source, known, anilist_after_id=None, refresh_ids=()):
                     if raw_page.isdigit() and int(raw_page) not in visited and int(raw_page) not in page_queue:
                         page_queue.append(int(raw_page))
             time.sleep(1.2)
+            if len(visited) % 25 == 0:
+                print(f'Onnada: {len(visited)} listing pages, {len(listing_ids)} IDs',
+                      file=sys.stderr, flush=True)
         minimum_expected = max(1, expected_total - max(3, int(expected_total * 0.02))) if expected_total else 1
         if not listing_ids or len(listing_ids) < minimum_expected:
             raise ValueError(f"Incomplete Onnada listing: found {len(listing_ids)}, expected {expected_total}")
-        detail_ids = (listing_ids - {int(x) for x in known if x.isdigit()}) | {
-            int(x) for x in refresh_ids if str(x).isdigit() and int(x) in listing_ids}
-        for anime_id in sorted(detail_ids):
+        detail_ids = listing_ids - {int(x) for x in known if x.isdigit()}
+        print(f'Onnada: {len(listing_ids)} listing IDs, {len(detail_ids)} new IDs need details',
+              file=sys.stderr, flush=True)
+        for checked, anime_id in enumerate(sorted(detail_ids), 1):
             detail = BeautifulSoup(fetch_html(detail_base + str(anime_id)), "html.parser")
             h1 = detail.select_one("h1")
             title_ko = h1.get_text(" ", strip=True) if h1 else ""
@@ -405,8 +420,17 @@ def online_rows(source, known, anilist_after_id=None, refresh_ids=()):
             season_info = meta.get("방영일", meta.get("방영시기", "")).strip()
             native = parts[0] if parts else ""
             country_tokens = [x.strip() for x in re.split(r"[,，、/|]+", country) if x.strip()]
-            if "특전" in category or not (any(x in ("일본", "Japan", "JP") for x in country_tokens)
-                    or (not country and re.search(r"[\u3040-\u309F\u30A0-\u30FF]", native))):
+            japanese = any(x in ('일본', 'Japan', 'JP') for x in country_tokens) or (
+                not country and re.search(r'[\u3040-\u309F\u30A0-\u30FF]', native))
+            reason = ('bonus' if '특전' in category else
+                      'non_japanese' if country and not japanese else
+                      'country_unverified' if not japanese else 'japanese_work')
+            if onnada_observer:
+                onnada_observer(anime_id, 'included' if reason == 'japanese_work' else 'excluded', reason)
+            if checked % 50 == 0 or checked == len(detail_ids):
+                print(f'Onnada: checked {checked}/{len(detail_ids)} new details',
+                      file=sys.stderr, flush=True)
+            if reason != 'japanese_work':
                 continue
             yield {"onnada_id": anime_id, "title_ko": title_ko,
                    "title_native": native, "title_romaji": parts[1] if len(parts) > 1 else "",
@@ -435,9 +459,14 @@ def main():
             source TEXT NOT NULL, source_record_id TEXT NOT NULL, reason TEXT NOT NULL,
             observed_at TEXT NOT NULL, PRIMARY KEY(source, source_record_id, reason))""")
         prepare_tables(db)
+        if args.online:
+            prepare_onnada_checks(db)
         db.execute("BEGIN")
         counts = {}
         state_changed = False
+        def observe_onnada(anime_id, outcome, reason):
+            nonlocal state_changed
+            state_changed = record_onnada_check(db, anime_id, outcome, reason) or state_changed
         try:
             # This release is the canonical four-source catalog. Remove any
             # legacy AniAll rows if a prior workflow run had stored them here.
@@ -454,13 +483,20 @@ def main():
                 tasks.append((source, Path(filename)))
             for source, filename in tasks:
                 known = {str(r[0]) for r in db.execute("SELECT source_record_id FROM entries WHERE source=?", (source,))}
+                if source == 'Onnada' and filename is None:
+                    known.update(r[0] for r in db.execute('SELECT source_record_id FROM onnada_detail_checks'))
                 if source == "AniList" and filename is None:
                     anilist_after_id = anilist_id_watermark(known)
                     print(json.dumps({"anilist_id_watermark": anilist_after_id}))
                 else:
                     anilist_after_id = None
                 selected = refresh_source_ids(db, source) if filename is None else set()
-                rows = online_rows(source, known, anilist_after_id, selected) if filename is None else incoming_rows(source, filename)
+                if filename is not None:
+                    rows = incoming_rows(source, filename)
+                elif source == 'Onnada':
+                    rows = online_rows(source, known, anilist_after_id, selected, onnada_observer=observe_onnada)
+                else:
+                    rows = online_rows(source, known, anilist_after_id, selected)
                 seen = set()
                 added = modified = scanned = 0
                 for row in rows:

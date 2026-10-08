@@ -37,7 +37,13 @@ explicit full rebuild, use `crawl_anikoto.py --full --fresh` or select
 timer, web build, or subtitle-download change is required.
 
 ReAnime keeps its full year-sorted API traversal, so newly added older-year
-works are not skipped. AniList, Onnada, and AniAll retain their existing refresh
-policies. This change limits new-work discovery; it does not periodically
+works are not skipped. Onnada walks the full listing but fetches details only for
+IDs absent from both saved entries and `onnada_detail_checks`. Included and
+excluded checks persist with their reasons and dates, and are not periodically
+revisited. Existing latest-100 and pending-reference detail refreshes are removed;
+pending matching still uses the saved catalog. A failed online run keeps the
+previous Release and its check records. The first run with an older Release
+still needs to record previously excluded IDs once. AniList and AniAll retain
+their existing refresh policies. This change limits new-work discovery; it does not periodically
 re-fetch all historical metadata or detect historical deletions during an
 incremental run.

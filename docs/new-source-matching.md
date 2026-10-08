@@ -18,8 +18,14 @@ are retried when another source gains a title, year, type, or target record.
   recent/upcoming works, pending references, and recent ReAnime declarations
   below the watermark. This can fill references previously omitted by the old
   format filter.
-- Onnada checks its full listing, reads new details, and refreshes the latest
-  100 known details plus pending Korean-title bridges and recorded references.
+- Onnada checks its full listing and reads details only for new IDs. Existing
+  entries and IDs in `onnada_detail_checks` are already known, including works
+  excluded as non-Japanese, bonus material, or country-unverified. It does not
+  revisit the latest 100 entries or pending source references. Pending matches
+  still retry against the full stored catalog. Check outcomes, reasons, and
+  dates persist in the same Release transaction, including exclusion-only runs;
+  failed requests are not marked complete. Older releases without check records
+  need one initial pass over excluded IDs before subsequent runs can skip them.
   It does not re-fetch every historical detail each month.
 
 ## Title and identity evidence
