@@ -100,7 +100,7 @@ def _register_sources(item, files, target):
     try:
         with (target / LOCAL_INDEX_CHANGES).open('a', encoding='utf-8') as updates:
             for file in files:
-                updates.write(json.dumps({'path': file.relative_to(target).as_posix()}, ensure_ascii=False) + '\\n')
+                print(json.dumps({'path': file.relative_to(target).as_posix()}, ensure_ascii=False), file=updates)
     except OSError as exc:
         print(f'Warning: local subtitle search index notification failed: {exc}')
 
