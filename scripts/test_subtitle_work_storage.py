@@ -60,6 +60,19 @@ class WorkStorageTests(unittest.TestCase):
             corpus=root/'anissia_subtitles';corpus.mkdir(exist_ok=True);(corpus/'작품 2기').symlink_to(root)
             with self.assertRaises(ValueError):work_directory(self.item(),root)
 
+    def test_new_download_registers_incremental_local_name_index_changes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            item = self.item('anissia')
+            directory = work_directory(item, root)
+            directory.mkdir(parents=True)
+            archive = directory / '새 자막 02.zip'
+            archive.write_bytes(b'local subtitle data')
+            register_sources(item, [archive], root)
+            journal = root / '.local-subtitle-search-updates.jsonl'
+            rows = [json.loads(line) for line in journal.read_text(encoding='utf-8').splitlines()]
+            self.assertEqual(rows, [{'path': 'anissia_subtitles/작품 2기/새 자막 02.zip'}])
+
     def test_concurrent_source_updates_keep_both_files(self):
         from concurrent.futures import ThreadPoolExecutor
         with tempfile.TemporaryDirectory() as tmp:

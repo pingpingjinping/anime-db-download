@@ -8,6 +8,7 @@ import unicodedata
 from pathlib import Path
 
 MANIFEST = '.weekly-subtitle-sources.json'
+LOCAL_INDEX_CHANGES = '.local-subtitle-search-updates.jsonl'
 
 
 def safe_name(value: str, limit: int = 160) -> str:
@@ -92,6 +93,16 @@ def _register_sources(item, files, target):
     temporary = target / f'{MANIFEST}.{os.getpid()}.tmp'
     temporary.write_text(json.dumps(manifest, ensure_ascii=False) + '\n', encoding='utf-8')
     temporary.replace(target / MANIFEST)
+    # The web catalog indexes physical ZIP names. Notify it only after the
+    # source manifest commits, under this same flock. The Pi app replays only
+    # newly appended paths; downloading one subtitle never rescans 50k files.
+    # Indexing is an acceleration, not part of the subtitle write transaction.
+    try:
+        with (target / LOCAL_INDEX_CHANGES).open('a', encoding='utf-8') as updates:
+            for file in files:
+                print(json.dumps({'path': file.relative_to(target).as_posix()}, ensure_ascii=False), file=updates)
+    except OSError as exc:
+        print(f'Warning: local subtitle search index notification failed: {exc}')
 
 
 def preserve_download(temporary, destination):
