@@ -96,9 +96,21 @@ close_erulabo_chromium_after_grace() {
   echo "Erulabo Chromium closed."
 }
 
+refresh_subtitle_name_index() {
+  # File Browser/SSH changes are not recorded by the incremental download
+  # journal, so reconcile the full folder+ZIP name index once per weekly run.
+  # Run even after a partial sync failure; never change the sync's exit status.
+  echo
+  echo "=== [index] Refresh full local subtitle name index ==="
+  if ! (cd "$STREAMING_REPO" && docker compose exec -T anime nice -n 15 node scripts/subtitle-cache/refresh-local-subtitle-index.cjs); then
+    echo "Local subtitle index refresh deferred: update/restart streaming-project anime first." >&2
+  fi
+}
+
 finish_run() {
   local run_status="$?"
   trap - EXIT
+  refresh_subtitle_name_index
   write_dashboard_report "$run_status"
   close_erulabo_chromium_after_grace
   exit "$run_status"
