@@ -1,7 +1,7 @@
 {
   "version": 1,
   "bootstrap_cutoff_kst": "2026-09-25T23:59:59+09:00",
-  "watermark_kst": "2026-10-03T07:38:28+09:00",
+  "watermark_kst": "2026-10-10T07:57:21+09:00",
   "discovered": {
     "aniall": {
       "5571": {
@@ -43,6 +43,41 @@
         "published_at": "2026-10-02T09:18:34+09:00",
         "title": "[ReinForce] 스트라이크 더 블러드 (BDRip 1920x1080 x264 FLAC)_자막",
         "source_url": "https://aniall.tistory.com/5579"
+      },
+      "5597": {
+        "published_at": "2026-10-09T09:20:30+09:00",
+        "title": "[Erai-raws] 리바이어던 - 01 ~ 12 [720p NF WEB-DL AVC EAC3][MultiSub]_자막",
+        "source_url": "https://aniall.tistory.com/5597"
+      },
+      "5595": {
+        "published_at": "2026-10-08T10:03:45+09:00",
+        "title": "[Grupa Mirai] 투장 다이모스 (01-44) [v2] [BD 1470x1080] [PL]_자막",
+        "source_url": "https://aniall.tistory.com/5595"
+      },
+      "5593": {
+        "published_at": "2026-10-07T16:43:33+09:00",
+        "title": "[Moozzi2] 고양이 당인전 테얀데에 BD-BOX [ x265-10Bit Ver. ] - TV + SP_자막",
+        "source_url": "https://aniall.tistory.com/5593"
+      },
+      "5589": {
+        "published_at": "2026-10-06T16:03:38+09:00",
+        "title": "[Moozzi2] 카구야 님은 고백받고 싶어 - TV + SP_자막",
+        "source_url": "https://aniall.tistory.com/5589"
+      },
+      "5587": {
+        "published_at": "2026-10-05T11:52:27+09:00",
+        "title": "[Ohys-Raws] 몬스터 아가씨가 있는 일상 (BD 1280x720 x264 AAC)+_자막",
+        "source_url": "https://aniall.tistory.com/5587"
+      },
+      "5585": {
+        "published_at": "2026-10-04T10:07:13+09:00",
+        "title": "[Moozzi2] 신세기 사이버 포뮬러 [ x265-10Bit Ver. ] - TV + SP_자막",
+        "source_url": "https://aniall.tistory.com/5585"
+      },
+      "5583": {
+        "published_at": "2026-10-03T10:35:19+09:00",
+        "title": "마지막으로 하나만 부탁드려도 될까요 S01 1080p BluRay Remux AVC Dual-Audio FLAC 2_자막",
+        "source_url": "https://aniall.tistory.com/5583"
       }
     },
     "anissia": {
@@ -374,11 +409,396 @@
         "updated_at": "2026-10-02T09:00:00+09:00",
         "source_url": "https://erulabo.com/859",
         "handler": "website"
+      },
+      "50d5531a7cc30cdae23b67531e1040038c1e1301c8aa622ff3df51b7354308e3": {
+        "id": "anissia:50d5531a7cc30cdae23b67531e1040038c1e1301c8aa622ff3df51b7354308e3",
+        "source": "anissia",
+        "anime_no": "3578",
+        "anime_title": "신 테니스의 왕자 U-17 WORLD CUP 결승 멤버 결정전",
+        "episode": "1",
+        "creator": "스모모",
+        "updated_at": "2026-10-07T19:16:00+09:00",
+        "source_url": "https://sumomomo.tistory.com/498",
+        "handler": "tistory"
+      },
+      "f34766539c247b44b33c42ac9068efa3535fad75b0a009d5b632a0e9aec3068e": {
+        "id": "anissia:f34766539c247b44b33c42ac9068efa3535fad75b0a009d5b632a0e9aec3068e",
+        "source": "anissia",
+        "anime_no": "3550",
+        "anime_title": "얼음 성벽 2기",
+        "episode": "16",
+        "creator": "C소라",
+        "updated_at": "2026-10-09T13:21:00+09:00",
+        "source_url": "https://csora556.blogspot.com/2026/10/2.html",
+        "handler": "blogspot"
+      },
+      "d4b6085767ee253d998b63711106cdee2a4baf9a4ba085823c5747b1fa5cd7e9": {
+        "id": "anissia:d4b6085767ee253d998b63711106cdee2a4baf9a4ba085823c5747b1fa5cd7e9",
+        "source": "anissia",
+        "anime_no": "3527",
+        "anime_title": "추방된 치트 부여 마술사는 제멋대로 세컨드 라이프를 구가한다.",
+        "episode": "1",
+        "creator": "에루샤",
+        "updated_at": "2026-10-07T14:45:00+09:00",
+        "source_url": "https://erulabo.com/866",
+        "handler": "website"
+      },
+      "a8389a8245b35cd45b3654d5a483f7e38f24579e7b0bedd5b0f6d5f4b37f323d": {
+        "id": "anissia:a8389a8245b35cd45b3654d5a483f7e38f24579e7b0bedd5b0f6d5f4b37f323d",
+        "source": "anissia",
+        "anime_no": "3514",
+        "anime_title": "버텍스 포스",
+        "episode": "1",
+        "creator": "하느",
+        "updated_at": "2026-10-04T03:01:00+09:00",
+        "source_url": "https://harne1.tistory.com/764",
+        "handler": "tistory"
+      },
+      "de5163d834eaecebcb0f2417dbf7683c184f5b0ddf957a320efb3c32745a6f9a": {
+        "id": "anissia:de5163d834eaecebcb0f2417dbf7683c184f5b0ddf957a320efb3c32745a6f9a",
+        "source": "anissia",
+        "anime_no": "3495",
+        "anime_title": "정반대의 너와 나 2기",
+        "episode": "13",
+        "creator": "스모모",
+        "updated_at": "2026-10-05T01:03:00+09:00",
+        "source_url": "https://sumomomo.tistory.com/495",
+        "handler": "tistory"
+      },
+      "2b70d5ba34c0b13646a2f407415fc872fa59270c7864f9d738485cbd1051280a": {
+        "id": "anissia:2b70d5ba34c0b13646a2f407415fc872fa59270c7864f9d738485cbd1051280a",
+        "source": "anissia",
+        "anime_no": "3495",
+        "anime_title": "정반대의 너와 나 2기",
+        "episode": "25",
+        "creator": "C소라",
+        "updated_at": "2026-10-04T21:37:00+09:00",
+        "source_url": "https://csora556.blogspot.com/2026/07/2.html",
+        "handler": "blogspot"
+      },
+      "34a15abe5358e7f15d5679d530c53663c06635c44c71ff232789d2874c330edb": {
+        "id": "anissia:34a15abe5358e7f15d5679d530c53663c06635c44c71ff232789d2874c330edb",
+        "source": "anissia",
+        "anime_no": "3486",
+        "anime_title": "PSYREN -사이렌-",
+        "episode": "1",
+        "creator": "C소라",
+        "updated_at": "2026-10-06T11:07:00+09:00",
+        "source_url": "https://csora556.blogspot.com/2026/10/psyren.html",
+        "handler": "blogspot"
+      },
+      "acb62ec5945c5dcd4b38bebeb4378b1d1c21a736b97dce66f2abd9086ac46929": {
+        "id": "anissia:acb62ec5945c5dcd4b38bebeb4378b1d1c21a736b97dce66f2abd9086ac46929",
+        "source": "anissia",
+        "anime_no": "3464",
+        "anime_title": "#좀비를 찾습니다",
+        "episode": "1",
+        "creator": "C소라",
+        "updated_at": "2026-10-04T11:26:00+09:00",
+        "source_url": "https://csora556.blogspot.com/2026/10/blog-post.html",
+        "handler": "blogspot"
+      },
+      "7640c8b07769e0718793481ec286168705e06c136e41606402b48fc827a0711a": {
+        "id": "anissia:7640c8b07769e0718793481ec286168705e06c136e41606402b48fc827a0711a",
+        "source": "anissia",
+        "anime_no": "3463",
+        "anime_title": "바람의 저편",
+        "episode": "1",
+        "creator": "isulbi",
+        "updated_at": "2026-10-05T21:39:00+09:00",
+        "source_url": "https://isulbi.tistory.com/42",
+        "handler": "tistory"
+      },
+      "6f0a1bfea27b249f157e9aa087c707d312aa3ee67af8361437fb4d93e9cf3c12": {
+        "id": "anissia:6f0a1bfea27b249f157e9aa087c707d312aa3ee67af8361437fb4d93e9cf3c12",
+        "source": "anissia",
+        "anime_no": "3462",
+        "anime_title": "쌀쌀맞은 사토 양이 나에게만 상냥하다",
+        "episode": "1",
+        "creator": "C소라",
+        "updated_at": "2026-10-07T12:02:00+09:00",
+        "source_url": "https://csora556.blogspot.com/2026/10/blog-post_07.html",
+        "handler": "blogspot"
+      },
+      "549eef9580ef8d5620081a87f6dd6c6b0b7d906b4a13b050e0c26f3b83d3db9e": {
+        "id": "anissia:549eef9580ef8d5620081a87f6dd6c6b0b7d906b4a13b050e0c26f3b83d3db9e",
+        "source": "anissia",
+        "anime_no": "3458",
+        "anime_title": "전생 고블린인데 질문 있어?",
+        "episode": "2",
+        "creator": "에루샤",
+        "updated_at": "2026-10-06T16:55:00+09:00",
+        "source_url": "https://erulabo.com/865",
+        "handler": "website"
+      },
+      "28415d353f79e3d147516bd3753c348262c74c6b0d73c55b35fc9ef49e00c91f": {
+        "id": "anissia:28415d353f79e3d147516bd3753c348262c74c6b0d73c55b35fc9ef49e00c91f",
+        "source": "anissia",
+        "anime_no": "3449",
+        "anime_title": "하늘은 붉은 강가",
+        "episode": "14",
+        "creator": "키리유",
+        "updated_at": "2026-10-08T13:43:00+09:00",
+        "source_url": "https://kiriu.tistory.com/326",
+        "handler": "tistory"
+      },
+      "48bf6c7f65f232e5f10c4680662fcc648d35bab27807712d55655c1ae81ea177": {
+        "id": "anissia:48bf6c7f65f232e5f10c4680662fcc648d35bab27807712d55655c1ae81ea177",
+        "source": "anissia",
+        "anime_no": "3441",
+        "anime_title": "안녕하세요. 반한 사람에게 사랑의 묘약을 의뢰받은 마녀입니다.",
+        "episode": "1",
+        "creator": "fanic",
+        "updated_at": "2026-10-07T00:22:00+09:00",
+        "source_url": "https://han1sub.blogspot.com/2026/10/blog-post.html",
+        "handler": "blogspot"
+      },
+      "fedc25c8fd88f59c0f9a822222ee62193a53efd8d7c568d2dd5b80cb6d399b6f": {
+        "id": "anissia:fedc25c8fd88f59c0f9a822222ee62193a53efd8d7c568d2dd5b80cb6d399b6f",
+        "source": "anissia",
+        "anime_no": "3433",
+        "anime_title": "흉란영애 니아 리스톤 병약한 영애로 전생한 살신 무인의 화려한 무쌍담",
+        "episode": "1",
+        "creator": "별명따위",
+        "updated_at": "2026-10-06T23:36:00+09:00",
+        "source_url": "https://bluewater91.blogspot.com/2026/10/1.html",
+        "handler": "blogspot"
+      },
+      "dcb7f647855f7f83c6414184bf49b93a6dbb6179bacb573a4850966f817a4217": {
+        "id": "anissia:dcb7f647855f7f83c6414184bf49b93a6dbb6179bacb573a4850966f817a4217",
+        "source": "anissia",
+        "anime_no": "3424",
+        "anime_title": "FX 전사 쿠루미",
+        "episode": "2",
+        "creator": "코코렛",
+        "updated_at": "2026-10-09T00:26:00+09:00",
+        "source_url": "https://felia.tistory.com/1191",
+        "handler": "tistory"
+      },
+      "5c2532431e7d2e9058f0f41ac890f989544b80a9804699f689ef787b5ae84be5": {
+        "id": "anissia:5c2532431e7d2e9058f0f41ac890f989544b80a9804699f689ef787b5ae84be5",
+        "source": "anissia",
+        "anime_no": "3417",
+        "anime_title": "반딧불이의 혼례",
+        "episode": "1",
+        "creator": "스모모",
+        "updated_at": "2026-10-10T04:11:00+09:00",
+        "source_url": "https://sumomomo.tistory.com/501",
+        "handler": "tistory"
+      },
+      "f21bafe0ecc99c53ea918e4c361c518247acc5fdd9c2682f0832d81d5ee8a28e": {
+        "id": "anissia:f21bafe0ecc99c53ea918e4c361c518247acc5fdd9c2682f0832d81d5ee8a28e",
+        "source": "anissia",
+        "anime_no": "3398",
+        "anime_title": "외출하는 아기상어 시즌2",
+        "episode": "26",
+        "creator": "isulbi",
+        "updated_at": "2026-10-04T13:53:00+09:00",
+        "source_url": "https://isulbi.tistory.com/21",
+        "handler": "tistory"
+      },
+      "8eba794183a309e7ec1986419453c879d253e227f2b5af6784602ee384803357": {
+        "id": "anissia:8eba794183a309e7ec1986419453c879d253e227f2b5af6784602ee384803357",
+        "source": "anissia",
+        "anime_no": "3396",
+        "anime_title": "마법의 자매 룰루토 릴리",
+        "episode": "13",
+        "creator": "코코렛",
+        "updated_at": "2026-10-05T01:11:00+09:00",
+        "source_url": "https://felia.tistory.com/1188",
+        "handler": "tistory"
+      },
+      "055d283a52102ab3b11207a356fe7e2e74db6722631c09553428a1da10756a4e": {
+        "id": "anissia:055d283a52102ab3b11207a356fe7e2e74db6722631c09553428a1da10756a4e",
+        "source": "anissia",
+        "anime_no": "3384",
+        "anime_title": "우리 남동생들이 죄송합니다",
+        "episode": "13",
+        "creator": "스모모",
+        "updated_at": "2026-10-04T03:33:00+09:00",
+        "source_url": "https://sumomomo.tistory.com/494",
+        "handler": "tistory"
+      },
+      "29e536fbacf8cc0ba521671a3cf73201a481c293dc9aa63516913836e41eeafe": {
+        "id": "anissia:29e536fbacf8cc0ba521671a3cf73201a481c293dc9aa63516913836e41eeafe",
+        "source": "anissia",
+        "anime_no": "3379",
+        "anime_title": "명탐정 프리큐어!",
+        "episode": "36",
+        "creator": "하루하루",
+        "updated_at": "2026-10-04T16:30:00+09:00",
+        "source_url": "https://blog.naver.com/zerocard2/224431161573",
+        "handler": "naver"
+      },
+      "4462c3b342009305c3e5680f3b097b7387dc12f96824572ab5a9b3ce8ec556c6": {
+        "id": "anissia:4462c3b342009305c3e5680f3b097b7387dc12f96824572ab5a9b3ce8ec556c6",
+        "source": "anissia",
+        "anime_no": "3379",
+        "anime_title": "명탐정 프리큐어!",
+        "episode": "36",
+        "creator": "수퍼소닉EX",
+        "updated_at": "2026-10-04T12:05:00+09:00",
+        "source_url": "https://blog.naver.com/gkdlfn0850/224430985762",
+        "handler": "naver"
+      },
+      "0670412a1014f0b321633f688c126d799181915ed64dee1d18371aa446cbef1e": {
+        "id": "anissia:0670412a1014f0b321633f688c126d799181915ed64dee1d18371aa446cbef1e",
+        "source": "anissia",
+        "anime_no": "3370",
+        "anime_title": "빌려준 마력은 【리볼빙】으로 강제징수",
+        "episode": "1",
+        "creator": "kanna",
+        "updated_at": "2026-10-04T04:53:00+09:00",
+        "source_url": "https://kannasub.tistory.com/entry/빌려준-마력은-리볼빙으로-강제징수-1화-자막",
+        "handler": "tistory"
+      },
+      "b70ac3df821c14cbb5df52391e4f90397ac58bf6d7481d78a32b6f86ae4d20a3": {
+        "id": "anissia:b70ac3df821c14cbb5df52391e4f90397ac58bf6d7481d78a32b6f86ae4d20a3",
+        "source": "anissia",
+        "anime_no": "3365",
+        "anime_title": "아저씨는 귀여운 것을 좋아해",
+        "episode": "1",
+        "creator": "스모모",
+        "updated_at": "2026-10-06T02:40:00+09:00",
+        "source_url": "https://sumomomo.tistory.com/496",
+        "handler": "tistory"
+      },
+      "53620dbc79c3c41e33b6abdd8034bb2b75778fae4709a09d1492937209eb0290": {
+        "id": "anissia:53620dbc79c3c41e33b6abdd8034bb2b75778fae4709a09d1492937209eb0290",
+        "source": "anissia",
+        "anime_no": "3356",
+        "anime_title": "약사의 혼잣말 3기",
+        "episode": "2",
+        "creator": "유진",
+        "updated_at": "2026-10-10T05:57:00+09:00",
+        "source_url": "https://yujin05.tistory.com/9",
+        "handler": "tistory"
+      },
+      "a6f110c1561f280b4bf0fdcc7500365619e6e23e26f18267346172dadcfb073a": {
+        "id": "anissia:a6f110c1561f280b4bf0fdcc7500365619e6e23e26f18267346172dadcfb073a",
+        "source": "anissia",
+        "anime_no": "3347",
+        "anime_title": "나약MAX 영애인데 수완가 약혼자와 내기를 하고 말았다",
+        "episode": "1",
+        "creator": "fanic",
+        "updated_at": "2026-10-09T20:43:00+09:00",
+        "source_url": "https://han1sub.blogspot.com/2026/10/max.html",
+        "handler": "blogspot"
+      },
+      "142469c5b8b42d9f972786d77840c4a44a6f6fa8720558de874a6e29f7ab685a": {
+        "id": "anissia:142469c5b8b42d9f972786d77840c4a44a6f6fa8720558de874a6e29f7ab685a",
+        "source": "anissia",
+        "anime_no": "3340",
+        "anime_title": "귀환자의 마법은 특별해야 합니다 2기",
+        "episode": "1",
+        "creator": "fanic",
+        "updated_at": "2026-10-09T14:06:00+09:00",
+        "source_url": "https://han1sub.blogspot.com/2026/10/2.html",
+        "handler": "blogspot"
+      },
+      "793847fe9772a91088d54890fd1489692795aba3f85bfc20c56abda9b4dc2ffd": {
+        "id": "anissia:793847fe9772a91088d54890fd1489692795aba3f85bfc20c56abda9b4dc2ffd",
+        "source": "anissia",
+        "anime_no": "3291",
+        "anime_title": "책벌레의 하극상 영주의 양녀",
+        "episode": "24",
+        "creator": "카이란",
+        "updated_at": "2026-10-04T05:24:00+09:00",
+        "source_url": "https://kairan03.blogspot.com/2026/10/24.html",
+        "handler": "blogspot"
+      },
+      "e5923c2ac89755037775272791681acf7c21f31045fd545ff877b2fc2f594c91": {
+        "id": "anissia:e5923c2ac89755037775272791681acf7c21f31045fd545ff877b2fc2f594c91",
+        "source": "anissia",
+        "anime_no": "3261",
+        "anime_title": "학생회에도 구멍은 있다!",
+        "episode": "1",
+        "creator": "카이란",
+        "updated_at": "2026-10-04T15:19:00+09:00",
+        "source_url": "https://kairan03.blogspot.com/2026/10/1.html",
+        "handler": "blogspot"
+      },
+      "a63d8f92e24192dde92eaadb21664ca9e199e53320d70c6aef346a8acc210250": {
+        "id": "anissia:a63d8f92e24192dde92eaadb21664ca9e199e53320d70c6aef346a8acc210250",
+        "source": "anissia",
+        "anime_no": "3216",
+        "anime_title": "어떤 암부의 소녀공서",
+        "episode": "0",
+        "creator": "얀제로",
+        "updated_at": "2026-10-09T22:59:00+09:00",
+        "source_url": "",
+        "handler": "empty"
+      },
+      "8169d96a4b0bac93aa6e866bca2da970aea3444b92f1cc3e41884bb76de36bce": {
+        "id": "anissia:8169d96a4b0bac93aa6e866bca2da970aea3444b92f1cc3e41884bb76de36bce",
+        "source": "anissia",
+        "anime_no": "3188",
+        "anime_title": "전생 귀족, 감정 스킬로 성공하다 3기",
+        "episode": "2",
+        "creator": "에루샤",
+        "updated_at": "2026-10-05T11:30:00+09:00",
+        "source_url": "https://erulabo.com/863",
+        "handler": "website"
+      },
+      "4c75bb9519032aa188a846af8d05cdfac6522a546bef7cf1200578b6d7ed2b34": {
+        "id": "anissia:4c75bb9519032aa188a846af8d05cdfac6522a546bef7cf1200578b6d7ed2b34",
+        "source": "anissia",
+        "anime_no": "3010",
+        "anime_title": "마법기사 레이어스",
+        "episode": "1",
+        "creator": "하느",
+        "updated_at": "2026-10-07T20:51:00+09:00",
+        "source_url": "https://harne1.tistory.com/765",
+        "handler": "tistory"
+      },
+      "12e94e6fc3ee2e470b1fe5595ee3f7902a04ea9a5d78912bcfbdd87f6d13a6df": {
+        "id": "anissia:12e94e6fc3ee2e470b1fe5595ee3f7902a04ea9a5d78912bcfbdd87f6d13a6df",
+        "source": "anissia",
+        "anime_no": "2791",
+        "anime_title": "매지컬★익스플로러",
+        "episode": "2",
+        "creator": "에루샤",
+        "updated_at": "2026-10-04T12:15:00+09:00",
+        "source_url": "https://erulabo.com/862",
+        "handler": "website"
+      },
+      "247db10b8ad454261eb7c46847cc16d9edbb0e1fd45cf798150951dd68ea2a56": {
+        "id": "anissia:247db10b8ad454261eb7c46847cc16d9edbb0e1fd45cf798150951dd68ea2a56",
+        "source": "anissia",
+        "anime_no": "2665",
+        "anime_title": "마법소녀 육성계획 restart",
+        "episode": "1",
+        "creator": "코코렛",
+        "updated_at": "2026-10-07T21:35:00+09:00",
+        "source_url": "https://felia.tistory.com/1190",
+        "handler": "tistory"
+      },
+      "c01b81ec2f5e54c5112b031382d1916410f96d5ce9f221a20e856b4197d5faef": {
+        "id": "anissia:c01b81ec2f5e54c5112b031382d1916410f96d5ce9f221a20e856b4197d5faef",
+        "source": "anissia",
+        "anime_no": "2624",
+        "anime_title": "전생했더니 검이었습니다 2기",
+        "episode": "2",
+        "creator": "수퍼소닉EX",
+        "updated_at": "2026-10-08T06:34:00+09:00",
+        "source_url": "https://blog.naver.com/gkdlfn0850/224434801130",
+        "handler": "naver"
+      },
+      "e05165844a55c19f02afd4587693319ce83a516998eb450aca7361586b44dbfb": {
+        "id": "anissia:e05165844a55c19f02afd4587693319ce83a516998eb450aca7361586b44dbfb",
+        "source": "anissia",
+        "anime_no": "2457",
+        "anime_title": "탐정은 이미 죽었다 Season2",
+        "episode": "1",
+        "creator": "별명따위",
+        "updated_at": "2026-10-07T23:56:00+09:00",
+        "source_url": "https://bluewater91.blogspot.com/2026/10/season2-1.html",
+        "handler": "blogspot"
       }
     }
   },
   "retry": {
     "anissia_api": {}
   },
-  "last_run_at_utc": "2026-10-02T22:51:52+00:00"
+  "last_run_at_utc": "2026-10-09T22:58:53+00:00"
 }
