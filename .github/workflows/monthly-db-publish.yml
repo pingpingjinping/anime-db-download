@@ -45,7 +45,18 @@ jobs:
             echo "::error::The monthly 03:00 candidate is missing. Keep the old release and rerun 03:00 refresh." >&2
             exit 1
           fi
-          conclusion="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id" --jq '.conclusion')"
+          run_info="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id")"
+          conclusion="$(jq -r '.conclusion // ""' <<< "$run_info")"
+          head_branch="$(jq -r '.head_branch // ""' <<< "$run_info")"
+          workflow_file="$(jq -r '.path // ""' <<< "$run_info")"
+          if [[ "$head_branch" != "main" ]]; then
+            echo "::error::Only a successful main-branch 03:00 run can publish the release." >&2
+            exit 1
+          fi
+          if [[ "$workflow_file" != ".github/workflows/monthly-db.yml" && "$workflow_file" != *"/.github/workflows/monthly-db.yml" ]]; then
+            echo "::error::The candidate was not staged by the approved monthly refresh workflow." >&2
+            exit 1
+          fi
           if [[ "$conclusion" != "success" ]]; then
             echo "::error::03:00 refresh run $run_id has not completed successfully ($conclusion)." >&2
             exit 1
