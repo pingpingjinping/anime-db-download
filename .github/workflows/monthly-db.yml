@@ -36,9 +36,9 @@ jobs:
         run: python3 -m pip install requests beautifulsoup4
       - name: Run updater and reviewed-overlay unit tests
         run: |
-          cd scripts
-          python3 -m unittest -v test_update_db.py test_match_new_sources.py \
-            test_reviewed_subtitle_runtime.py test_apply_pi_reviewed_groups.py
+          PYTHONPATH="$GITHUB_WORKSPACE:$GITHUB_WORKSPACE/scripts" python3 -m unittest -v \
+            scripts.test_update_db scripts.test_match_new_sources \
+            scripts.test_reviewed_subtitle_runtime scripts.test_apply_pi_reviewed_groups
       - name: Download published catalog and Pi's 04:00 monthly review
         env:
           GH_TOKEN: ${{ github.token }}
