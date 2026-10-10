@@ -1,0 +1,94 @@
+name: Cloudflare anime search D1 sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Dry-run validates the export without touching Cloudflare"
+        required: true
+        default: dry-run
+        type: choice
+        options:
+          - dry-run
+          - publish
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-anime-search-d1
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test search exporter
+        run: python3 -m unittest discover -s scripts -p 'test_export_cloudflare_search_sql.py' -v
+      - name: Download reviewed Release assets (no subtitles or private user data)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cloudflare-search"
+          gh release download db-v1 --repo "$GITHUB_REPOSITORY" \
+            --pattern 'anime_four_sources_multilingual_prepared.zip' \
+            --pattern 'anime_reviewed_subtitle_registry_v1.zip' \
+            --dir "$RUNNER_TEMP/cloudflare-search" --clobber
+          test -s "$RUNNER_TEMP/cloudflare-search/anime_four_sources_multilingual_prepared.zip"
+          test -s "$RUNNER_TEMP/cloudflare-search/anime_reviewed_subtitle_registry_v1.zip"
+      - name: Extract and validate SQLite assets
+        run: |
+          set -euo pipefail
+          python3 scripts/extract_cloudflare_search_releases.py \
+            "$RUNNER_TEMP/cloudflare-search/anime_four_sources_multilingual_prepared.zip" \
+            "$RUNNER_TEMP/cloudflare-search/catalog.db"
+          python3 scripts/extract_cloudflare_search_releases.py \
+            "$RUNNER_TEMP/cloudflare-search/anime_reviewed_subtitle_registry_v1.zip" \
+            "$RUNNER_TEMP/cloudflare-search/registry.db"
+      - name: Build conservative search projection
+        run: |
+          set -euo pipefail
+          python3 scripts/export_cloudflare_search_sql.py \
+            --catalog "$RUNNER_TEMP/cloudflare-search/catalog.db" \
+            --registry "$RUNNER_TEMP/cloudflare-search/registry.db" \
+            --output "$RUNNER_TEMP/cloudflare-search/import.sql" \
+            --manifest "$RUNNER_TEMP/cloudflare-search/manifest.json" \
+            --max-rows 35000
+      - name: Import reviewed search metadata into Cloudflare D1
+        if: inputs.mode == 'publish'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_D1_DATABASE_ID: ${{ vars.CLOUDFLARE_D1_DATABASE_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ] || [ -z "$CLOUDFLARE_D1_DATABASE_ID" ]; then
+            echo 'Missing Cloudflare D1 credentials; configure repository Actions Secrets and Variables.' >&2
+            exit 1
+          fi
+          cat > "$RUNNER_TEMP/cloudflare-search/wrangler.toml" <<'TOML'
+          name = "anime-search-d1-sync"
+          compatibility_date = "2026-10-01"
+          [[d1_databases]]
+          binding = "DB"
+          database_name = "anime-search-db"
+          database_id = "__DATABASE_ID__"
+          TOML
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          file = Path(os.environ['RUNNER_TEMP']) / 'cloudflare-search/wrangler.toml'
+          file.write_text(file.read_text().replace('__DATABASE_ID__',os.environ['CLOUDFLARE_D1_DATABASE_ID']), encoding='utf-8')
+          PY
+          npx --yes wrangler@4 d1 execute anime-search-db \
+            --config "$RUNNER_TEMP/cloudflare-search/wrangler.toml" \
+            --remote --yes --file "$RUNNER_TEMP/cloudflare-search/import.sql"
+          npx --yes wrangler@4 d1 execute anime-search-db \
+            --config "$RUNNER_TEMP/cloudflare-search/wrangler.toml" \
+            --remote --yes --command 'SELECT COUNT(*) AS works FROM works; SELECT COUNT(*) AS aliases FROM work_aliases;'
