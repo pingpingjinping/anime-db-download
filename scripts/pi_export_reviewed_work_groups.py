@@ -83,68 +83,145 @@ def export_rows(streaming_repo):
     return rows
 
 
+def candidate_name(month):
+    return "anime_four_sources_multilingual_prepared_pi_reviewed_" + month + ".zip"
+
+
+def fetch_canonical_catalog(streaming_repo, token):
+    """Use the existing Pi Release downloader and verify the GitHub digest."""
+    import importlib.util
+    script = streaming_repo / "scripts" / "update-anime-db-release.py"
+    if not script.is_file():
+        raise RuntimeError("Cannot locate streaming-project GitHub Release updater")
+    spec=importlib.util.spec_from_file_location("pi_review_release_read",script)
+    updater=importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(updater)
+    release=updater.api_json(updater.RELEASE_API, token)
+    asset=updater.release_asset(release, updater.CATALOG_ASSET_NAME)
+    payload=updater.download_asset(asset["url"], token)
+    expected=updater.metadata_digest(asset)
+    actual=hashlib.sha256(payload).hexdigest()
+    if expected and expected != actual:
+        raise RuntimeError("Canonical db-v1 catalog SHA-256 verification failed")
+    return payload
+
+
 def stage_path(month, directory):
     return pathlib.Path(directory) / ("pi-reviewed-work-groups-" + month + ".json")
 
 
 def prepare_snapshot(streaming_repo, month, directory, *, dry_run=False):
-    """Freeze a sanitized verified snapshot for the independent 04:00 publish."""
+    """At 03:00, merge reviewed Pi IDs into a validated SQLite release candidate."""
+    from apply_pi_reviewed_groups import patch_archive
     manifest = build_manifest(export_rows(streaming_repo), month)
     if dry_run:
         print("Validated", manifest["count"], "Pi reviewed groups for", month,
-              "(no stage or upload)")
+              "(no stage/download/upload)")
         return manifest
-    import stat
+
+    read_token=os.environ.get("ANIME_DB_GITHUB_TOKEN","").strip()
+    if not read_token:
+        raise RuntimeError("ANIME_DB_GITHUB_TOKEN is required to fetch the existing catalog")
+
     directory = pathlib.Path(directory)
     directory.mkdir(parents=True, exist_ok=True, mode=0o700)
     os.chmod(directory, 0o700)
-    target = stage_path(month, directory)
-    manifest["prepared_at_kst"] = dt.datetime.now(
-        dt.timezone(dt.timedelta(hours=9))).isoformat()
-    payload = (json.dumps(manifest, ensure_ascii=False, sort_keys=True,
-                          separators=(",", ":")) + "\n").encode("utf-8")
-    if target.exists():
-        # Prevent an edit after a snapshot has already been prepared/uploaded.
-        if target.read_bytes() != payload:
-            # Prepared time naturally differs; permit byte-identical reviewed
-            # groups only, leaving the original preparation timestamp intact.
-            earlier = json.loads(target.read_text(encoding="utf-8"))
-            earlier.pop("prepared_at_kst", None)
-            manifest2 = dict(manifest)
-            manifest2.pop("prepared_at_kst", None)
-            if earlier != manifest2:
-                raise RuntimeError("This month's prepared Pi review has changed; inspect before republishing")
-        print("Existing verified monthly Pi review stage:", target)
-        return manifest
-    fd, tmp = tempfile.mkstemp(prefix=".pi-reviewed-", suffix=".json", dir=directory)
+    target_json = stage_path(month, directory)
+    target_db = directory / candidate_name(month)
+    if target_json.exists() or target_db.exists():
+        if not target_json.is_file() or not target_db.is_file():
+            raise RuntimeError("Incomplete 03:00 Pi DB stage; do not upload")
+        previous=json.loads(target_json.read_text(encoding="utf-8"))
+        from apply_pi_reviewed_groups import checked_manifest
+        checked_manifest(previous, month)
+        if previous.get("groups") != manifest["groups"]:
+            raise RuntimeError("Confirmed reviewed work IDs differ from the frozen 03:00 DB")
+        if hashlib.sha256(target_db.read_bytes()).hexdigest()!=previous.get("candidate_sha256"):
+            raise RuntimeError("Frozen Pi reviewed DB candidate checksum changed")
+        print("Previously prepared Pi reviewed DB:", target_db)
+        return previous
+
+    from apply_pi_reviewed_groups import checked_manifest
+    checked_manifest(manifest,month)
+    existing=fetch_canonical_catalog(streaming_repo,read_token)
+    base_sha=hashlib.sha256(existing).hexdigest()
+    fd, tmp_db = tempfile.mkstemp(prefix=".candidate-",suffix=".zip",dir=directory)
+    os.close(fd)
+    fd, tmp_json = tempfile.mkstemp(prefix=".review-",suffix=".json",dir=directory)
+    os.close(fd)
     try:
-        with os.fdopen(fd, "wb") as output:
-            output.write(payload)
-            output.flush()
-            os.fsync(output.fileno())
-        os.chmod(tmp, stat.S_IRUSR | stat.S_IWUSR)
-        os.replace(tmp, target)
+        pathlib.Path(tmp_db).write_bytes(existing)
+        # Use a provisional manifest to validate each source ID against actual
+        # release SQLite rows before copying the finalized DB to the stage.
+        pathlib.Path(tmp_json).write_text(json.dumps(manifest,ensure_ascii=False),
+                                           encoding="utf-8")
+        patch_archive(tmp_db, tmp_json, month)
+        manifest["base_release_sha256"]=base_sha
+        manifest["candidate_sha256"]=hashlib.sha256(pathlib.Path(tmp_db).read_bytes()).hexdigest()
+        manifest["prepared_at_kst"]=dt.datetime.now(
+            dt.timezone(dt.timedelta(hours=9))).isoformat()
+        pathlib.Path(tmp_json).write_text(
+            json.dumps(manifest,ensure_ascii=False,sort_keys=True,separators=(",",":"))+"\n",
+            encoding="utf-8")
+        os.chmod(tmp_db,0o600)
+        os.chmod(tmp_json,0o600)
+        os.replace(tmp_db,target_db)
+        os.replace(tmp_json,target_json)
     finally:
-        if os.path.exists(tmp):
-            os.unlink(tmp)
-    print("Prepared", manifest["count"], "groups for month", month, "at", target)
+        for file in (tmp_db,tmp_json):
+            if os.path.exists(file): os.unlink(file)
+    print("Prepared",manifest["count"],"verified groups in Pi SQLite DB candidate:",target_db)
     return manifest
 
 
 def load_prepared_snapshot(month, directory, today):
-    """Only a fresh, first-KST-day frozen snapshot may be published."""
-    target = stage_path(month, directory)
-    if not target.is_file():
-        raise RuntimeError("03:00 Pi reviewed snapshot is missing: " + str(target))
-    manifest = json.loads(target.read_text(encoding="utf-8"))
+    """Verify that 04:00 only uploads 03:00's completed, unchanged DB."""
+    target=stage_path(month,directory)
+    candidate=pathlib.Path(directory)/candidate_name(month)
+    if not target.is_file() or not candidate.is_file():
+        raise RuntimeError("03:00 Pi reviewed DB candidate or manifest is missing")
+    manifest=json.loads(target.read_text(encoding="utf-8"))
     from apply_pi_reviewed_groups import checked_manifest
-    checked_manifest(manifest, month)
-    prepared = dt.datetime.fromisoformat(manifest.get("prepared_at_kst", ""))
-    kst = dt.timezone(dt.timedelta(hours=9))
-    prepared = prepared.astimezone(kst)
-    if prepared.date() != today.date() or today.day != 1:
-        raise RuntimeError("Prepared Pi review must come from this month's first KST day")
+    checked_manifest(manifest,month)
+    if today.day!=1:
+        raise RuntimeError("Reviewed DB upload is only permitted on the first KST day")
+    prepared=dt.datetime.fromisoformat(manifest.get("prepared_at_kst",""))
+    prepared=prepared.astimezone(dt.timezone(dt.timedelta(hours=9)))
+    if prepared.date()!=today.date():
+        raise RuntimeError("The prepared Pi reviewed DB belongs to another day")
+    if hashlib.sha256(candidate.read_bytes()).hexdigest()!=manifest.get("candidate_sha256"):
+        raise RuntimeError("Pi 03:00 reviewed DB candidate has been modified")
     return manifest
+
+
+def upload_candidate(manifest, directory, token):
+    """Publish an immutable prepared *candidate*, never replace canonical db-v1 at 04:00."""
+    name=candidate_name(manifest["month"])
+    path=pathlib.Path(directory)/name
+    payload=path.read_bytes()
+    if hashlib.sha256(payload).hexdigest()!=manifest.get("candidate_sha256"):
+        raise RuntimeError("Candidate SHA-256 changed before upload")
+    release=api("/releases/tags/db-v1",token)
+    previous=[asset for asset in release.get("assets",[]) if asset.get("name")==name]
+    if previous:
+        if len(previous)==1 and previous[0].get("digest")=="sha256:"+manifest["candidate_sha256"]:
+            print("Identical Pi-reviewed DB already uploaded:",name)
+            return
+        raise RuntimeError("Conflicting current-month candidate already exists; manual reconciliation required")
+    url="https://uploads.github.com/repos/"+REPO+"/releases/"+str(release["id"])+"/assets?"
+    url+=urllib.parse.urlencode({"name":name})
+    req=urllib.request.Request(url,data=payload,method="POST",headers={
+        "Authorization":"Bearer "+token,
+        "Accept":"application/vnd.github+json",
+        "X-GitHub-Api-Version":"2022-11-28",
+        "Content-Type":"application/zip",
+        "User-Agent":"anime-db-reviewed-pi/1.0",
+    })
+    with urllib.request.urlopen(req,timeout=180) as response:
+        uploaded=json.load(response)
+    if uploaded.get("name")!=name:
+        raise RuntimeError("Unexpected uploaded Pi reviewed DB candidate")
+    print("Uploaded staged Pi-reviewed DB ZIP:",name)
 
 
 def api(path, token):
@@ -213,6 +290,13 @@ def main():
         token = os.environ.get("ANIME_DB_GITHUB_UPLOAD_TOKEN", "").strip()
         if not token:
             raise SystemExit("ANIME_DB_GITHUB_UPLOAD_TOKEN with contents:write is required")
+        read_token=os.environ.get("ANIME_DB_GITHUB_TOKEN","").strip()
+        if not read_token:
+            raise SystemExit("ANIME_DB_GITHUB_TOKEN is required to recheck the base release")
+        current=fetch_canonical_catalog(args.streaming_repo,read_token)
+        if hashlib.sha256(current).hexdigest()!=manifest.get("base_release_sha256"):
+            raise SystemExit("GitHub canonical release changed since 03:00; refusing stale Pi DB upload")
+        upload_candidate(manifest, args.stage_dir, token)
         upload(manifest, token)
     else:
         prepare_snapshot(args.streaming_repo, month, args.stage_dir,
