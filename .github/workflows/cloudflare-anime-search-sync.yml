@@ -1,6 +1,16 @@
 name: Cloudflare anime search D1 sync
 
 on:
+  # Runs after the downstream writer of the final reviewed db-v1 catalog.
+  # Monthly anime DB refresh -> Anikoto reviewed catalog matching -> D1.
+  workflow_run:
+    workflows: ["Anikoto reviewed catalog matching"]
+    types: [completed]
+    branches: [main]
+  # Reconciliation in case the downstream workflow was skipped or failed.
+  # 2nd of every month at 11:30 KST (02:30 UTC).
+  schedule:
+    - cron: '30 2 2 * *'
   workflow_dispatch:
     inputs:
       mode:
@@ -21,6 +31,7 @@ concurrency:
 
 jobs:
   sync:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -61,11 +72,12 @@ jobs:
             --manifest "$RUNNER_TEMP/cloudflare-search/manifest.json" \
             --max-rows 35000
       - uses: actions/setup-node@v4
-        if: inputs.mode == 'publish'
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'publish' }}
         with:
           node-version: '22'
       - name: Import reviewed search metadata into Cloudflare D1
-        if: inputs.mode == 'publish'
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.mode == 'publish' }}
+        id: publish
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -90,9 +102,51 @@ jobs:
           file = Path(os.environ['RUNNER_TEMP']) / 'cloudflare-search/wrangler.toml'
           file.write_text(file.read_text().replace('__DATABASE_ID__',os.environ['CLOUDFLARE_D1_DATABASE_ID']), encoding='utf-8')
           PY
+          # Metadata is separate from public search tables and survives index replacements.
+          npx --yes wrangler@4 d1 execute anime-search-db \
+            --config "$RUNNER_TEMP/cloudflare-search/wrangler.toml" \
+            --remote --yes --command \
+            "CREATE TABLE IF NOT EXISTS anime_search_sync_metadata (key TEXT PRIMARY KEY, sql_sha256 TEXT NOT NULL, works INTEGER NOT NULL, aliases INTEGER NOT NULL, updated_at TEXT NOT NULL);"
+
+          # Avoid a full DELETE/re-INSERT of ~19k index rows when the same verified
+          # search projection is already deployed. Count checks catch truncated DBs.
+          npx --yes wrangler@4 d1 execute anime-search-db \
+            --config "$RUNNER_TEMP/cloudflare-search/wrangler.toml" \
+            --remote --json --command \
+            "SELECT sql_sha256, works, aliases, (SELECT COUNT(*) FROM works) AS actual_works, (SELECT COUNT(*) FROM work_aliases) AS actual_aliases FROM anime_search_sync_metadata WHERE key='db-v1';" \
+            > "$RUNNER_TEMP/cloudflare-search/sync-state.json"
+          python3 scripts/cloudflare_sync_guard.py check \
+            --manifest "$RUNNER_TEMP/cloudflare-search/manifest.json" \
+            --wrangler-json "$RUNNER_TEMP/cloudflare-search/sync-state.json" \
+            --github-output "$GITHUB_OUTPUT"
+          if grep -qx 'skip=true' "$GITHUB_OUTPUT"; then
+            echo "Cloudflare D1 already contains the identical verified search index; skipping."
+            echo "### Cloudflare D1 sync: unchanged index (no import)" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
           npx --yes wrangler@4 d1 execute anime-search-db \
             --config "$RUNNER_TEMP/cloudflare-search/wrangler.toml" \
             --remote --yes --file "$RUNNER_TEMP/cloudflare-search/import.sql"
           npx --yes wrangler@4 d1 execute anime-search-db \
             --config "$RUNNER_TEMP/cloudflare-search/wrangler.toml" \
-            --remote --yes --command 'SELECT COUNT(*) AS works FROM works; SELECT COUNT(*) AS aliases FROM work_aliases;'
+            --remote --json --command \
+            'SELECT COUNT(*) AS works FROM works; SELECT COUNT(*) AS aliases FROM work_aliases;' \
+            > "$RUNNER_TEMP/cloudflare-search/counts.json"
+          python3 scripts/cloudflare_sync_guard.py verify \
+            --manifest "$RUNNER_TEMP/cloudflare-search/manifest.json" \
+            --wrangler-json "$RUNNER_TEMP/cloudflare-search/counts.json"
+
+          # Advance sync state only after the remote tables passed verification.
+          read -r digest works aliases < <(python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          data = json.loads((Path(os.environ["RUNNER_TEMP"]) / "cloudflare-search/manifest.json").read_text())
+          print(data["sql_sha256"], int(data["works"]), int(data["aliases"]))
+          PY
+          )
+          npx --yes wrangler@4 d1 execute anime-search-db \
+            --config "$RUNNER_TEMP/cloudflare-search/wrangler.toml" \
+            --remote --yes --command \
+            "INSERT INTO anime_search_sync_metadata (key,sql_sha256,works,aliases,updated_at) VALUES ('db-v1','$digest',$works,$aliases,strftime('%Y-%m-%dT%H:%M:%SZ','now')) ON CONFLICT(key) DO UPDATE SET sql_sha256=excluded.sql_sha256, works=excluded.works, aliases=excluded.aliases, updated_at=excluded.updated_at;"
+          echo "### Cloudflare D1 sync: published ${works} works and ${aliases} aliases" >> "$GITHUB_STEP_SUMMARY"
