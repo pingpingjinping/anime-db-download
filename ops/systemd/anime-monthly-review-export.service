@@ -1,5 +1,5 @@
 [Unit]
-Description=Export verified Pi cross-source subtitle work IDs (no private paths) for month-end GitHub DB release
+Description=Stage sanitized Pi PostgreSQL work ID snapshot for monthly GitHub publication
 Wants=network-online.target
 After=network-online.target docker.service
 
@@ -10,4 +10,4 @@ Group=pi
 WorkingDirectory=/home/pi/anime-db-download
 EnvironmentFile=/home/pi/.config/streaming-project/anime-db.env
 UMask=0077
-ExecStart=/usr/bin/python3 /home/pi/anime-db-download/scripts/pi_export_reviewed_work_groups.py
+ExecStart=/usr/bin/python3 /home/pi/anime-db-download/scripts/pi_export_reviewed_work_groups.py --prepare
