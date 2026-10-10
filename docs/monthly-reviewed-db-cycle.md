@@ -5,9 +5,9 @@
 
 | 한국시간 | 실행 위치 | 동작 |
 |---|---|---|
-| 매월 1일 03:00 | Pi systemd | PostgreSQL에서 관리자 확정 작품 연결 조회/검증, 안전한 로컬 JSON 스냅샷 생성 |
-| 매월 1일 04:00 | Pi systemd | 03:00 스냅샷 파일만 GitHub Release에 업로드 |
-| 매월 1일 10:17 | GitHub Actions | 업로드한 작품 ID를 db-v1 SQLite에 먼저 병합, 신규 DB 수집, 최종 릴리즈 게시 |
+| 매월 1일 03:00 | Pi systemd | 확정 DB 연결 조회·검수 → 기존 릴리즈 SQLite에 직접 병합 → 검증된 DB 후보 ZIP을 Pi에 보관 |
+| 매월 1일 04:00 | Pi systemd | 03:00 완성본 DB 후보 ZIP과 검수 manifest를 GitHub Release에 업로드 |
+| 매월 1일 10:17 | GitHub Actions | Pi가 반영한 DB ZIP을 기반으로 신규 DB 수집·병합, 최종 릴리즈 게시 |
 | 매월 2일 02:00 | Pi systemd | 해당 월 성공 마커와 GitHub 파일 SHA-256 검사 후 최신 DB 적용 |
 
 ## 안전장치
@@ -16,11 +16,13 @@
   저장한다. Pi 디렉터리, ZIP 파일명, 자막 내용 및 사용자 정보는 업로드하지 않는다.
 - 관리자가 수동으로 저장한 Pi 작품↔자막 연결은 저장 즉시 사용 가능하다.
   월간 게시를 기다리지 않는다.
-- 03:00 Pi DB 조회나 검증이 실패하면 04:00 업로드는 실패한다. 04:00은
-  PostgreSQL 재조회 대신 준비된 그 달 파일을 사용한다.
-- 04:00 Pi 업로드가 실패/누락되면 10:17 GitHub Action은 릴리즈를
-  덮어쓰지 않는다. 확정 검수 ID의 충돌·시즌 혼동도 검증에서 중단한다.
-- GitHub Action은 기존 릴리즈의 SHA-256 변경 여부를 확인하고
+- 03:00 Pi DB 조회·SQLite 병합·무결성 검증이 실패하면 04:00 업로드는 실패한다.
+  04:00은 PostgreSQL을 다시 읽지 않고 준비된 그 달 DB 후보 ZIP을 사용한다.
+- 04:00 Pi DB 후보 ZIP 또는 검수 manifest 업로드가 실패/누락되면
+  10:17 GitHub Action은 릴리즈를 덮어쓰지 않는다. 확정 검수 ID의
+  충돌·시즌 혼동도 검증에서 중단한다.
+- 04시에는 기존 정식 릴리즈를 덮어쓰지 않고 후보 ZIP만 올린다.
+  GitHub 오전 Action은 기존 릴리즈의 SHA-256 변경 여부를 확인하고
   백업 ZIP을 올린 다음 최종 ZIP을 게시한다. 새 릴리즈 게시 확인 후
   `monthly-db-refresh-YYYY-MM.json` 성공 마커를 업로드한다.
 - 2일 Pi 동기화는 성공 마커와 실제 GitHub 릴리즈 SHA-256이 맞을 때만
