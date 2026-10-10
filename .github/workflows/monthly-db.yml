@@ -74,6 +74,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          cp "$RUNNER_TEMP/anime_four_sources_multilingual_prepared.zip" \
+            "$RUNNER_TEMP/anime_four_sources_multilingual_prepared_backup.zip"
           before="$(sha256sum "$RUNNER_TEMP/anime.db.gz" | cut -d ' ' -f 1)"
           python3 scripts/update_db.py --snapshot "$RUNNER_TEMP/anime.db.gz" --online
           after="$(sha256sum "$RUNNER_TEMP/anime.db.gz" | cut -d ' ' -f 1)"
@@ -94,6 +96,7 @@ jobs:
           with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
               zf.write(raw_db, arcname=entry)
           PY
+            gh release upload db-v1 "$RUNNER_TEMP/anime_four_sources_multilingual_prepared_backup.zip" --repo "$GITHUB_REPOSITORY" --clobber
             gh release upload db-v1 "$RUNNER_TEMP/anime_four_sources_multilingual_prepared.zip" --repo "$GITHUB_REPOSITORY" --clobber
 
             legacy_asset_id="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/db-v1" \
