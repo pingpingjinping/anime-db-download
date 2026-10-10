@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from export_cloudflare_search_sql import build, emit_sql, normalized_title
+from export_cloudflare_search_sql import build, emit_sql, normalized_title, reviewed_artwork
 
 
 class CloudflareSearchExportTests(unittest.TestCase):
@@ -66,6 +66,47 @@ class CloudflareSearchExportTests(unittest.TestCase):
             self.assertEqual(d1.execute('SELECT COUNT(*) FROM works').fetchone()[0],len(works))
             self.assertEqual(d1.execute('SELECT COUNT(*) FROM work_aliases').fetchone()[0],len(aliases))
             d1.close()
+
+    def test_cloudflare_uses_only_reviewed_artwork_by_exact_id_priority(self):
+        self.cat.execute("""CREATE TABLE pi_search_poster_cache(
+            work_id TEXT PRIMARY KEY,poster TEXT,source TEXT)""")
+        self.cat.execute("INSERT INTO pi_search_poster_cache VALUES (?,?,?)",
+                         ("db_Onnada_10","https://cdn.example/ani-list.jpg","AniList"))
+        self.cat.execute("INSERT INTO pi_search_poster_cache VALUES (?,?,?)",
+                         ("re_slug1","https://cdn.example/reanime.jpg","ReAnime"))
+        self.cat.execute("INSERT INTO pi_search_poster_cache VALUES (?,?,?)",
+                         ("db_Onnada_11","https://cdn.example/another-season.jpg","AniList"))
+        self.cat.execute("""CREATE TABLE pi_reviewed_work_groups(
+            members_json TEXT)""")
+        self.cat.execute("INSERT INTO pi_reviewed_work_groups VALUES(?)",
+                         (json.dumps(["db_Onnada_10","re_slug1"]),))
+        self.reg.executemany('INSERT INTO subtitle_runtime_files_export VALUES (?,?,?,?,?,?)',[
+            ('1','naver','Onnada','10','같은 제목',1),
+            ('2','naver','Onnada','11','같은 제목',1),
+            ('3','naver','ReAnime','slug1','R-15',1),
+        ])
+        works,_,_,_=build(self.cat,self.reg)
+        by_id={row[0]:row for row in works}
+        self.assertEqual(by_id["db_Onnada_10"][-1],"https://cdn.example/reanime.jpg")
+        self.assertEqual(by_id["db_Onnada_11"][-1],"https://cdn.example/another-season.jpg")
+        with tempfile.TemporaryDirectory() as temp:
+            sqlfile=Path(temp)/"import.sql"
+            emit_sql(works,[],sqlfile)
+            text=sqlfile.read_text(encoding="utf-8")
+            self.assertIn("https://cdn.example/reanime.jpg",text)
+            self.assertNotIn("http://cdn.example/reanime.jpg",text)
+
+    def test_reject_unsafe_urls_and_do_not_merge_identical_titles(self):
+        self.cat.execute("CREATE TABLE pi_search_poster_cache(work_id TEXT,poster TEXT,source TEXT)")
+        self.cat.executemany("INSERT INTO pi_search_poster_cache VALUES(?,?,?)",[
+            ("db_Onnada_10","javascript:alert(1)","AniList"),
+            ("db_Onnada_11","https://img.example/other.jpg","AniList"),
+        ])
+        entries={(r["source"],r["source_record_id"]):dict(r)
+                 for r in self.cat.execute("SELECT * FROM entries")}
+        posters=reviewed_artwork(self.cat,entries)
+        self.assertNotIn("db_Onnada_10",posters)
+        self.assertEqual(posters["db_Onnada_11"],"https://img.example/other.jpg")
 
     def test_v6_packaged_tables_when_runtime_view_absent(self):
         self.reg.execute('DROP TABLE subtitle_runtime_files_export')
