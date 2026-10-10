@@ -34,6 +34,9 @@ publish는 D1 works/work_aliases 테이블을 교체하므로 테스트 작품 t
 - 제목 유사성만으로 작품을 결합하지 않는다. 시즌, 리메이크, OVA는 다른 ID라면 별도 카드로 유지한다.
 - 누적 자막 파일 본체, 영상, 개인 정보, 미확정 후보는 전송하지 않는다. 공개 검색용 작품 ID/제목/별칭/연도/확정 자막 수/상세 링크만 업로드한다.
 - Pi에만 존재하는 로컬 수동 매칭 및 주간 새 AniAll 후보는 현재 범위 밖이다.
+- 썸네일은 작품 본문/자막 파일이 아니라 **HTTPS 이미지 URL**만 저장한다. Pi DB 검색은 ReAnime → 정확한 AniList ID → 검수된 Anikoto 순으로 빈 포스터를 지연 보완하고, Pi PostgreSQL `anime_search_poster_cache`에 출처와 URL을 저장한다.
+- **매월 1일 Pi 03:00 DB 후보 생성** 단계에서 위 포스터 캐시를 경로/계정 정보 없이 SQLite `pi_search_poster_cache`로 병합한다. 04:00 Pi 업로드, 10:17 GitHub 월간 DB 갱신, 후속 Cloudflare D1 인덱스 동기화에 반영한다.
+- Cloudflare 검색 SQL은 작품에 확인된 ID 연결로만 ReAnime → AniList → Anikoto 포스터를 골라 넣는다. **같은 제목의 1기/2기를 서로 연관시키지 않는다.** 한 번도 Pi에서 이미지가 조회되지 않았거나 기존 Release에 이미지 정보가 없는 작품은 첫 검색 시 이미지가 비어 있을 수 있으며 Pi가 점진적으로 캐시한다.
 - 무료 D1 행 쓰기 제한을 고려해 이번 1차는 작품+별칭 35,000행 초과 시 차단한다. 삭제/인덱스 쓰기가 추가되므로 실제 계측 후 상한을 조정한다.
 - 현재 Worker의 instr(alias_norm, q) 검색은 인덱스로 최적화된 부분문자열 검색이 아니다. 실사용 속도/읽기 과금을 확인한 뒤 FTS 등 검색 개선이 별도로 필요하다.
 - 월간 자동 연동은 **Anikoto reviewed catalog matching**이 성공한 이후의 GitHub Actions `workflow_run`으로 시작한다. 해당 작업은 매월 1일의 `Monthly anime DB refresh` 다음에 실행되고 같은 `db-v1` 릴리즈의 최종 카탈로그를 갱신한다.
