@@ -1,0 +1,153 @@
+name: Monthly anime DB release publish (04:00 KST)
+
+on:
+  schedule:
+    # First day of each month at 04:00 KST = previous UTC day at 19:00.
+    - cron: '0 19 28-31 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: anime-db-refresh
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check first-day KST schedule
+        id: calendar
+        run: |
+          python3 - <<'PY'
+          import datetime,os
+          from zoneinfo import ZoneInfo
+          now=datetime.datetime.now(ZoneInfo("Asia/Seoul"))
+          eligible=now.day==1 or os.environ.get("GITHUB_EVENT_NAME")=="workflow_dispatch"
+          with open(os.environ["GITHUB_OUTPUT"],"a") as f:
+              f.write("run="+str(eligible).lower()+"\n")
+              f.write("month="+now.strftime("%Y-%m")+"\n")
+          PY
+      - name: Locate completed 03:00 KST catalog candidate
+        if: steps.calendar.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MONTH: ${{ steps.calendar.outputs.month }}
+        run: |
+          set -euo pipefail
+          name="monthly-db-candidate-$MONTH"
+          run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=$name&per_page=100" \
+            --jq '[.artifacts[] | select(.expired == false) | select(.name == "'"$name"'")] | sort_by(.created_at) | last | .workflow_run.id // empty')"
+          if [[ -z "$run_id" ]]; then
+            echo "::error::The monthly 03:00 candidate is missing. Keep the old release and rerun 03:00 refresh." >&2
+            exit 1
+          fi
+          run_info="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id")"
+          conclusion="$(jq -r '.conclusion // ""' <<< "$run_info")"
+          head_branch="$(jq -r '.head_branch // ""' <<< "$run_info")"
+          workflow_file="$(jq -r '.path // ""' <<< "$run_info")"
+          if [[ "$head_branch" != "main" ]]; then
+            echo "::error::Only a successful main-branch 03:00 run can publish the release." >&2
+            exit 1
+          fi
+          if [[ "$workflow_file" != ".github/workflows/monthly-db.yml" && "$workflow_file" != *"/.github/workflows/monthly-db.yml" ]]; then
+            echo "::error::The candidate was not staged by the approved monthly refresh workflow." >&2
+            exit 1
+          fi
+          if [[ "$conclusion" != "success" ]]; then
+            echo "::error::03:00 refresh run $run_id has not completed successfully ($conclusion)." >&2
+            exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/staged" "$RUNNER_TEMP/current"
+          gh run download "$run_id" --repo "$GITHUB_REPOSITORY" --name "$name" \
+            --dir "$RUNNER_TEMP/staged"
+          test -s "$RUNNER_TEMP/staged/monthly-db-candidate.json"
+          test -s "$RUNNER_TEMP/staged/anime_four_sources_multilingual_prepared.zip"
+          gh release download db-v1 --repo "$GITHUB_REPOSITORY" \
+            --pattern anime_four_sources_multilingual_prepared.zip --dir "$RUNNER_TEMP/current"
+      - name: Confirm source snapshot unchanged and candidate valid
+        if: steps.calendar.outputs.run == 'true'
+        id: verify
+        env:
+          MONTH: ${{ steps.calendar.outputs.month }}
+        run: |
+          python3 - <<'PY'
+          import datetime,hashlib,json,os,pathlib,sqlite3,tempfile,zipfile,gzip
+          from zoneinfo import ZoneInfo
+          root=pathlib.Path(os.environ["RUNNER_TEMP"])
+          stage=root/"staged"
+          candidate=json.loads((stage/"monthly-db-candidate.json").read_text())
+          if candidate.get("schema")!=1 or candidate.get("month")!=os.environ["MONTH"]:
+              raise ValueError("The staged candidate belongs to a different month")
+          prepared=datetime.datetime.fromisoformat(candidate["prepared_utc"])
+          kst=prepared.astimezone(ZoneInfo("Asia/Seoul"))
+          if kst.day!=1 or kst.strftime("%Y-%m")!=os.environ["MONTH"]:
+              raise ValueError("A stale candidate was staged outside the first KST day")
+          archive=stage/"anime_four_sources_multilingual_prepared.zip"
+          digest=hashlib.sha256(archive.read_bytes()).hexdigest()
+          if digest!=candidate.get("catalog_sha256"):
+              raise ValueError("The staged archive does not match its SHA-256")
+          with zipfile.ZipFile(archive) as zf:
+              names=[n for n in zf.namelist() if n.endswith((".db",".db.gz"))]
+              if len(names)!=1: raise ValueError("Unexpected release SQLite layout")
+              body=zf.read(names[0])
+              data=gzip.decompress(body) if body.startswith(b"\x1f\x8b") else body
+          with tempfile.NamedTemporaryFile(suffix=".db") as tmp:
+              tmp.write(data);tmp.flush()
+              with sqlite3.connect(tmp.name) as db:
+                  if db.execute("PRAGMA quick_check").fetchone()[0]!="ok":
+                      raise ValueError("Staged SQLite failed integrity check")
+          current=root/"current"/"anime_four_sources_multilingual_prepared.zip"
+          current_hash=hashlib.sha256(current.read_bytes()).hexdigest()
+          if current_hash==candidate.get("base_sha256"): upload="true"
+          elif current_hash==digest: upload="false" # repair marker after partial 04:00 failure
+          else: raise ValueError("GitHub release changed since 03:00 staging; refusing to overwrite")
+          with open(os.environ["GITHUB_OUTPUT"],"a") as out: out.write("upload="+upload+"\n")
+          print("Verified 03:00 candidate, release upload required:",upload)
+          PY
+      - name: Preserve previous release before 04:00 publish
+        if: steps.calendar.outputs.run == 'true' && steps.verify.outputs.upload == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cp "$RUNNER_TEMP/current/anime_four_sources_multilingual_prepared.zip" \
+            "$RUNNER_TEMP/current/anime_four_sources_multilingual_prepared_backup.zip"
+          gh release upload db-v1 \
+            "$RUNNER_TEMP/current/anime_four_sources_multilingual_prepared_backup.zip" \
+            --repo "$GITHUB_REPOSITORY" --clobber
+      - name: Publish validated monthly catalog to db-v1
+        if: steps.calendar.outputs.run == 'true' && steps.verify.outputs.upload == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release upload db-v1 \
+            "$RUNNER_TEMP/staged/anime_four_sources_multilingual_prepared.zip" \
+            --repo "$GITHUB_REPOSITORY" --clobber
+      - name: Publish completion marker for next-day Pi sync
+        if: steps.calendar.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MONTH: ${{ steps.calendar.outputs.month }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime,hashlib,json,os,pathlib
+          root=pathlib.Path(os.environ["RUNNER_TEMP"])
+          candidate=json.loads((root/"staged"/"monthly-db-candidate.json").read_text())
+          meta={
+              "schema":1,
+              "month":os.environ["MONTH"],
+              "catalog_sha256":candidate["catalog_sha256"],
+              "finished_utc":datetime.datetime.now(datetime.timezone.utc).isoformat(),
+          }
+          (root/("monthly-db-refresh-"+os.environ["MONTH"]+".json")).write_text(
+              json.dumps(meta,sort_keys=True)+"\n")
+          PY
+          gh release upload db-v1 "$RUNNER_TEMP/monthly-db-refresh-$MONTH.json" \
+            --repo "$GITHUB_REPOSITORY" --clobber
+          echo "04:00 KST release publication completed for $MONTH."

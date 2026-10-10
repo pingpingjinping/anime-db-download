@@ -2,12 +2,13 @@ name: Monthly anime DB refresh
 
 on:
   schedule:
-    # 1st of each month, 10:17 KST (01:17 UTC)
-    - cron: '17 1 1 * *'
+    # First of each month, 03:00 KST is 18:00 UTC on the preceding day.
+    # GitHub cron cannot express the variable final UTC day; skip non-first KST days.
+    - cron: '0 18 28-31 * *'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: anime-db-refresh
@@ -19,11 +20,26 @@ jobs:
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
+      - name: Gate scheduled run to the first of the month (KST)
+        id: calendar
+        run: |
+          python3 - <<'PY'
+          import datetime,os
+          from zoneinfo import ZoneInfo
+          now=datetime.datetime.now(ZoneInfo("Asia/Seoul"))
+          eligible=(now.day==1 or os.environ.get("GITHUB_EVENT_NAME")=="workflow_dispatch")
+          with open(os.environ["GITHUB_OUTPUT"],"a") as f:
+              f.write("run="+str(eligible).lower()+"\n")
+              f.write("month="+now.strftime("%Y-%m")+"\n")
+          PY
       - name: Install HTML parser dependencies
+        if: steps.calendar.outputs.run == 'true'
         run: python3 -m pip install requests beautifulsoup4
       - name: Run updater unit tests
+        if: steps.calendar.outputs.run == 'true'
         run: cd scripts && python3 -m unittest -v test_update_db.py test_match_new_sources.py test_reviewed_subtitle_runtime.py
       - name: Download and unpack current Release snapshot
+        if: steps.calendar.outputs.run == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -45,7 +61,7 @@ jobs:
               content = zf.read(entry)
 
           raw_db = root / "anime.db"
-          source = gzip.GzipFile(fileobj=io.BytesIO(content)) if content.startswith(b"\\x1f\\x8b") else io.BytesIO(content)
+          source = gzip.GzipFile(fileobj=io.BytesIO(content)) if content.startswith(b"\x1f\x8b") else io.BytesIO(content)
           with source, raw_db.open("wb") as out:
               shutil.copyfileobj(source, out)
           packed = root / "anime.db.gz"
@@ -54,10 +70,36 @@ jobs:
                   shutil.copyfileobj(src, dst)
           (root / "anime-db-entry.txt").write_text(entry, encoding="utf-8")
           PY
-      - name: Refresh source catalogs and retry pending work matches
+      - name: Fail closed if last month's uploaded Pi review was not published
+        if: steps.calendar.outputs.run == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
+          previous_month="$(python3 - <<'PY'
+          import datetime
+          from zoneinfo import ZoneInfo
+          today=datetime.datetime.now(ZoneInfo('Asia/Seoul')).date()
+          print((today.replace(day=1)-datetime.timedelta(days=1)).strftime('%Y-%m'))
+          PY
+          )"
+          asset="pi-reviewed-work-groups-$previous_month.json"
+          asset_id="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/db-v1" \
+            --jq ".assets[] | select(.name == \"$asset\") | .id" | head -n 1)"
+          if [[ -n "$asset_id" ]]; then
+            python3 scripts/check_monthly_review_overlay.py \
+              --archive "$RUNNER_TEMP/anime_four_sources_multilingual_prepared.zip" \
+              --month "$previous_month"
+          else
+            echo "No Pi reviewed manifest was submitted for $previous_month; retain existing catalog."
+          fi
+      - name: Refresh source catalogs and retry pending work matches
+        if: steps.calendar.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha256sum "$RUNNER_TEMP/anime_four_sources_multilingual_prepared.zip" \
+            | cut -d ' ' -f 1 > "$RUNNER_TEMP/base-release-sha256.txt"
           before="$(sha256sum "$RUNNER_TEMP/anime.db.gz" | cut -d ' ' -f 1)"
           python3 scripts/update_db.py --snapshot "$RUNNER_TEMP/anime.db.gz" --online
           after="$(sha256sum "$RUNNER_TEMP/anime.db.gz" | cut -d ' ' -f 1)"
@@ -78,14 +120,43 @@ jobs:
           with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
               zf.write(raw_db, arcname=entry)
           PY
-            gh release upload db-v1 "$RUNNER_TEMP/anime_four_sources_multilingual_prepared.zip" --repo "$GITHUB_REPOSITORY" --clobber
-
-            legacy_asset_id="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/db-v1" \
-              --jq '.assets[] | select(.name == "anime_four_sources_multilingual_prepared_updated.zip") | .id' | head -n 1)"
-            if [ -n "$legacy_asset_id" ]; then
-              echo "Removing stale duplicate Release asset: $legacy_asset_id"
-              gh api --method DELETE "repos/$GITHUB_REPOSITORY/releases/assets/$legacy_asset_id"
-            fi
           fi
 
-
+      - name: Validate staged catalog and prepare candidate metadata
+        if: steps.calendar.outputs.run == 'true'
+        env:
+          MONTH: ${{ steps.calendar.outputs.month }}
+        run: |
+          python3 - <<'PY'
+          import datetime,hashlib,json,os,pathlib,sqlite3,zipfile,gzip,tempfile
+          root=pathlib.Path(os.environ["RUNNER_TEMP"])
+          archive=root/"anime_four_sources_multilingual_prepared.zip"
+          with zipfile.ZipFile(archive) as zf:
+              names=[n for n in zf.namelist() if n.endswith((".db",".db.gz"))]
+              if len(names)!=1: raise ValueError("Unexpected monthly catalog ZIP layout")
+              body=zf.read(names[0])
+              data=gzip.decompress(body) if body.startswith(b"\x1f\x8b") else body
+          with tempfile.NamedTemporaryFile(suffix=".db") as tmp:
+              tmp.write(data);tmp.flush()
+              with sqlite3.connect(tmp.name) as db:
+                  if db.execute("PRAGMA quick_check").fetchone()[0]!="ok":
+                      raise ValueError("Candidate DB integrity check failed")
+          candidate={
+              "schema":1,
+              "month":os.environ["MONTH"],
+              "catalog_sha256":hashlib.sha256(archive.read_bytes()).hexdigest(),
+              "base_sha256":(root/"base-release-sha256.txt").read_text().strip(),
+              "prepared_utc":datetime.datetime.now(datetime.timezone.utc).isoformat(),
+          }
+          (root/"monthly-db-candidate.json").write_text(json.dumps(candidate,sort_keys=True)+"\n")
+          PY
+      - name: Stage candidate for separate 04:00 KST release upload
+        if: steps.calendar.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: monthly-db-candidate-${{ steps.calendar.outputs.month }}
+          path: |
+            ${{ runner.temp }}/anime_four_sources_multilingual_prepared.zip
+            ${{ runner.temp }}/monthly-db-candidate.json
+          retention-days: 5
+          if-no-files-found: error
