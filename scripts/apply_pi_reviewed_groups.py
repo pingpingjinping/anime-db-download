@@ -68,7 +68,7 @@ def apply_overlay(db, groups, month):
     for src,id in all_refs:
         if src == "Anikoto":
             if "anikoto_catalog" not in table_names or not db.execute(
-                "SELECT 1 FROM anikoto_catalog WHERE anikoto_id=?", (id,)
+                "SELECT 1 FROM anikoto_catalog WHERE source_record_id=?", (id,)
             ).fetchone():
                 raise ValueError("Reviewed Anikoto ID absent from published catalog: " + id)
         elif not db.execute(
