@@ -1,0 +1,67 @@
+name: Month-end Pi reviewed works into DB Release
+
+on:
+  schedule:
+    # Daily 28-31 at 23:15 KST; exact last-day check below handles leap years.
+    - cron: '15 14 28-31 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: anime-db-refresh
+  cancel-in-progress: false
+
+jobs:
+  publish-reviewed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm last calendar day (Asia/Seoul)
+        id: calendar
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          python3 - <<'PY'
+          import calendar,datetime,os
+          now=datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+          is_end=now.day==calendar.monthrange(now.year,now.month)[1]
+          if os.environ['EVENT_NAME']=='workflow_dispatch' and not is_end:
+            raise SystemExit('Manual month-end publishing is only permitted on the final KST calendar day')
+          with open(os.environ['GITHUB_OUTPUT'],'a') as output:
+            output.write('run='+str(is_end).lower()+'\n')
+            output.write('month='+now.strftime('%Y-%m')+'\n')
+          PY
+      - name: Check monthly overlay regression
+        if: steps.calendar.outputs.run == 'true'
+        run: python3 -m unittest scripts/test_apply_pi_reviewed_groups.py -v
+      - name: Read sanitized Pi review manifest and current catalog
+        if: steps.calendar.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MONTH: ${{ steps.calendar.outputs.month }}
+        run: |
+          set -euo pipefail
+          gh release download db-v1 --repo "$GITHUB_REPOSITORY" --dir "$RUNNER_TEMP" \
+            --pattern "pi-reviewed-work-groups-$MONTH.json"
+          gh release download db-v1 --repo "$GITHUB_REPOSITORY" --dir "$RUNNER_TEMP" \
+            --pattern anime_four_sources_multilingual_prepared.zip
+      - name: Validate and apply only verified IDs to release overlay
+        if: steps.calendar.outputs.run == 'true'
+        env:
+          MONTH: ${{ steps.calendar.outputs.month }}
+        run: |
+          set -euo pipefail
+          python3 scripts/apply_pi_reviewed_groups.py \
+            --archive "$RUNNER_TEMP/anime_four_sources_multilingual_prepared.zip" \
+            --manifest "$RUNNER_TEMP/pi-reviewed-work-groups-$MONTH.json" --month "$MONTH"
+      - name: Publish reviewed release database
+        if: steps.calendar.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload db-v1 "$RUNNER_TEMP/anime_four_sources_multilingual_prepared.zip" \
+            --repo "$GITHUB_REPOSITORY" --clobber
+          echo "Verified month-end reviewed SQLite overlay published."
