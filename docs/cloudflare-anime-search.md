@@ -36,7 +36,13 @@ publish는 D1 works/work_aliases 테이블을 교체하므로 테스트 작품 t
 - Pi에만 존재하는 로컬 수동 매칭 및 주간 새 AniAll 후보는 현재 범위 밖이다.
 - 무료 D1 행 쓰기 제한을 고려해 이번 1차는 작품+별칭 35,000행 초과 시 차단한다. 삭제/인덱스 쓰기가 추가되므로 실제 계측 후 상한을 조정한다.
 - 현재 Worker의 instr(alias_norm, q) 검색은 인덱스로 최적화된 부분문자열 검색이 아니다. 실사용 속도/읽기 과금을 확인한 뒤 FTS 등 검색 개선이 별도로 필요하다.
-- 안정성 확인 전에는 월간 자동 실행을 연결하지 않는다.
+- 월간 자동 연동은 **Anikoto reviewed catalog matching**이 성공한 이후의 GitHub Actions `workflow_run`으로 시작한다. 해당 작업은 매월 1일의 `Monthly anime DB refresh` 다음에 실행되고 같은 `db-v1` 릴리즈의 최종 카탈로그를 갱신한다.
+- 마지막 작업이 실패하거나 건너뛰어졌을 때를 대비해 **매월 2일 11:30 KST**에 재조정 작업을 실행한다. 이때도 Release는 변경하지 않고, 있는 자산으로 검색 인덱스만 갱신한다.
+- `anime_search_sync_metadata`에는 마지막으로 성공·검증한 **검색 SQL SHA-256**과 작품/별칭 수만 보존한다. 해시와 실제 D1 건수가 일치하면 재업로드하지 않아 무료 D1 쓰기 한도를 아낀다.
+- `dry-run`은 Cloudflare에 전혀 접속하거나 쓰지 않는다. 수동 `publish`는 기존대로 실행되지만 동일 인덱스이면 안전하게 건너뛴다.
+- Anikoto 작업이 성공했어도 Release 검색 자료가 실제로 바뀌지 않았다면 SQL 해시 확인 후 아무것도 교체하지 않는다.
+- GitHub 외부에서 `db-v1`를 직접 수동 변경한 경우에는 수동 `publish`를 실행하거나 다음 월간 재조정을 통해 반영한다. 주간 `subs-queue` 릴리즈는 Cloudflare 검색 인덱스 입력이 아니므로 주간마다 D1을 갱신하지 않는다.
+- 자동 동기화에는 기존 `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID` Secrets 및 `CLOUDFLARE_D1_DATABASE_ID` Variable을 그대로 사용한다. 추가 토큰은 불필요하다.
 
 ## 로컬 테스트
 
