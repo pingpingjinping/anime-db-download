@@ -14,6 +14,7 @@ import pathlib
 import re
 import subprocess
 import sys
+import tempfile
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -68,28 +69,159 @@ def build_manifest(rows, month):
 
 
 def export_rows(streaming_repo):
-    # Local PostgreSQL command uses the existing docker-compose DB credentials.
-    # The SQL does not return relative_path, updated_by or any subtitle filenames.
-    sql = """
-      SELECT json_build_object(
-        'members', array_prepend(l.anime_id,
-          COALESCE((SELECT array_agg(m.anime_id ORDER BY m.anime_id)
-            FROM anime_admin_subtitle_link_members m
-            WHERE m.relative_path=l.relative_path), ARRAY[]::text[])),
-        'title', l.work_title, 'kind', l.subtitle_kind, 'season', l.season
-      )::text
-      FROM anime_admin_subtitle_links l ORDER BY l.anime_id;
-    """
-    command = ["docker", "compose", "exec", "-T", "db", "sh", "-c",
-               'psql -X -q -A -t -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "$1"',
-               "sh", sql]
-    result = subprocess.run(command, cwd=streaming_repo, text=True, capture_output=True)
+    """Ask streaming-project to produce its read-only, path-free PG projection."""
+    script = streaming_repo / "scripts" / "export-reviewed-subtitle-work-links.py"
+    if not script.is_file():
+        raise RuntimeError("Missing streaming-project reviewed link exporter: " + str(script))
+    result = subprocess.run([sys.executable, str(script)], cwd=streaming_repo,
+                            capture_output=True, text=True)
     if result.returncode:
-        # Initial setup may have no administrator-created link tables yet.
-        if 'relation "anime_admin_subtitle_links" does not exist' in result.stderr:
-            return []
-        raise RuntimeError("Unable to export Pi reviewed groups: " + result.stderr[:300])
-    return [json.loads(line) for line in result.stdout.splitlines() if line.strip()]
+        raise RuntimeError("Unable to validate Pi reviewed links: " + result.stderr[:280])
+    rows = json.loads(result.stdout)
+    if not isinstance(rows, list):
+        raise ValueError("Reviewed work exporter did not return an array")
+    return rows
+
+
+def candidate_name(month):
+    return "anime_four_sources_multilingual_prepared_pi_reviewed_" + month + ".zip"
+
+
+def fetch_canonical_catalog(streaming_repo, token):
+    """Use the existing Pi Release downloader and verify the GitHub digest."""
+    import importlib.util
+    script = streaming_repo / "scripts" / "update-anime-db-release.py"
+    if not script.is_file():
+        raise RuntimeError("Cannot locate streaming-project GitHub Release updater")
+    spec=importlib.util.spec_from_file_location("pi_review_release_read",script)
+    updater=importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(updater)
+    release=updater.api_json(updater.RELEASE_API, token)
+    asset=updater.release_asset(release, updater.CATALOG_ASSET_NAME)
+    payload=updater.download_asset(asset["url"], token)
+    expected=updater.metadata_digest(asset)
+    actual=hashlib.sha256(payload).hexdigest()
+    if expected and expected != actual:
+        raise RuntimeError("Canonical db-v1 catalog SHA-256 verification failed")
+    return payload
+
+
+def stage_path(month, directory):
+    return pathlib.Path(directory) / ("pi-reviewed-work-groups-" + month + ".json")
+
+
+def prepare_snapshot(streaming_repo, month, directory, *, dry_run=False):
+    """At 03:00, merge reviewed Pi IDs into a validated SQLite release candidate."""
+    from apply_pi_reviewed_groups import patch_archive
+    manifest = build_manifest(export_rows(streaming_repo), month)
+    if dry_run:
+        print("Validated", manifest["count"], "Pi reviewed groups for", month,
+              "(no stage/download/upload)")
+        return manifest
+
+    read_token=os.environ.get("ANIME_DB_GITHUB_TOKEN","").strip()
+    if not read_token:
+        raise RuntimeError("ANIME_DB_GITHUB_TOKEN is required to fetch the existing catalog")
+
+    directory = pathlib.Path(directory)
+    directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+    os.chmod(directory, 0o700)
+    target_json = stage_path(month, directory)
+    target_db = directory / candidate_name(month)
+    if target_json.exists() or target_db.exists():
+        if not target_json.is_file() or not target_db.is_file():
+            raise RuntimeError("Incomplete 03:00 Pi DB stage; do not upload")
+        previous=json.loads(target_json.read_text(encoding="utf-8"))
+        from apply_pi_reviewed_groups import checked_manifest
+        checked_manifest(previous, month)
+        if previous.get("groups") != manifest["groups"]:
+            raise RuntimeError("Confirmed reviewed work IDs differ from the frozen 03:00 DB")
+        if hashlib.sha256(target_db.read_bytes()).hexdigest()!=previous.get("candidate_sha256"):
+            raise RuntimeError("Frozen Pi reviewed DB candidate checksum changed")
+        print("Previously prepared Pi reviewed DB:", target_db)
+        return previous
+
+    from apply_pi_reviewed_groups import checked_manifest
+    checked_manifest(manifest,month)
+    existing=fetch_canonical_catalog(streaming_repo,read_token)
+    base_sha=hashlib.sha256(existing).hexdigest()
+    fd, tmp_db = tempfile.mkstemp(prefix=".candidate-",suffix=".zip",dir=directory)
+    os.close(fd)
+    fd, tmp_json = tempfile.mkstemp(prefix=".review-",suffix=".json",dir=directory)
+    os.close(fd)
+    try:
+        pathlib.Path(tmp_db).write_bytes(existing)
+        # Use a provisional manifest to validate each source ID against actual
+        # release SQLite rows before copying the finalized DB to the stage.
+        pathlib.Path(tmp_json).write_text(json.dumps(manifest,ensure_ascii=False),
+                                           encoding="utf-8")
+        patch_archive(tmp_db, tmp_json, month)
+        manifest["base_release_sha256"]=base_sha
+        manifest["candidate_sha256"]=hashlib.sha256(pathlib.Path(tmp_db).read_bytes()).hexdigest()
+        manifest["prepared_at_kst"]=dt.datetime.now(
+            dt.timezone(dt.timedelta(hours=9))).isoformat()
+        pathlib.Path(tmp_json).write_text(
+            json.dumps(manifest,ensure_ascii=False,sort_keys=True,separators=(",",":"))+"\n",
+            encoding="utf-8")
+        os.chmod(tmp_db,0o600)
+        os.chmod(tmp_json,0o600)
+        os.replace(tmp_db,target_db)
+        os.replace(tmp_json,target_json)
+    finally:
+        for file in (tmp_db,tmp_json):
+            if os.path.exists(file): os.unlink(file)
+    print("Prepared",manifest["count"],"verified groups in Pi SQLite DB candidate:",target_db)
+    return manifest
+
+
+def load_prepared_snapshot(month, directory, today):
+    """Verify that 04:00 only uploads 03:00's completed, unchanged DB."""
+    target=stage_path(month,directory)
+    candidate=pathlib.Path(directory)/candidate_name(month)
+    if not target.is_file() or not candidate.is_file():
+        raise RuntimeError("03:00 Pi reviewed DB candidate or manifest is missing")
+    manifest=json.loads(target.read_text(encoding="utf-8"))
+    from apply_pi_reviewed_groups import checked_manifest
+    checked_manifest(manifest,month)
+    if today.day!=1:
+        raise RuntimeError("Reviewed DB upload is only permitted on the first KST day")
+    prepared=dt.datetime.fromisoformat(manifest.get("prepared_at_kst",""))
+    prepared=prepared.astimezone(dt.timezone(dt.timedelta(hours=9)))
+    if prepared.date()!=today.date():
+        raise RuntimeError("The prepared Pi reviewed DB belongs to another day")
+    if hashlib.sha256(candidate.read_bytes()).hexdigest()!=manifest.get("candidate_sha256"):
+        raise RuntimeError("Pi 03:00 reviewed DB candidate has been modified")
+    return manifest
+
+
+def upload_candidate(manifest, directory, token):
+    """Publish an immutable prepared *candidate*, never replace canonical db-v1 at 04:00."""
+    name=candidate_name(manifest["month"])
+    path=pathlib.Path(directory)/name
+    payload=path.read_bytes()
+    if hashlib.sha256(payload).hexdigest()!=manifest.get("candidate_sha256"):
+        raise RuntimeError("Candidate SHA-256 changed before upload")
+    release=api("/releases/tags/db-v1",token)
+    previous=[asset for asset in release.get("assets",[]) if asset.get("name")==name]
+    if previous:
+        if len(previous)==1 and previous[0].get("digest")=="sha256:"+manifest["candidate_sha256"]:
+            print("Identical Pi-reviewed DB already uploaded:",name)
+            return
+        raise RuntimeError("Conflicting current-month candidate already exists; manual reconciliation required")
+    url="https://uploads.github.com/repos/"+REPO+"/releases/"+str(release["id"])+"/assets?"
+    url+=urllib.parse.urlencode({"name":name})
+    req=urllib.request.Request(url,data=payload,method="POST",headers={
+        "Authorization":"Bearer "+token,
+        "Accept":"application/vnd.github+json",
+        "X-GitHub-Api-Version":"2022-11-28",
+        "Content-Type":"application/zip",
+        "User-Agent":"anime-db-reviewed-pi/1.0",
+    })
+    with urllib.request.urlopen(req,timeout=180) as response:
+        uploaded=json.load(response)
+    if uploaded.get("name")!=name:
+        raise RuntimeError("Unexpected uploaded Pi reviewed DB candidate")
+    print("Uploaded staged Pi-reviewed DB ZIP:",name)
 
 
 def api(path, token):
@@ -133,22 +265,44 @@ def upload(manifest, token):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--streaming-repo", type=pathlib.Path, default=pathlib.Path("/home/pi/streaming-project"))
+    parser.add_argument("--streaming-repo", type=pathlib.Path,
+                        default=pathlib.Path("/home/pi/streaming-project"))
+    parser.add_argument("--stage-dir", type=pathlib.Path,
+                        default=pathlib.Path("/home/pi/.local/state/anime-db-download/monthly-reviewed"))
+    operations = parser.add_mutually_exclusive_group()
+    operations.add_argument("--prepare", action="store_true",
+                            help="At 03:00, verify live Pi PostgreSQL links and stage JSON")
+    operations.add_argument("--publish-staged", action="store_true",
+                            help="At 04:00, upload the exactly staged JSON to GitHub")
     parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--force", action="store_true", help="Manual test on a non-last day; still uses the current month")
+    parser.add_argument("--force", action="store_true",
+                        help="Allow a preparation dry-run outside the first day")
     args = parser.parse_args()
     now = dt.datetime.now(dt.timezone(dt.timedelta(hours=9)))
-    if not is_last_day(now) and not args.force:
-        print("Not the last calendar day in Asia/Seoul; skip.")
-        return
-    manifest = build_manifest(export_rows(args.streaming_repo), now.strftime("%Y-%m"))
-    if args.dry_run:
-        print("Validated " + str(manifest["count"]) + " reviewed groups for " + manifest["month"])
-        return
-    token = os.environ.get("ANIME_DB_GITHUB_UPLOAD_TOKEN", "").strip()
-    if not token:
-        raise SystemExit("ANIME_DB_GITHUB_UPLOAD_TOKEN with release contents:write permission is required")
-    upload(manifest, token)
+    if now.day != 1 and not (args.force and args.dry_run and not args.publish_staged):
+        raise SystemExit("Pi monthly reviewed export only runs on the first KST calendar day")
+
+    month = now.strftime("%Y-%m")
+    if args.publish_staged:
+        if args.dry_run:
+            raise SystemExit("--dry-run cannot be used with --publish-staged")
+        manifest = load_prepared_snapshot(month, args.stage_dir, now)
+        token = os.environ.get("ANIME_DB_GITHUB_UPLOAD_TOKEN", "").strip()
+        if not token:
+            raise SystemExit("ANIME_DB_GITHUB_UPLOAD_TOKEN with contents:write is required")
+        read_token=os.environ.get("ANIME_DB_GITHUB_TOKEN","").strip()
+        if not read_token:
+            raise SystemExit("ANIME_DB_GITHUB_TOKEN is required to recheck the base release")
+        current=fetch_canonical_catalog(args.streaming_repo,read_token)
+        if hashlib.sha256(current).hexdigest()!=manifest.get("base_release_sha256"):
+            raise SystemExit("GitHub canonical release changed since 03:00; refusing stale Pi DB upload")
+        upload_candidate(manifest, args.stage_dir, token)
+        upload(manifest, token)
+    else:
+        prepare_snapshot(args.streaming_repo, month, args.stage_dir,
+                         dry_run=args.dry_run)
+
+
 
 
 if __name__ == "__main__":
