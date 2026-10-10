@@ -28,11 +28,15 @@ jobs:
           import calendar,datetime,os
           now=datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
           is_end=now.day==calendar.monthrange(now.year,now.month)[1]
-          if os.environ['EVENT_NAME']=='workflow_dispatch' and not is_end:
-            raise SystemExit('Manual month-end publishing is only permitted on the final KST calendar day')
+          # Actions cron may be delayed beyond midnight: accept a small KST
+          # next-day grace period, but always target the previous month.
+          grace=now.day==1 and now.hour<5
+          target=now if is_end else now-datetime.timedelta(days=1) if grace else now
+          if os.environ['EVENT_NAME']=='workflow_dispatch' and not (is_end or grace):
+            raise SystemExit('Manual month-end publishing is only permitted on final KST day or first 5 hours next day')
           with open(os.environ['GITHUB_OUTPUT'],'a') as output:
-            output.write('run='+str(is_end).lower()+'\n')
-            output.write('month='+now.strftime('%Y-%m')+'\n')
+            output.write('run='+str(is_end or grace).lower()+'\n')
+            output.write('month='+target.strftime('%Y-%m')+'\n')
           PY
       - name: Check monthly overlay regression
         if: steps.calendar.outputs.run == 'true'
