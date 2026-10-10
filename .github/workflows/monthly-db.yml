@@ -38,7 +38,8 @@ jobs:
         run: |
           PYTHONPATH="$GITHUB_WORKSPACE:$GITHUB_WORKSPACE/scripts" python3 -m unittest -v \
             scripts.test_update_db scripts.test_match_new_sources \
-            scripts.test_reviewed_subtitle_runtime scripts.test_apply_pi_reviewed_groups
+            scripts.test_reviewed_subtitle_runtime scripts.test_apply_pi_reviewed_groups \
+            scripts.test_apply_pi_search_posters
       - name: Download published catalog and Pi's 04:00 monthly review
         env:
           GH_TOKEN: ${{ github.token }}

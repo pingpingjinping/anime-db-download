@@ -12,7 +12,7 @@ import sqlite3
 import unicodedata
 from collections import Counter, defaultdict
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 
 SOURCES = {"AniList", "ReAnime", "Onnada", "Anissia"}
 LABELS = {"Anissia": "애니시아", "aniall": "AniAll", "naver": "네이버"}
@@ -100,6 +100,94 @@ def identity(source, record_id):
     return "db_" + source + "_" + record_id, "/catalog/" + source + "/" + quote(record_id, safe="")
 
 
+def json_obj(value):
+    if isinstance(value, str):
+        try: value = json.loads(value)
+        except (TypeError, ValueError): return {}
+    return value if isinstance(value, dict) else {}
+
+
+def poster_url(raw):
+    if not isinstance(raw, str) or len(raw) > 2048: return ""
+    uri = urlsplit(raw)
+    return raw if uri.scheme == "https" and uri.hostname and not uri.username and not uri.password else ""
+
+
+def metadata_poster(row):
+    metadata = json_obj(row.get("source_metadata_json"))
+    image = json_obj(metadata.get("cover_image"))
+    image2 = json_obj(metadata.get("coverImage"))
+    values = (metadata.get("poster"), metadata.get("poster_url"), metadata.get("image_url"),
+              image.get("extra_large"), image2.get("extraLarge"), image.get("large"),
+              image2.get("large"), image.get("medium"), image2.get("medium"),
+              metadata.get("banner_image"), metadata.get("bannerImage"))
+    return next((poster_url(v) for v in values if poster_url(v)), "")
+
+
+def work_ref(source, rid):
+    return ("ani_" + rid if source == "Anissia" else
+            "re_" + rid if source == "ReAnime" else
+            "db_" + source + "_" + rid if source in {"AniList", "Onnada"} else
+            "ak_" + rid if source == "Anikoto" else "")
+
+
+def reviewed_artwork(catalog_db, entries):
+    """Use stored Pi URL cache and exact reviewed source IDs, never title matching."""
+    cached = {}
+    if table_exists(catalog_db, "pi_search_poster_cache"):
+        for work, poster, source in catalog_db.execute(
+                "SELECT work_id,poster,source FROM pi_search_poster_cache"):
+            value = poster_url(poster)
+            if value and source in {"ReAnime", "AniList", "Anikoto"}:
+                cached[str(work)] = (value, source)
+
+    groups = defaultdict(set)
+    if table_exists(catalog_db, "pi_reviewed_work_groups"):
+        for (encoded,) in catalog_db.execute("SELECT members_json FROM pi_reviewed_work_groups"):
+            try: members = json.loads(encoded)
+            except (TypeError, ValueError): continue
+            if not isinstance(members, list) or len(members) > 12: continue
+            # Anikoto may span seasons, so only reference it from the same
+            # explicitly saved core group; never merge groups via Anikoto.
+            for work in members:
+                if isinstance(work, str) and not work.startswith("ak_"):
+                    groups[work].update(m for m in members if isinstance(m, str))
+
+    output = {}
+    for (source,rid), row in entries.items():
+        work = work_ref(source,rid)
+        if not work: continue
+        references = set(groups.get(work,set()))
+        references.add(work)
+        cross = json_obj(row.get("cross_source_ids_json"))
+        for field,prefix in (("reanime_ids","re_"),("anilist_ids","db_AniList_")):
+            if isinstance(cross.get(field),list) and len(cross[field])==1:
+                value = str(cross[field][0])
+                if value and len(value)<=150:
+                    references.add(prefix+value)
+        by_source=defaultdict(set)
+        for ref in references:
+            if ref in cached:
+                value,provider=cached[ref]
+                by_source[provider].add(value)
+            if ref.startswith("re_"):
+                sibling=entries.get(("ReAnime",ref[3:]))
+                if sibling and metadata_poster(sibling):
+                    by_source["ReAnime"].add(metadata_poster(sibling))
+            elif ref.startswith("db_AniList_"):
+                sibling=entries.get(("AniList",ref[len("db_AniList_"):]))
+                if sibling and metadata_poster(sibling):
+                    by_source["AniList"].add(metadata_poster(sibling))
+        if source in {"ReAnime","AniList"}:
+            own=metadata_poster(row)
+            if own: by_source[source].add(own)
+        for provider in ("ReAnime","AniList","Anikoto"):
+            if len(by_source[provider]) == 1:
+                output[work] = next(iter(by_source[provider]))
+                break
+    return output
+
+
 def build(catalog_db, registry_db):
     entries = {}
     counts = Counter()
@@ -127,6 +215,7 @@ def build(catalog_db, registry_db):
         if title:
             item["titles"].add(title)
 
+    posters=reviewed_artwork(catalog_db,entries)
     works = []
     aliases = set()
     for (source, rid), row in sorted(entries.items()):
@@ -163,7 +252,7 @@ def build(catalog_db, registry_db):
             if norm and len(norm) <= 300:
                 aliases.add((work_id, norm))
         works.append((work_id, title, number(row.get("year")) or None,
-                      " · ".join(sorted(providers)), caption_count, detail, ""))
+                      " · ".join(sorted(providers)), caption_count, detail, posters.get(work_id,"")))
     if len(works) < 1000 or len(aliases) < len(works):
         raise ValueError(f"Suspiciously small export: {len(works)} works / {len(aliases)} aliases")
     return works, sorted(aliases), dict(counts), len(confirmed)

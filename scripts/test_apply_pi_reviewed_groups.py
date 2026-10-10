@@ -40,7 +40,8 @@ class MonthlyReviewedGroupsTest(unittest.TestCase):
             root=pathlib.Path(tmp)
             with mock.patch.dict("os.environ",{"ANIME_DB_GITHUB_TOKEN":"test"}), \
                  mock.patch("scripts.pi_export_reviewed_work_groups.fetch_canonical_catalog",return_value=self.make_zip(root).read_bytes()), \
-                 mock.patch("scripts.pi_export_reviewed_work_groups.export_rows",return_value=self.rows()):
+                 mock.patch("scripts.pi_export_reviewed_work_groups.export_rows",return_value=self.rows()), \
+                 mock.patch("scripts.pi_export_reviewed_work_groups.export_cached_posters",return_value=[]):
                 manifest=prepare_snapshot(root,"2026-11",root/"stage")
                 self.assertEqual(manifest["count"],1)
                 staged=root/"stage"/"pi-reviewed-work-groups-2026-11.json"
@@ -62,7 +63,8 @@ class MonthlyReviewedGroupsTest(unittest.TestCase):
             root=pathlib.Path(tmp)
             with mock.patch.dict("os.environ",{"ANIME_DB_GITHUB_TOKEN":"test"}), \
                  mock.patch("scripts.pi_export_reviewed_work_groups.fetch_canonical_catalog",return_value=self.make_zip(root).read_bytes()), \
-                 mock.patch("scripts.pi_export_reviewed_work_groups.export_rows",return_value=self.rows()):
+                 mock.patch("scripts.pi_export_reviewed_work_groups.export_rows",return_value=self.rows()), \
+                 mock.patch("scripts.pi_export_reviewed_work_groups.export_cached_posters",return_value=[]):
                 prepare_snapshot(root,"2026-11",root/"stage")
             changed=[{"members":["ani_1","re_different"],"title":"different","kind":"main","season":1}]
             with mock.patch("scripts.pi_export_reviewed_work_groups.export_rows",return_value=changed):

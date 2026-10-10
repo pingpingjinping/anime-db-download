@@ -106,6 +106,21 @@ def fetch_canonical_catalog(streaming_repo, token):
     return payload
 
 
+def export_cached_posters(streaming_repo):
+    """Use the streamer-owned, read-only artwork cache export (no user paths)."""
+    script=streaming_repo/"scripts"/"export-db-search-posters.py"
+    if not script.is_file():
+        raise RuntimeError("Missing streaming-project db search poster exporter")
+    proc=subprocess.run([sys.executable,str(script)],cwd=streaming_repo,
+                        text=True,capture_output=True)
+    if proc.returncode:
+        raise RuntimeError("Pi cached artwork export failed: "+proc.stderr[:280])
+    rows=json.loads(proc.stdout)
+    from apply_pi_search_posters import validate
+    validate(rows)
+    return rows
+
+
 def stage_path(month, directory):
     return pathlib.Path(directory) / ("pi-reviewed-work-groups-" + month + ".json")
 
@@ -156,6 +171,9 @@ def prepare_snapshot(streaming_repo, month, directory, *, dry_run=False):
         pathlib.Path(tmp_json).write_text(json.dumps(manifest,ensure_ascii=False),
                                            encoding="utf-8")
         patch_archive(tmp_db, tmp_json, month)
+        from apply_pi_search_posters import patch_archive as patch_artwork
+        artwork_count=patch_artwork(tmp_db,export_cached_posters(streaming_repo))
+        manifest["cached_artwork_count"]=artwork_count
         manifest["base_release_sha256"]=base_sha
         manifest["candidate_sha256"]=hashlib.sha256(pathlib.Path(tmp_db).read_bytes()).hexdigest()
         manifest["prepared_at_kst"]=dt.datetime.now(
