@@ -49,25 +49,43 @@ jobs:
             --pattern anime_four_sources_multilingual_prepared.zip --dir "$RUNNER_TEMP"
           gh release download db-v1 --repo "$GITHUB_REPOSITORY" \
             --pattern "pi-reviewed-work-groups-$MONTH.json" --dir "$RUNNER_TEMP"
+          gh release download db-v1 --repo "$GITHUB_REPOSITORY" \
+            --pattern "anime_four_sources_multilingual_prepared_pi_reviewed_$MONTH.zip" --dir "$RUNNER_TEMP"
           sha256sum "$RUNNER_TEMP/anime_four_sources_multilingual_prepared.zip" \
             | cut -d ' ' -f 1 > "$RUNNER_TEMP/baseline-sha256.txt"
           cp "$RUNNER_TEMP/anime_four_sources_multilingual_prepared.zip" \
              "$RUNNER_TEMP/anime_four_sources_multilingual_prepared_backup.zip"
-      - name: Validate and incorporate Pi's reviewed work links before online refresh
+      - name: Verify Pi's 03:00 merged DB and use that published candidate
         env:
           MONTH: ${{ steps.calendar.outputs.month }}
         run: |
           set -euo pipefail
-          python3 scripts/apply_pi_reviewed_groups.py \
-            --archive "$RUNNER_TEMP/anime_four_sources_multilingual_prepared.zip" \
-            --manifest "$RUNNER_TEMP/pi-reviewed-work-groups-$MONTH.json" --month "$MONTH"
           python3 - <<'PY'
-          import gzip,io,os,pathlib,zipfile
+          import hashlib,json,os,pathlib
+          root=pathlib.Path(os.environ["RUNNER_TEMP"])
+          month=os.environ["MONTH"]
+          manifest=json.loads((root/("pi-reviewed-work-groups-"+month+".json")).read_text())
+          if manifest.get("schema")!=1 or manifest.get("month")!=month:
+              raise ValueError("Pi 04:00 upload belongs to another month")
+          baseline=(root/"baseline-sha256.txt").read_text().strip()
+          if manifest.get("base_release_sha256")!=baseline:
+              raise ValueError("GitHub catalog changed between Pi 03:00 validation and 10:17 refresh")
+          candidate=root/("anime_four_sources_multilingual_prepared_pi_reviewed_"+month+".zip")
+          actual=hashlib.sha256(candidate.read_bytes()).hexdigest()
+          if manifest.get("candidate_sha256")!=actual:
+              raise ValueError("Pi 04:00 uploaded DB candidate does not match its SHA-256 manifest")
+          candidate.replace(root/"anime_four_sources_multilingual_prepared.zip")
+          PY
+          python3 scripts/check_monthly_review_overlay.py \
+            --archive "$RUNNER_TEMP/anime_four_sources_multilingual_prepared.zip" \
+            --month "$MONTH"
+          python3 - <<'PY'
+          import gzip,os,pathlib,zipfile
           root=pathlib.Path(os.environ["RUNNER_TEMP"])
           archive=root/"anime_four_sources_multilingual_prepared.zip"
           with zipfile.ZipFile(archive) as zf:
               members=[n for n in zf.namelist() if n.endswith((".db",".db.gz"))]
-              if len(members)!=1: raise ValueError("Unexpected published catalog ZIP structure")
+              if len(members)!=1: raise ValueError("Unexpected published Pi DB candidate ZIP structure")
               name=members[0]
               value=zf.read(name)
           db=gzip.decompress(value) if value.startswith(b"\x1f\x8b") else value
