@@ -54,6 +54,22 @@ jobs:
                   shutil.copyfileobj(src, dst)
           (root / "anime-db-entry.txt").write_text(entry, encoding="utf-8")
           PY
+      - name: Fail closed if last month's uploaded Pi review was not published
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          previous_month="$(TZ=Asia/Seoul date -d "$(date -u +%Y-%m-01) -1 month" +%Y-%m)"
+          asset="pi-reviewed-work-groups-$previous_month.json"
+          asset_id="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/db-v1" \
+            --jq ".assets[] | select(.name == \"$asset\") | .id" | head -n 1)"
+          if [[ -n "$asset_id" ]]; then
+            python3 scripts/check_monthly_review_overlay.py \
+              --archive "$RUNNER_TEMP/anime_four_sources_multilingual_prepared.zip" \
+              --month "$previous_month"
+          else
+            echo "No Pi reviewed manifest was submitted for $previous_month; retain existing catalog."
+          fi
       - name: Refresh source catalogs and retry pending work matches
         env:
           GH_TOKEN: ${{ github.token }}
@@ -88,4 +104,24 @@ jobs:
             fi
           fi
 
+      - name: Record successful first-day catalog refresh for Pi's second-day sync
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import datetime,hashlib,json,os,pathlib
+          month=datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9))).strftime('%Y-%m')
+          archive=pathlib.Path(os.environ["RUNNER_TEMP"])/"anime_four_sources_multilingual_prepared.zip"
+          marker={
+            "schema":1, "month":month,
+            "catalog_sha256":hashlib.sha256(archive.read_bytes()).hexdigest(),
+            "finished_utc":datetime.datetime.now(datetime.timezone.utc).isoformat()
+          }
+          path=pathlib.Path(os.environ["RUNNER_TEMP"])/f"monthly-db-refresh-{month}.json"
+          path.write_text(json.dumps(marker,sort_keys=True)+"\n")
+          PY
+          month="$(TZ=Asia/Seoul date +%Y-%m)"
+          gh release upload db-v1 "$RUNNER_TEMP/monthly-db-refresh-$month.json" \
+            --repo "$GITHUB_REPOSITORY" --clobber
 
