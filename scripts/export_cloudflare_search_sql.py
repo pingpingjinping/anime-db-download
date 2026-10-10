@@ -68,8 +68,28 @@ def registry_rows(db):
                   AND target_id IS NOT NULL AND target_id != ''
                   AND target_source IN ('AniList','ReAnime','Onnada','Anissia')
             ''').fetchall()
-    # Keep the export strict. Guessing from old archive names can merge seasons.
-    raise ValueError("Missing reviewed subtitle runtime files relation")
+    # The reviewed Release can contain the original v6 packaged tables instead
+    # of the materialized subtitle_runtime_files[_export] relation. Mirror the
+    # existing Pi importer; only kept subtitle files with exact target IDs count.
+    required = ("packaged_files_v6", "packaged_archives_v6", "subtitle_review_details")
+    if not all(table_exists(db, name) for name in required):
+        raise ValueError("Missing reviewed subtitle runtime files and v6 packaged fallback tables")
+    allowed_ext = (".ass", ".ssa", ".srt", ".smi", ".vtt", ".sub")
+    extension_checks = []
+    for column in ("f.member_path", "f.original_path"):
+        extension_checks.extend(f"lower({column}) LIKE '%{ext}'" for ext in allowed_ext)
+    return db.execute(f"""SELECT DISTINCT
+            f.pid, f.source, f.target_source, f.target_id,
+            NULLIF(r.work_title_ko, '') AS work_title_ko
+        FROM packaged_files_v6 f
+        JOIN packaged_archives_v6 a USING(pack_id)
+        LEFT JOIN subtitle_review_details r USING(pid)
+        WHERE f.action='kept'
+          AND f.source IN ('aniall','naver')
+          AND f.target_source IN ('AniList','ReAnime','Onnada','Anissia')
+          AND f.target_id IS NOT NULL AND f.target_id != ''
+          AND ({" OR ".join(extension_checks)})
+        """).fetchall()
 
 
 def identity(source, record_id):

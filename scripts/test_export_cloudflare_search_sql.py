@@ -67,6 +67,33 @@ class CloudflareSearchExportTests(unittest.TestCase):
             self.assertEqual(d1.execute('SELECT COUNT(*) FROM work_aliases').fetchone()[0],len(aliases))
             d1.close()
 
+    def test_v6_packaged_tables_when_runtime_view_absent(self):
+        self.reg.execute('DROP TABLE subtitle_runtime_files_export')
+        self.reg.execute('''CREATE TABLE packaged_files_v6 (
+          pid TEXT, source TEXT, pack_id TEXT, member_path TEXT,
+          original_path TEXT, action TEXT, target_source TEXT,
+          target_id TEXT, review_status TEXT)''')
+        self.reg.execute('CREATE TABLE packaged_archives_v6 (pack_id TEXT PRIMARY KEY)')
+        self.reg.execute('CREATE TABLE subtitle_review_details (pid TEXT PRIMARY KEY, work_title_ko TEXT)')
+        self.reg.execute("INSERT INTO packaged_archives_v6 VALUES ('pack1')")
+        self.reg.executemany('INSERT INTO packaged_files_v6 VALUES (?,?,?,?,?,?,?,?,?)', [
+            ('keep','naver','pack1','subtitles/01.srt','subtitles/01.srt','kept','Onnada','10','confirmed'),
+            ('not-subtitle','naver','pack1','cover.jpg','cover.jpg','kept','Onnada','10','confirmed'),
+            ('discard','naver','pack1','02.srt','02.srt','removed','Onnada','10','confirmed'),
+            ('unmatched','aniall','pack1','03.srt','03.srt','kept','Onnada',None,'hold'),
+            ('wrong-source','anissia','pack1','04.srt','04.srt','kept','Onnada','10','confirmed'),
+            ('other-season','aniall','pack1','01.ass','01.ass','kept','Onnada','11','confirmed'),
+        ])
+        self.reg.executemany('INSERT INTO subtitle_review_details VALUES (?,?)', [
+            ('keep','검수한 제목'),('other-season','다른 시즌')])
+        works, aliases, _, linked = build(self.cat,self.reg)
+        by_id = {w[0]:w for w in works}
+        self.assertEqual(linked,2)
+        self.assertEqual(by_id['db_Onnada_10'][4],1)
+        self.assertEqual(by_id['db_Onnada_11'][4],1)
+        self.assertIn(('db_Onnada_10',normalized_title('검수한 제목')), aliases)
+        self.assertIn(('db_Onnada_11',normalized_title('다른 시즌')), aliases)
+
     def test_unicode_normalization_matches_worker(self):
         self.assertEqual(normalized_title(' ＡＰＩ 연결 테스트☆ '),'api연결테스트☆')
         self.assertEqual(normalized_title('R-15'),'r15')
