@@ -47,7 +47,7 @@ supplies `ANIME_DB_GITHUB_TOKEN` for the private release download.
 Additionally supply **a separate fine-grained GitHub token**
 `ANIME_DB_GITHUB_UPLOAD_TOKEN`, scoped *only* to
 `pingpingjinping/anime-db-download` with **Contents: Read and write**.
-Keep it only in the Pi's root-owner-readable env file; do not paste it
+Keep it in the Pi user's private env file (owner pi, mode 0600); do not paste it
 into chat, logs, GitHub source, or a public commit. GitHub release assets
 are treated as public metadata; NEVER put private paths in them.
 
