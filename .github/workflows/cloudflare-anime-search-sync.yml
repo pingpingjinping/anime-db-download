@@ -60,6 +60,10 @@ jobs:
             --output "$RUNNER_TEMP/cloudflare-search/import.sql" \
             --manifest "$RUNNER_TEMP/cloudflare-search/manifest.json" \
             --max-rows 35000
+      - uses: actions/setup-node@v4
+        if: inputs.mode == 'publish'
+        with:
+          node-version: '22'
       - name: Import reviewed search metadata into Cloudflare D1
         if: inputs.mode == 'publish'
         env:
