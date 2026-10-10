@@ -14,6 +14,7 @@ import pathlib
 import re
 import subprocess
 import sys
+import tempfile
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -68,28 +69,82 @@ def build_manifest(rows, month):
 
 
 def export_rows(streaming_repo):
-    # Local PostgreSQL command uses the existing docker-compose DB credentials.
-    # The SQL does not return relative_path, updated_by or any subtitle filenames.
-    sql = """
-      SELECT json_build_object(
-        'members', array_prepend(l.anime_id,
-          COALESCE((SELECT array_agg(m.anime_id ORDER BY m.anime_id)
-            FROM anime_admin_subtitle_link_members m
-            WHERE m.relative_path=l.relative_path), ARRAY[]::text[])),
-        'title', l.work_title, 'kind', l.subtitle_kind, 'season', l.season
-      )::text
-      FROM anime_admin_subtitle_links l ORDER BY l.anime_id;
-    """
-    command = ["docker", "compose", "exec", "-T", "db", "sh", "-c",
-               'psql -X -q -A -t -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "$1"',
-               "sh", sql]
-    result = subprocess.run(command, cwd=streaming_repo, text=True, capture_output=True)
+    """Ask streaming-project to produce its read-only, path-free PG projection."""
+    script = streaming_repo / "scripts" / "export-reviewed-subtitle-work-links.py"
+    if not script.is_file():
+        raise RuntimeError("Missing streaming-project reviewed link exporter: " + str(script))
+    result = subprocess.run([sys.executable, str(script)], cwd=streaming_repo,
+                            capture_output=True, text=True)
     if result.returncode:
-        # Initial setup may have no administrator-created link tables yet.
-        if 'relation "anime_admin_subtitle_links" does not exist' in result.stderr:
-            return []
-        raise RuntimeError("Unable to export Pi reviewed groups: " + result.stderr[:300])
-    return [json.loads(line) for line in result.stdout.splitlines() if line.strip()]
+        raise RuntimeError("Unable to validate Pi reviewed links: " + result.stderr[:280])
+    rows = json.loads(result.stdout)
+    if not isinstance(rows, list):
+        raise ValueError("Reviewed work exporter did not return an array")
+    return rows
+
+
+def stage_path(month, directory):
+    return pathlib.Path(directory) / ("pi-reviewed-work-groups-" + month + ".json")
+
+
+def prepare_snapshot(streaming_repo, month, directory, *, dry_run=False):
+    """Freeze a sanitized verified snapshot for the independent 04:00 publish."""
+    manifest = build_manifest(export_rows(streaming_repo), month)
+    if dry_run:
+        print("Validated", manifest["count"], "Pi reviewed groups for", month,
+              "(no stage or upload)")
+        return manifest
+    import stat
+    directory = pathlib.Path(directory)
+    directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+    os.chmod(directory, 0o700)
+    target = stage_path(month, directory)
+    manifest["prepared_at_kst"] = dt.datetime.now(
+        dt.timezone(dt.timedelta(hours=9))).isoformat()
+    payload = (json.dumps(manifest, ensure_ascii=False, sort_keys=True,
+                          separators=(",", ":")) + "\n").encode("utf-8")
+    if target.exists():
+        # Prevent an edit after a snapshot has already been prepared/uploaded.
+        if target.read_bytes() != payload:
+            # Prepared time naturally differs; permit byte-identical reviewed
+            # groups only, leaving the original preparation timestamp intact.
+            earlier = json.loads(target.read_text(encoding="utf-8"))
+            earlier.pop("prepared_at_kst", None)
+            manifest2 = dict(manifest)
+            manifest2.pop("prepared_at_kst", None)
+            if earlier != manifest2:
+                raise RuntimeError("This month's prepared Pi review has changed; inspect before republishing")
+        print("Existing verified monthly Pi review stage:", target)
+        return manifest
+    fd, tmp = tempfile.mkstemp(prefix=".pi-reviewed-", suffix=".json", dir=directory)
+    try:
+        with os.fdopen(fd, "wb") as output:
+            output.write(payload)
+            output.flush()
+            os.fsync(output.fileno())
+        os.chmod(tmp, stat.S_IRUSR | stat.S_IWUSR)
+        os.replace(tmp, target)
+    finally:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+    print("Prepared", manifest["count"], "groups for month", month, "at", target)
+    return manifest
+
+
+def load_prepared_snapshot(month, directory, today):
+    """Only a fresh, first-KST-day frozen snapshot may be published."""
+    target = stage_path(month, directory)
+    if not target.is_file():
+        raise RuntimeError("03:00 Pi reviewed snapshot is missing: " + str(target))
+    manifest = json.loads(target.read_text(encoding="utf-8"))
+    from apply_pi_reviewed_groups import checked_manifest
+    checked_manifest(manifest, month)
+    prepared = dt.datetime.fromisoformat(manifest.get("prepared_at_kst", ""))
+    kst = dt.timezone(dt.timedelta(hours=9))
+    prepared = prepared.astimezone(kst)
+    if prepared.date() != today.date() or today.day != 1:
+        raise RuntimeError("Prepared Pi review must come from this month's first KST day")
+    return manifest
 
 
 def api(path, token):
@@ -133,22 +188,37 @@ def upload(manifest, token):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--streaming-repo", type=pathlib.Path, default=pathlib.Path("/home/pi/streaming-project"))
+    parser.add_argument("--streaming-repo", type=pathlib.Path,
+                        default=pathlib.Path("/home/pi/streaming-project"))
+    parser.add_argument("--stage-dir", type=pathlib.Path,
+                        default=pathlib.Path("/home/pi/.local/state/anime-db-download/monthly-reviewed"))
+    operations = parser.add_mutually_exclusive_group()
+    operations.add_argument("--prepare", action="store_true",
+                            help="At 03:00, verify live Pi PostgreSQL links and stage JSON")
+    operations.add_argument("--publish-staged", action="store_true",
+                            help="At 04:00, upload the exactly staged JSON to GitHub")
     parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--force", action="store_true", help="Manual test on a non-last day; still uses the current month")
+    parser.add_argument("--force", action="store_true",
+                        help="Allow a preparation dry-run outside the first day")
     args = parser.parse_args()
     now = dt.datetime.now(dt.timezone(dt.timedelta(hours=9)))
-    if not is_last_day(now) and not args.force:
-        print("Not the last calendar day in Asia/Seoul; skip.")
-        return
-    manifest = build_manifest(export_rows(args.streaming_repo), now.strftime("%Y-%m"))
-    if args.dry_run:
-        print("Validated " + str(manifest["count"]) + " reviewed groups for " + manifest["month"])
-        return
-    token = os.environ.get("ANIME_DB_GITHUB_UPLOAD_TOKEN", "").strip()
-    if not token:
-        raise SystemExit("ANIME_DB_GITHUB_UPLOAD_TOKEN with release contents:write permission is required")
-    upload(manifest, token)
+    if now.day != 1 and not (args.force and args.dry_run and not args.publish_staged):
+        raise SystemExit("Pi monthly reviewed export only runs on the first KST calendar day")
+
+    month = now.strftime("%Y-%m")
+    if args.publish_staged:
+        if args.dry_run:
+            raise SystemExit("--dry-run cannot be used with --publish-staged")
+        manifest = load_prepared_snapshot(month, args.stage_dir, now)
+        token = os.environ.get("ANIME_DB_GITHUB_UPLOAD_TOKEN", "").strip()
+        if not token:
+            raise SystemExit("ANIME_DB_GITHUB_UPLOAD_TOKEN with contents:write is required")
+        upload(manifest, token)
+    else:
+        prepare_snapshot(args.streaming_repo, month, args.stage_dir,
+                         dry_run=args.dry_run)
+
+
 
 
 if __name__ == "__main__":
