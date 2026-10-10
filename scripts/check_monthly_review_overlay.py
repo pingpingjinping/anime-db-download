@@ -4,7 +4,9 @@ import argparse
 import pathlib
 import sqlite3
 import tempfile
-from split_db_v1_release import extract_database
+import sys
+sys.path.insert(0,str(pathlib.Path(__file__).resolve().parents[1]))
+from scripts.split_db_v1_release import extract_database
 
 
 def check(archive, month):
