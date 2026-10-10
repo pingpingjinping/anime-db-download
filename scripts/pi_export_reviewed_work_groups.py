@@ -54,6 +54,10 @@ def build_manifest(rows, month):
         if key in groups and (groups[key]["kind"],groups[key]["season"]) != (kind,season):
             raise ValueError("Same work group has conflicting season or media format")
         for member in members:
+            # One Anikoto listing may intentionally serve multiple TV seasons;
+            # its URL is a non-union reference, unlike core source IDs.
+            if member.startswith("ak_"):
+                continue
             if member in identity_owner and identity_owner[member] != key:
                 raise ValueError("Conflicting manual groups share a source ID: " + member)
             identity_owner[member] = key
