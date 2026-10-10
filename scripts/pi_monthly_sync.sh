@@ -13,6 +13,9 @@ if [[ ! -f "$ARCHIVE_REPO/scripts/pi_import_aniall_matches.py" ]]; then
   exit 1
 fi
 
+echo "=== [preflight] Verified current-month GitHub catalog ==="
+/usr/bin/python3 "$ARCHIVE_REPO/scripts/verify_monthly_release.py"
+
 echo "=== [1/2] Anime DB Release ==="
 /usr/bin/python3 "$STREAMING_REPO/scripts/update-anime-db-release.py"
 
