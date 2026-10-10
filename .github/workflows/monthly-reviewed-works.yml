@@ -52,6 +52,8 @@ jobs:
             --pattern "pi-reviewed-work-groups-$MONTH.json"
           gh release download db-v1 --repo "$GITHUB_REPOSITORY" --dir "$RUNNER_TEMP" \
             --pattern anime_four_sources_multilingual_prepared.zip
+          cp "$RUNNER_TEMP/anime_four_sources_multilingual_prepared.zip" \
+            "$RUNNER_TEMP/anime_four_sources_multilingual_prepared_backup.zip"
       - name: Validate and apply only verified IDs to release overlay
         if: steps.calendar.outputs.run == 'true'
         env:
@@ -66,6 +68,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          gh release upload db-v1 "$RUNNER_TEMP/anime_four_sources_multilingual_prepared_backup.zip" \
+            --repo "$GITHUB_REPOSITORY" --clobber
           gh release upload db-v1 "$RUNNER_TEMP/anime_four_sources_multilingual_prepared.zip" \
             --repo "$GITHUB_REPOSITORY" --clobber
           echo "Verified month-end reviewed SQLite overlay published."
