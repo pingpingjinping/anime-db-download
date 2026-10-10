@@ -1,0 +1,10 @@
+[Unit]
+Description=Upload the Pi 03:00 reviewed DB snapshot on the 1st at 04:00 KST
+
+[Timer]
+OnCalendar=*-*-01 04:00:00 Asia/Seoul
+Persistent=true
+Unit=anime-monthly-review-upload.service
+
+[Install]
+WantedBy=timers.target
