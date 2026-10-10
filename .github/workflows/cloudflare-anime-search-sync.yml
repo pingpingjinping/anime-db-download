@@ -76,6 +76,14 @@ jobs:
             echo 'Missing Cloudflare D1 credentials; configure repository Actions Secrets and Variables.' >&2
             exit 1
           fi
+          # Copy/pasting Account ID into a GitHub Secret can carry a trailing newline.
+          # Strip surrounding whitespace without ever printing the secret to Actions logs.
+          CLOUDFLARE_ACCOUNT_ID="$(python3 -c 'import os; print(os.environ["CLOUDFLARE_ACCOUNT_ID"].strip())')"
+          export CLOUDFLARE_ACCOUNT_ID
+          if [[ ! "$CLOUDFLARE_ACCOUNT_ID" =~ ^[a-fA-F0-9]{32}$ ]]; then
+            echo 'CLOUDFLARE_ACCOUNT_ID must be the 32-character Cloudflare Account ID (not email, account name or Worker domain).' >&2
+            exit 1
+          fi
           cat > "$RUNNER_TEMP/cloudflare-search/wrangler.toml" <<'TOML'
           name = "anime-search-d1-sync"
           compatibility_date = "2026-10-01"
