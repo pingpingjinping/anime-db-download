@@ -53,6 +53,8 @@ def checked_manifest(payload, month):
         if not isinstance(group.get("title"),str) or not 0<len(group["title"])<=300:
             raise ValueError("Invalid work title")
         for member in members:
+            if member.startswith("ak_"):
+                continue  # A single reviewed Anikoto URL can cover several seasons.
             if member in used and used[member] != group["id"]:
                 raise ValueError("Cross-group conflict for " + member)
             used[member] = group["id"]
