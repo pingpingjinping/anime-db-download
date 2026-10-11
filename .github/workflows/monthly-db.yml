@@ -81,7 +81,8 @@ jobs:
           PY
           python3 scripts/check_monthly_review_overlay.py \
             --archive "$RUNNER_TEMP/anime_four_sources_multilingual_prepared.zip" \
-            --month "$MONTH"
+            --month "$MONTH" \
+            --manifest "$RUNNER_TEMP/pi-reviewed-work-groups-$MONTH.json"
           python3 - <<'PY'
           import gzip,os,pathlib,zipfile
           root=pathlib.Path(os.environ["RUNNER_TEMP"])
@@ -109,6 +110,22 @@ jobs:
           python3 scripts/reviewed_matching_guard.py \
             --catalog "$RUNNER_TEMP/anime.db.gz" \
             --registry "$RUNNER_TEMP/anime_reviewed_subtitle_registry_v1.zip"
+      - name: Assert manual ReAnime and Anikoto mappings still match Pi
+        env:
+          MONTH: ${{ steps.calendar.outputs.month }}
+        run: |
+          python3 - <<'PY'
+          import gzip,json,os,pathlib,sqlite3,tempfile,sys
+          sys.path.insert(0,"scripts")
+          from apply_pi_manual_work_matches import assert_overlay
+          root=pathlib.Path(os.environ["RUNNER_TEMP"])
+          manifest=json.loads((root/("pi-reviewed-work-groups-"+os.environ["MONTH"]+".json")).read_text())
+          with tempfile.NamedTemporaryFile(suffix=".sqlite") as target:
+              target.write(gzip.decompress((root/"anime.db.gz").read_bytes()))
+              target.flush()
+              with sqlite3.connect(target.name) as db:
+                  assert_overlay(db,manifest,os.environ["MONTH"])
+          PY
       - name: Repackage and validate completed monthly database
         env:
           MONTH: ${{ steps.calendar.outputs.month }}
