@@ -166,7 +166,8 @@ class CloudflareSearchExportTests(unittest.TestCase):
         # Main titles, caption counts, links and every work identity remain unchanged.
         self.cat.execute("UPDATE entries SET cross_source_ids_json='{}'")
         without_aliases,_,_,_=build(self.cat,self.reg)
-        self.assertEqual(before,without_aliases)
+        self.assertEqual([row[:1]+row[2:] for row in before],
+                         [row[:1]+row[2:] for row in without_aliases])
         self.cat.execute("UPDATE entries SET cross_source_ids_json=? WHERE source='Onnada' AND source_record_id='1073'",(json.dumps({'anilist_ids':['1372','1577']}),))
         self.cat.execute("UPDATE entries SET cross_source_ids_json=? WHERE source='Onnada' AND source_record_id='1001'",(json.dumps({'anilist_ids':['2014']}),))
         works,aliases,_,_=build(self.cat,self.reg)
@@ -175,6 +176,7 @@ class CloudflareSearchExportTests(unittest.TestCase):
         self.assertNotIn(('db_AniList_1372',normalized_title('체포하겠어 SECOND SEASON')),aliases)
         self.assertNotIn(('db_AniList_1577',normalized_title('체포하겠어 SECOND SEASON')),aliases)
         self.assertEqual(next(w for w in works if w[0]=='db_AniList_1372')[5],'/catalog/AniList/1372')
+        self.assertEqual(next(w for w in works if w[0]=='db_AniList_1372')[1],'체포하겠어')
 
     def test_unreviewed_or_explicitly_held_links_do_not_lend_korean_names(self):
         self.add_reviewed_arrest_fixture(status='hold')
@@ -186,7 +188,70 @@ class CloudflareSearchExportTests(unittest.TestCase):
         _,aliases,_,_=build(self.cat,self.reg)
         self.assertNotIn(('db_AniList_1372',normalized_title('체포하겠어')),aliases)
 
+    def test_unique_reanime_card_opens_playable_detail_with_korean_title(self):
+        self.add_reviewed_arrest_fixture()
+        self.reg.execute('''CREATE TABLE subtitle_work_reanime_links(
+            target_source TEXT,target_id TEXT,reanime_id TEXT,automatic_eligible INTEGER)''')
+        self.reg.execute("INSERT INTO subtitle_work_reanime_links VALUES('AniList','1372','slug1',1)")
+        works,aliases,_,_=build(self.cat,self.reg)
+        card=next(w for w in works if w[0]=='re_slug1')
+        self.assertEqual(card[1],'체포하겠어')
+        self.assertEqual(card[5],'/anime/re_slug1')
+        self.assertNotIn('db_AniList_1372',{w[0] for w in works})
+        self.assertIn(('re_slug1',normalized_title("You're Under Arrest! (TV)")),aliases)
+
+    def test_nav_aniall_anissia_cards_merge_only_by_unique_reviewed_ids(self):
+        self.add('AniList','97625','',native='つぐもも')
+        self.add('AniList','108266','',native='継つぐもも')
+        self.add('ReAnime','tsugumomo-first','',native='つぐもも')
+        self.add('ReAnime','tsugumomo-second','',native='継つぐもも')
+        for rid,title in [('1','츠구모모'),('2','계 츠구모모'),('3','츠구모모 OVA')]:
+            self.cat.execute("UPDATE entries SET title_ko=? WHERE source='Anissia' AND source_record_id=?",(title,rid))
+        self.reg.execute('''CREATE TABLE subtitle_work_reanime_links(
+            target_source TEXT,target_id TEXT,reanime_id TEXT,automatic_eligible INTEGER)''')
+        self.reg.executemany('INSERT INTO subtitle_work_reanime_links VALUES(?,?,?,?)',[
+            ('Anissia','1','tsugumomo-first',1),('AniList','97625','tsugumomo-first',1),
+            ('Anissia','2','tsugumomo-second',1),('AniList','108266','tsugumomo-second',1)])
+        self.reg.executemany('INSERT INTO subtitle_runtime_files_export VALUES(?,?,?,?,?,?)',[
+            ('a','aniall','AniList','97625',None,1),('b','naver','AniList','97625',None,1),
+            ('c','naver','AniList','108266',None,1),
+            ('a','aniall','ReAnime','tsugumomo-first',None,1)])
+        works,aliases,_,_=build(self.cat,self.reg)
+        hits={wid for wid,a in aliases if '츠구모모' in a}
+        self.assertEqual(hits,{'ani_1','ani_2','ani_3'})
+        first=next(w for w in works if w[0]=='ani_1')
+        self.assertEqual(first[1],'츠구모모')
+        self.assertEqual(first[3],'AniAll · 네이버 · 애니시아')
+        self.assertEqual(first[4],5)  # two unique local pids + three Anissia captions
+        self.assertEqual(first[5],'/anime/ani_1')
+        self.assertIn(('ani_1',normalized_title('つぐもも')),aliases)
+        self.assertIn(('ani_2',normalized_title('継つぐもも')),aliases)
+
+    def test_ambiguous_or_ineligible_links_do_not_collapse_separate_works(self):
+        self.add_reviewed_arrest_fixture()
+        self.reg.execute('''CREATE TABLE subtitle_work_reanime_links(
+            target_source TEXT,target_id TEXT,reanime_id TEXT,automatic_eligible INTEGER)''')
+        self.reg.executemany('INSERT INTO subtitle_work_reanime_links VALUES(?,?,?,?)',[
+            ('AniList','1372','slug1',1),('AniList','1372','unknown-other-season',1),
+            ('AniList','1577','slug1',0)])
+        works,_,_,_=build(self.cat,self.reg)
+        ids={w[0] for w in works}
+        self.assertIn('db_AniList_1372',ids)
+        self.assertIn('db_AniList_1577',ids)
+
+    def test_multiple_anissia_registrations_do_not_choose_one_arbitrarily(self):
+        self.reg.execute('''CREATE TABLE subtitle_work_reanime_links(
+            target_source TEXT,target_id TEXT,reanime_id TEXT,automatic_eligible INTEGER)''')
+        self.reg.executemany('INSERT INTO subtitle_work_reanime_links VALUES(?,?,?,?)',[
+            ('Anissia','1','slug1',1),('Anissia','2','slug1',1),('AniList','30','slug1',1)])
+        self.reg.execute("INSERT INTO subtitle_runtime_files_export VALUES('file','naver','AniList','30',NULL,1)")
+        works,_,_,_=build(self.cat,self.reg)
+        ids={w[0] for w in works}
+        self.assertTrue({'ani_1','ani_2','re_slug1'}<=ids)
+        self.assertNotIn('db_AniList_30',ids)
+
 
 if __name__=='__main__':
     unittest.main()
+
 

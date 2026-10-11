@@ -1,0 +1,29 @@
+name: Verify reviewed search cards against published DB
+on:
+  pull_request:
+    paths:
+      - scripts/export_cloudflare_search_sql.py
+      - scripts/verify_reviewed_search_cards.py
+      - scripts/audit_search_card_projection.py
+      - .github/workflows/verify-reviewed-search-cards.yml
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download existing reviewed release and base exporter
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir -p search-card-input
+          gh release download db-v1 --repo "$GITHUB_REPOSITORY" --pattern anime_four_sources_multilingual_prepared.zip --pattern anime_reviewed_subtitle_registry_v1.zip --dir search-card-input
+          gh api "repos/$GITHUB_REPOSITORY/contents/scripts/export_cloudflare_search_sql.py?ref=${{ github.event.pull_request.base.sha }}" --jq .content | base64 --decode > search-card-input/baseline_export.py
+      - name: Verify canonical routes, Korean names, season separation and retained aliases
+        run: |
+          python scripts/extract_cloudflare_search_releases.py search-card-input/anime_four_sources_multilingual_prepared.zip search-card-input/catalog.db
+          python scripts/extract_cloudflare_search_releases.py search-card-input/anime_reviewed_subtitle_registry_v1.zip search-card-input/registry.db
+          python scripts/verify_reviewed_search_cards.py --catalog search-card-input/catalog.db --registry search-card-input/registry.db --baseline search-card-input/baseline_export.py
+      - name: Audit every published card, subtitle PID, provider and prior alias
+        run: |
+          python scripts/audit_search_card_projection.py --catalog search-card-input/catalog.db --registry search-card-input/registry.db --baseline search-card-input/baseline_export.py
