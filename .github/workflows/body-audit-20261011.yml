@@ -1,20 +1,25 @@
-name: Inspect body-reviewed release mappings
+name: Build body-reviewed release 20261011
 on:
   push:
-    branches: ['codex/body-audit-release-20261011']
+    branches: [codex/body-audit-release-20261011]
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  inspect:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Download current split release
+      - name: Download pinned release inputs
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          mkdir -p "$RUNNER_TEMP/review-input"
-          gh release download db-v1 --repo "$GITHUB_REPOSITORY" --pattern anime_four_sources_multilingual_prepared.zip --pattern anime_reviewed_subtitle_registry_v1.zip --dir "$RUNNER_TEMP/review-input"
-      - name: Inspect exact reviewed keys without publishing
-        run: python3 scripts/inspect_audit_release_20261011.py "$RUNNER_TEMP/review-input"
+          mkdir -p body-input
+          gh release download db-v1 --repo "$GITHUB_REPOSITORY" --pattern anime_four_sources_multilingual_prepared.zip --pattern anime_reviewed_subtitle_registry_v1.zip --dir body-input
+      - name: Build and verify exact body corrections
+        run: python scripts/build_body_audit_release_20261011.py --input body-input --output body-output
+      - uses: actions/upload-artifact@v4
+        with:
+          name: body-audit-20261011-build
+          path: body-output/
+          retention-days: 30

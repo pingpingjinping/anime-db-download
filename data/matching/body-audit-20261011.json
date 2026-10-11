@@ -45,6 +45,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "095745659e56515f1854afc88013c64825cbcf7e3b5e149aa905c5d31b7ebb78",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제06화ns.smi",
+        "sha256": "d909a31320a0262dabae43fc68800ce79eb33ec1c224c9c7e1adb172d21d0e35",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"de37dd8baedc9793bcbf40e8\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제06화ns.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"kiss×sis 제6화\"], \"body_sha256\": \"18549f7406b92aaf6a9a35131d602d99b0b151fae49de0d3b1d3ed3a216d10a2\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 66941, \"reason\": \"[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -90,6 +109,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "11899b3fc99363e6124bd9c070a519a118818fa451cad14e2dc736c7c7d2532d",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제02화ns.smi",
+        "sha256": "dbfdd867e7851ebca36817842682cdf3d7669cf9bdecf9a1bb584ddd2d91011e",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"62ca4aea96193a80c05e36b0\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제02화ns.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"kiss×sis 제2화\"], \"body_sha256\": \"f91b4403c379ea6f90d2784cb8eb0d22205585684b2ba59bde53c445804e910d\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 66933, \"reason\": \"[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -135,6 +173,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "3518ab4fc2fb9fc811a1a7caf978cd8d0a4f93ece04cffd70bfa779356333c0a",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제07화ns.smi",
+        "sha256": "b1cd1f9829d9fc3f93e5fe429db9bc751eefc7d53de6479a74099e3ebce7e719",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"21216d6096e5b0b48d6814f0\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제07화ns.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"kiss×sis 제6화\"], \"body_sha256\": \"a56720c66fa6792121d8e842d91dee69d9a24b5de0cffe528ed918001f69dc45\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 66943, \"reason\": \"[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -180,6 +237,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "6b76c81df7cd31bcee0751464ba46d108f467dd2f524a22b062164da351ca483",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제04화ns.smi",
+        "sha256": "093f6c98411ecd4a30cff767b4859df7d065e79e8f65e583e675fbf34003cbde",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"eeb45944072c7cf739863054\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제04화ns.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"kiss×sis 제4화\"], \"body_sha256\": \"e200a9589d2673a311420f7ddd7571af72393ef87d5558bdb50a0112afa899b6\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 66937, \"reason\": \"[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -225,6 +301,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "7ce85307a3a930f7b90671387e84fdd147213c4a3ccb492cbc743aa2d14aa2a7",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제11화ns.smi",
+        "sha256": "2e32162b808379ec6d92c1ba1edcaaaceb8e0ce3d1c452e4968f918b5c2716d5",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"b171e09fc03e943ed5c8fa0b\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제11화ns.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"kiss×sis 제11화\"], \"body_sha256\": \"43bf0d8464a3b0b30a1e3098c1c3245e9b6e998e7d2966965851daeba40edb28\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 66927, \"reason\": \"[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -270,6 +365,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "ad29a2b9cbda1b87c55bf15b47d5d8b22fa36916921cec007ee1c3d3af71eff5",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제09화ns.smi",
+        "sha256": "db669ae4557d1eb01b9c317852d5565c50f8396ab5e3a88a52420394c9e3b4cd",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"057e958847f624151af2c48b\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제09화ns.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"kiss×sis 제9화\"], \"body_sha256\": \"5bf3be545578e37ef8c2edcec19c331bad3bd1be0357299cbf02b8afd7293cf2\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 66947, \"reason\": \"[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -315,6 +429,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "b59e4e7ebcec5b9454561fc2fa94ef333623846ce50906b07bed7ef207b95c2a",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제08화ns.smi",
+        "sha256": "8a3fd290351198922c108509e45905995a21f946ab0d183ef5475079abe35a43",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"3db835fa55d5a51fa22ef76a\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제08화ns.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"kiss×sis 제8화\"], \"body_sha256\": \"e301a2ad4e082618d02e37539b2eff57d76d9f7aca332009db1d97716ca9824a\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 66945, \"reason\": \"[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -360,6 +493,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "b8959da4f8c8ed5547b7cc9c1eedb7fe29f24c4999359212249527b37697a3c0",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제10화ns.smi",
+        "sha256": "f006e819f0cce7213f0f2d133a65d2caba4b7c9eef072740b45580a1c90e7fae",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"1701c6b8d5dde5c0554939ec\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제10화ns.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"kiss×sis 제10화\"], \"body_sha256\": \"f43489389c9ba90a2a9ee0a10af32f14c616763d6cb4baccef5b8a6114e09964\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 66949, \"reason\": \"[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -405,6 +557,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "bc855618367b83a2c5fa9114e63dc08b1e92d0b7d93ab6227c46037cb08b7013",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제12화ns.smi",
+        "sha256": "aa364c2ac246018a7f8d7a1cbc61052fefbb0f2b0c45dccd5143eee62fadd5bb",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"868296f0c3e1264570254de3\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제12화ns.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"kiss×sis 제12화\"], \"body_sha256\": \"373bd867487dd7c46051a8b9ee4748b78a837b774d13bd8a2fcefef61dbde606\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 66929, \"reason\": \"[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -450,6 +621,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "bd9424bfc192680445566f875f2a9203991f665950a0179d80e55aa7129d240e",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제03화ns.smi",
+        "sha256": "18a18afe99d38a2dc9e1787a3deea706026aa0e167080cca4a50b9c9aa7e19dd",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"1100d0736657395398d5aa44\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제03화ns.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"kiss×sis 제3화\"], \"body_sha256\": \"db88d191881c855650591a882ed62ac631db52f9898b07017241334b56242ec6\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 66935, \"reason\": \"[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -495,6 +685,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "c867b380cbb5a84e09b3d596602111c0f49897b174478c35aec4bd0115f69dbc",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제05화ns.smi",
+        "sha256": "fc628573b9d489b52103e9bbe2066e0c33397a40b1d71d757318d0097745fa06",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"f236a9fd98690adf61e2fa6b\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제05화ns.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"kiss×sis 제5화\"], \"body_sha256\": \"b9a73a2a8cbfec6bef130c45d468b70664623276530c2a69c4fdd7f6eb0a0285\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 66939, \"reason\": \"[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -540,6 +749,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "e187f31c35bde6fb50a09c99776b3c73b2b9190c801317d670cb017c702bfe45",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제01화ns.smi",
+        "sha256": "a6eba00d18d3e3743e575cb7e4cf54f4b94c48dc68a21a80bfbdae4be93adc97",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"0f7103d47124ad7f6e88f616\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제01화ns.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"kiss×sis 제1화\"], \"body_sha256\": \"c7cb1cc68839c0a81992421dfdc8caad1d02272eeabebf57160367ba8feea32b\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 66931, \"reason\": \"[CSV 수정 2026-10-11] kiss×sis TV/OVA 확정 회차 충돌과 동일 SHA의 자막. 실제 판본 확인 전 연결 보류. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -585,6 +813,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "02f71b5fd8ff0308dc7d834ece673ef786cba18ea04fd806e5db2782958bcc23",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제06화s.smi",
+        "sha256": "e67f98608d7736af6d07c9d79ad1790babcf98dd5cec0bad16b5519dfb643f91",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"44f0499e63959edcef87be92\"]",
+        "target_source": "AniList",
+        "target_id": "5042",
+        "review_status": "confirmed_exact_title_v6",
+        "reason": "실제 파일명·내부 제목 또는 단일 폴더 제목이 원래 DB 제목과 일치. 시즌·형식 충돌 없음",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제06화s.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\":[\"kiss×sis 제6화\"],\"body_sha256\":\"18549f7406b92aaf6a9a35131d602d99b0b151fae49de0d3b1d3ed3a216d10a2\"}"
       }
     },
     {
@@ -630,6 +877,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "1045b936da404211614d672d01d8fadb7c446b581f327136ab8ebda4fc307855",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제09화s.smi",
+        "sha256": "f82188b904376e3933a5c44d14e40a2bebabfbd92ea62964946927b7d7827cad",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"3a325b9c2a2b39d1cace187e\"]",
+        "target_source": "AniList",
+        "target_id": "5042",
+        "review_status": "confirmed_exact_title_v6",
+        "reason": "실제 파일명·내부 제목 또는 단일 폴더 제목이 원래 DB 제목과 일치. 시즌·형식 충돌 없음",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제09화s.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\":[\"kiss×sis 제9화\"],\"body_sha256\":\"5bf3be545578e37ef8c2edcec19c331bad3bd1be0357299cbf02b8afd7293cf2\"}"
       }
     },
     {
@@ -675,6 +941,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "16edb3e1e5c498e49a9ed72227782ca951e75b034ff7cf57d594d1f581549cfa",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제03화s.smi",
+        "sha256": "c28ee0650545bef213805344f9eb4ad7d55445eb41feac2bf6403a94fafc4fe4",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"8c7d61f578f53fb67c081286\"]",
+        "target_source": "AniList",
+        "target_id": "5042",
+        "review_status": "confirmed_exact_title_v6",
+        "reason": "실제 파일명·내부 제목 또는 단일 폴더 제목이 원래 DB 제목과 일치. 시즌·형식 충돌 없음",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제03화s.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\":[\"kiss×sis 제3화\"],\"body_sha256\":\"db88d191881c855650591a882ed62ac631db52f9898b07017241334b56242ec6\"}"
       }
     },
     {
@@ -720,6 +1005,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "18a9aa7f098fdcf887c2adbcaad5edfac976360d435fccf21dd0ec2e3a13d661",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제12화s.smi",
+        "sha256": "20e95a9da1c086c8a40349b31cb3619ff70822239ee1a56ac4791b9b3e96d1e2",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"5abf96467e9ef2b746bb6d58\"]",
+        "target_source": "AniList",
+        "target_id": "5042",
+        "review_status": "confirmed_exact_title_v6",
+        "reason": "실제 파일명·내부 제목 또는 단일 폴더 제목이 원래 DB 제목과 일치. 시즌·형식 충돌 없음",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제12화s.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\":[\"kiss×sis 제12화\"],\"body_sha256\":\"373bd867487dd7c46051a8b9ee4748b78a837b774d13bd8a2fcefef61dbde606\"}"
       }
     },
     {
@@ -765,6 +1069,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "4880c5d0b34d3d14a52ca3cc3b103960ed38418950c681b995f7ad85fbf3c6aa",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제04화s.smi",
+        "sha256": "16d52b94324e702c4b55b69570467545940f3be3d641579574107f40e8225ccf",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"fccbc2e80810de126aec5190\"]",
+        "target_source": "AniList",
+        "target_id": "5042",
+        "review_status": "confirmed_exact_title_v6",
+        "reason": "실제 파일명·내부 제목 또는 단일 폴더 제목이 원래 DB 제목과 일치. 시즌·형식 충돌 없음",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제04화s.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\":[\"kiss×sis 제4화\"],\"body_sha256\":\"e200a9589d2673a311420f7ddd7571af72393ef87d5558bdb50a0112afa899b6\"}"
       }
     },
     {
@@ -810,6 +1133,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "49d755e19597d599a460c8e8b2171791bdfb5223db816fe928fd5205d700ff0e",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제10화s.smi",
+        "sha256": "79614ed3e73126e188125cd6a5a0c46dc8d4de6b38879f5dfbeac3c01136c0bb",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"2cedef8d98546b72efaf9816\"]",
+        "target_source": "AniList",
+        "target_id": "5042",
+        "review_status": "confirmed_exact_title_v6",
+        "reason": "실제 파일명·내부 제목 또는 단일 폴더 제목이 원래 DB 제목과 일치. 시즌·형식 충돌 없음",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제10화s.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\":[\"kiss×sis 제10화\"],\"body_sha256\":\"f43489389c9ba90a2a9ee0a10af32f14c616763d6cb4baccef5b8a6114e09964\"}"
       }
     },
     {
@@ -855,6 +1197,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "6a6b9840233dd5e40fbcd500e8bdeb95212d085413ab82da66cfedf884981d21",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제11화s.smi",
+        "sha256": "ef9c8f5e24a122cc8b28e4ce8b51c262db8471c27ecb3e308086d08971389a19",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"6cad0d60e6af03d7e758250a\"]",
+        "target_source": "AniList",
+        "target_id": "5042",
+        "review_status": "confirmed_exact_title_v6",
+        "reason": "실제 파일명·내부 제목 또는 단일 폴더 제목이 원래 DB 제목과 일치. 시즌·형식 충돌 없음",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제11화s.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\":[\"kiss×sis 제11화\"],\"body_sha256\":\"43bf0d8464a3b0b30a1e3098c1c3245e9b6e998e7d2966965851daeba40edb28\"}"
       }
     },
     {
@@ -900,6 +1261,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "a877d3c9009b581b596ce8b521a317c83bd809381f64cebdc35edbf74efb0def",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제05화s.smi",
+        "sha256": "e4fe8817fe114ad7f5b70b676d39b38ac1317f58979db799f61706b16ad2e403",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"34564d7c8c4311041e315fec\"]",
+        "target_source": "AniList",
+        "target_id": "5042",
+        "review_status": "confirmed_exact_title_v6",
+        "reason": "실제 파일명·내부 제목 또는 단일 폴더 제목이 원래 DB 제목과 일치. 시즌·형식 충돌 없음",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제05화s.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\":[\"kiss×sis 제5화\"],\"body_sha256\":\"b9a73a2a8cbfec6bef130c45d468b70664623276530c2a69c4fdd7f6eb0a0285\"}"
       }
     },
     {
@@ -945,6 +1325,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "ac2e1cab9a2d4bd053cd033724d38bef65180e7dcc519fc26c13571e827b2be8",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제02화s.smi",
+        "sha256": "9c3faefdf0e10438786deeb0c415611833dec2758493a7af3385c2b85e73c005",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"4f590830e072bbe80f1006ab\"]",
+        "target_source": "AniList",
+        "target_id": "5042",
+        "review_status": "confirmed_exact_title_v6",
+        "reason": "실제 파일명·내부 제목 또는 단일 폴더 제목이 원래 DB 제목과 일치. 시즌·형식 충돌 없음",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제02화s.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\":[\"kiss×sis 제2화\"],\"body_sha256\":\"f91b4403c379ea6f90d2784cb8eb0d22205585684b2ba59bde53c445804e910d\"}"
       }
     },
     {
@@ -990,6 +1389,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "ae87909bff6baf9745bf2833ff7b822d2e397f88d0e7a2482d9b6dbb34e4313b",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제01화s.smi",
+        "sha256": "795b93f19c1db3d1a2ba1189605c75d48f1a708b213c9e9cae932b056dee65b6",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"ffc770987a9a88b28e9f3516\"]",
+        "target_source": "AniList",
+        "target_id": "5042",
+        "review_status": "confirmed_exact_title_v6",
+        "reason": "실제 파일명·내부 제목 또는 단일 폴더 제목이 원래 DB 제목과 일치. 시즌·형식 충돌 없음",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제01화s.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\":[\"kiss×sis 제1화\"],\"body_sha256\":\"c7cb1cc68839c0a81992421dfdc8caad1d02272eeabebf57160367ba8feea32b\"}"
       }
     },
     {
@@ -1035,6 +1453,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "c8b0bac95b3262264d63a16895be84c8d0b7894a7f8141916be1c0324e9a88f1",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제08화s.smi",
+        "sha256": "cdfa1529f190b36c77d45e686793926dd2cf63a8d5426a4e6c372682e63fbe49",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"3d724b2e0d2f197f0ec54ec1\"]",
+        "target_source": "AniList",
+        "target_id": "5042",
+        "review_status": "confirmed_exact_title_v6",
+        "reason": "실제 파일명·내부 제목 또는 단일 폴더 제목이 원래 DB 제목과 일치. 시즌·형식 충돌 없음",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제08화s.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\":[\"kiss×sis 제8화\"],\"body_sha256\":\"e301a2ad4e082618d02e37539b2eff57d76d9f7aca332009db1d97716ca9824a\"}"
       }
     },
     {
@@ -1080,6 +1517,25 @@
         "reanime_id": "kiss-sis-tv-nq4rh6",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "cd64e42f91b286bcb5ab83509618380f626207b27e3f16898a2e7d8231118cc8",
+        "source": "naver",
+        "drive_id": "1jN3bobsF6tuXhiy-aIwe0uzkhIpUep6x",
+        "outer_zip": "001.zip",
+        "original_path": "221416300138 (０４０)__kiss×sis_all.zip!/kiss×sis 제07화s.smi",
+        "sha256": "7823a608a4e956b9b037ca301e85aee5fd794747e48eba70cb074c0a7a365a02",
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_ids_json": "[\"e3f84996aebccd7b97de93c7\"]",
+        "target_source": "AniList",
+        "target_id": "5042",
+        "review_status": "confirmed_exact_title_v6",
+        "reason": "실제 파일명·내부 제목 또는 단일 폴더 제목이 원래 DB 제목과 일치. 시즌·형식 충돌 없음",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:2895324462324c99d9eee60e",
+        "member_path": "원본_73258484be/자막/kiss×sis 제07화s.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\":[\"kiss×sis 제6화\"],\"body_sha256\":\"a56720c66fa6792121d8e842d91dee69d9a24b5de0cffe528ed918001f69dc45\"}"
       }
     },
     {
@@ -1125,6 +1581,25 @@
         "reanime_id": "kizumonogatari-part-3-reiketsu-byfa6f",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "ea77901cb7830afba10d6fde57932bf9dbe30d7e1c1ad9872456f9e472a7111c",
+        "source": "aniall",
+        "drive_id": "1hPAKzx6hHAx0IvzPcu_esykR5z9ziLjy",
+        "outer_zip": "001.zip",
+        "original_path": "02. 키즈모노가타리_자막/02. Kizumonogatari.zip!/Kizumonogatari II - Nekketsu-hen.smi",
+        "sha256": "22c5eac5626e6368a0edf123f8d681cac08bf0cfa406fb01a10184b940340787",
+        "bundle_id": "aniall:7d89706bd58e09bf3cfbf45a",
+        "file_ids_json": "[\"8f11c088bafa722a02b5c922\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] 동일 SHA가 다른 영화/본편·0화/매너 영상에 동시에 확정됨. 실제 본문·타임라인 확인 전 양쪽 연결 보류. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:aniall:1c533835a026a5d05b44d127",
+        "member_path": "원본_7d89706bd5/자막/Kizumonogatari II - Nekketsu-hen.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"자막 제목 with Caption Creator 4\"], \"body_sha256\": \"2d5fd8b8feccd561610be81d5218a16034f17f77065a3bffe5dd07519d6d2bef\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 96622, \"reason\": \"[CSV 수정 2026-10-11] 동일 SHA가 다른 영화/본편·0화/매너 영상에 동시에 확정됨. 실제 본문·타임라인 확인 전 양쪽 연결 보류. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -1170,6 +1645,25 @@
         "reanime_id": "kizumonogatari-part-2-nekketsu-3cptc9",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "8861671fba9919edc42e39238f7320532f92624cfa50336785c4fa6dff797ffd",
+        "source": "aniall",
+        "drive_id": "1tzL4hShNcyT11DZY4r2jR6aAkPwAECpV",
+        "outer_zip": "003.zip",
+        "original_path": "[ReinForce] 키즈모노가타리 (BDRip 1920x816 x264 FLAC)_자막/[ReinForce] Kizumonogatari (BDRip 1920x816 x264 FLAC).zip!/[ReinForce] Kizumonogatari ~Nekketsu-hen~ (BDRip 1920x816 x264 FLAC).smi",
+        "sha256": "2d9fcf673d557bac2b051891ad240b0c968aa3a1e8264eff5bbdb51290bc356b",
+        "bundle_id": "aniall:219792b2faefecc9c580646f",
+        "file_ids_json": "[\"cade2d9541ed9a07a5ab2675\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] 동일 SHA가 다른 영화/본편·0화/매너 영상에 동시에 확정됨. 실제 본문·타임라인 확인 전 양쪽 연결 보류. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:aniall:1c533835a026a5d05b44d127",
+        "member_path": "원본_219792b2fa/자막/[ReinForce] Kizumonogatari ~Nekketsu-hen~ (BDRip 1920x816 x264 FLAC).smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"자막 제목 with Caption Creator 4\"], \"body_sha256\": \"a0d14fb3a27687c9afa1b0955177eb08ba614885196f32513232fb5ee2cac26a\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 90146, \"reason\": \"[CSV 수정 2026-10-11] 동일 SHA가 다른 영화/본편·0화/매너 영상에 동시에 확정됨. 실제 본문·타임라인 확인 전 양쪽 연결 보류. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -1215,6 +1709,25 @@
         "reanime_id": "kizumonogatari-part-2-nekketsu-3cptc9",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "7c90ccd5bbf7650ed33999cb870956e4856b1d3ba7f7fc3f6aacdfb349d766de",
+        "source": "aniall",
+        "drive_id": "1hPAKzx6hHAx0IvzPcu_esykR5z9ziLjy",
+        "outer_zip": "001.zip",
+        "original_path": "02. 키즈모노가타리_자막/02. Kizumonogatari.zip!/Kizumonogatari III - Reiketsu-hen.smi",
+        "sha256": "2d9fcf673d557bac2b051891ad240b0c968aa3a1e8264eff5bbdb51290bc356b",
+        "bundle_id": "aniall:7d89706bd58e09bf3cfbf45a",
+        "file_ids_json": "[\"9f7c01f3da4133fc1aacf553\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] 동일 SHA가 다른 영화/본편·0화/매너 영상에 동시에 확정됨. 실제 본문·타임라인 확인 전 양쪽 연결 보류. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:aniall:be25ca30f1608788d4b36e73",
+        "member_path": "원본_7d89706bd5/자막/Kizumonogatari III - Reiketsu-hen.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"자막 제목 with Caption Creator 4\"], \"body_sha256\": \"a0d14fb3a27687c9afa1b0955177eb08ba614885196f32513232fb5ee2cac26a\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 96623, \"reason\": \"[CSV 수정 2026-10-11] 동일 SHA가 다른 영화/본편·0화/매너 영상에 동시에 확정됨. 실제 본문·타임라인 확인 전 양쪽 연결 보류. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -1260,6 +1773,25 @@
         "reanime_id": "kizumonogatari-part-3-reiketsu-byfa6f",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "a761d8edcfa79bc3816467b3671961961995c4902023d63f5d5869d3cdca11de",
+        "source": "aniall",
+        "drive_id": "1tzL4hShNcyT11DZY4r2jR6aAkPwAECpV",
+        "outer_zip": "003.zip",
+        "original_path": "[ReinForce] 키즈모노가타리 (BDRip 1920x816 x264 FLAC)_자막/[ReinForce] Kizumonogatari (BDRip 1920x816 x264 FLAC).zip!/[ReinForce] Kizumonogatari ~Reiketsu-hen~ (BDRip 1920x816 x264 FLAC).smi",
+        "sha256": "22c5eac5626e6368a0edf123f8d681cac08bf0cfa406fb01a10184b940340787",
+        "bundle_id": "aniall:219792b2faefecc9c580646f",
+        "file_ids_json": "[\"29ef253a5a4e3c4c89082e11\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] 동일 SHA가 다른 영화/본편·0화/매너 영상에 동시에 확정됨. 실제 본문·타임라인 확인 전 양쪽 연결 보류. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:aniall:be25ca30f1608788d4b36e73",
+        "member_path": "원본_219792b2fa/자막/[ReinForce] Kizumonogatari ~Reiketsu-hen~ (BDRip 1920x816 x264 FLAC).smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"자막 제목 with Caption Creator 4\"], \"body_sha256\": \"2d5fd8b8feccd561610be81d5218a16034f17f77065a3bffe5dd07519d6d2bef\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 90147, \"reason\": \"[CSV 수정 2026-10-11] 동일 SHA가 다른 영화/본편·0화/매너 영상에 동시에 확정됨. 실제 본문·타임라인 확인 전 양쪽 연결 보류. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -1305,6 +1837,25 @@
         "reanime_id": "non-non-biyori-2c6v77",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "b9e0563840ab84323724c4f792ed30e8bc1627ce1dd7118d6699f6bfc5426b0a",
+        "source": "naver",
+        "drive_id": "1n55kcQuxdZj23GXJX0clBO-PqZIp8xqG",
+        "outer_zip": "005.zip",
+        "original_path": "222277227749 (２０８)__[BD] non non.zip!/[BD] non non 01.smi",
+        "sha256": "b67be163e8da596aa257d846063fef02a2788dc89e1fc169057a99903ef75771",
+        "bundle_id": "naver:49e8f23db3f4c7ace63cd27c",
+        "file_ids_json": "[\"792a424485a2dd0f5574bdf9\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:faa13a404d1847e38af4799d",
+        "member_path": "원본_a936ee760b/자막/[BD] non non 01.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"불량기념물 자막 185th\"], \"body_sha256\": \"6af8e9f0c14a41722bca27b5980e7d6aa0a9a29ea964f338031fd178d5c365b9\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 57307, \"reason\": \"[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -1350,6 +1901,25 @@
         "reanime_id": "non-non-biyori-2c6v77",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "bee0f004d61f4fe4eaddbf2ab7b4edd7978d9c793dd390dc0c6d6c88881b2e58",
+        "source": "naver",
+        "drive_id": "1n55kcQuxdZj23GXJX0clBO-PqZIp8xqG",
+        "outer_zip": "005.zip",
+        "original_path": "222277227749 (２０８)__[BD] non non.zip!/[BD] non non 02.smi",
+        "sha256": "3c397c9d0cee18477b96bcd100d2dd713e9ea52afb4da731024823f199de3795",
+        "bundle_id": "naver:49e8f23db3f4c7ace63cd27c",
+        "file_ids_json": "[\"c8706476c6f30e5134f9a7fd\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:faa13a404d1847e38af4799d",
+        "member_path": "원본_a936ee760b/자막/[BD] non non 02.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"불량기념물 자막 188th\"], \"body_sha256\": \"93e3cb0f4822090346a6a352efe462d5b26d8b993ab4e4807239bebcfbf239a3\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 57308, \"reason\": \"[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -1395,6 +1965,25 @@
         "reanime_id": "non-non-biyori-2c6v77",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "1c50eb9ae5d1d29c9b7b5ab189c391ae1d6610ba57ad67bcf3a2bbbcc295cc5e",
+        "source": "naver",
+        "drive_id": "1n55kcQuxdZj23GXJX0clBO-PqZIp8xqG",
+        "outer_zip": "005.zip",
+        "original_path": "222277227749 (２０８)__[BD] non non.zip!/[BD] non non 03.smi",
+        "sha256": "3ef4c4520010bc34990fe517ed9d11f6706b46dbe7bb98a71639c9c99b63537a",
+        "bundle_id": "naver:49e8f23db3f4c7ace63cd27c",
+        "file_ids_json": "[\"82b6c5b512b54ff2c669989c\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:faa13a404d1847e38af4799d",
+        "member_path": "원본_a936ee760b/자막/[BD] non non 03.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"불량기념물 자막 192nd\"], \"body_sha256\": \"241235103c453fe5a3155490abe27d0759aa96d1f563b311de51f23f949fc79a\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 57309, \"reason\": \"[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -1440,6 +2029,25 @@
         "reanime_id": "non-non-biyori-2c6v77",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "1df10af65ff2ed40a15bf9959c93fecffdb2a1446ec453df54ae2e5caa73b2a1",
+        "source": "naver",
+        "drive_id": "1n55kcQuxdZj23GXJX0clBO-PqZIp8xqG",
+        "outer_zip": "005.zip",
+        "original_path": "222277227749 (２０８)__[BD] non non.zip!/[BD] non non 04.smi",
+        "sha256": "86bc64100300336bd84c91742a89f05e41b29481f3891bac1168efccce057ccd",
+        "bundle_id": "naver:49e8f23db3f4c7ace63cd27c",
+        "file_ids_json": "[\"d46e6f11566d859ca9153b2c\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:faa13a404d1847e38af4799d",
+        "member_path": "원본_a936ee760b/자막/[BD] non non 04.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"불량기념물 자막 195th\"], \"body_sha256\": \"ddc07f217b6a1a5e33c75e202903f69e35ebc34ce14e9d8f23e2e78b08891ecf\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 57310, \"reason\": \"[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -1485,6 +2093,25 @@
         "reanime_id": "non-non-biyori-2c6v77",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "a2edf6c7070ed0f02a622b126f1c6bb9e09ebe3d907139a4d1a6deb274479e7a",
+        "source": "naver",
+        "drive_id": "1n55kcQuxdZj23GXJX0clBO-PqZIp8xqG",
+        "outer_zip": "005.zip",
+        "original_path": "222277227749 (２０８)__[BD] non non.zip!/[BD] non non 05.smi",
+        "sha256": "5d84969fead75bffd883c3f3888fbd1e1b0f4c6af4fd39e94ad3ab4f82b7adee",
+        "bundle_id": "naver:49e8f23db3f4c7ace63cd27c",
+        "file_ids_json": "[\"abc47143aac1c7a4974f7c9d\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:faa13a404d1847e38af4799d",
+        "member_path": "원본_a936ee760b/자막/[BD] non non 05.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"불량기념물 자막 198th\"], \"body_sha256\": \"9da50884a446b71f12fe7acc92b55935adc19f18ab664b216a5f8bb947e25a0d\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 57311, \"reason\": \"[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -1530,6 +2157,25 @@
         "reanime_id": "non-non-biyori-2c6v77",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "90d0dbc63c82b6b6c5df238fc8bdc98e62b078ab69bfebaea98f0f92a93a91f4",
+        "source": "naver",
+        "drive_id": "1n55kcQuxdZj23GXJX0clBO-PqZIp8xqG",
+        "outer_zip": "005.zip",
+        "original_path": "222277227749 (２０８)__[BD] non non.zip!/[BD] non non 06.smi",
+        "sha256": "ab9b342b608a7152f26d85564cceed975e7e76818045426c582c237358939780",
+        "bundle_id": "naver:49e8f23db3f4c7ace63cd27c",
+        "file_ids_json": "[\"064eee4ced0c76ad9b7ac8ac\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:faa13a404d1847e38af4799d",
+        "member_path": "원본_a936ee760b/자막/[BD] non non 06.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"불량기념물 자막 201st\"], \"body_sha256\": \"de39536d9d0f17270ee2bdbce8409ae433f530e991176d0838aa835ef6e66950\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 57312, \"reason\": \"[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -1575,6 +2221,25 @@
         "reanime_id": "non-non-biyori-2c6v77",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "ba016241daed9ddad9ac44d7be474c70083321bf045ce1e0ad416eb029fd031f",
+        "source": "naver",
+        "drive_id": "1n55kcQuxdZj23GXJX0clBO-PqZIp8xqG",
+        "outer_zip": "005.zip",
+        "original_path": "222277227749 (２０８)__[BD] non non.zip!/[BD] non non 07.smi",
+        "sha256": "38f769afeb964cfa069901700929cac447c36758c1042f380edd4045c7f12c70",
+        "bundle_id": "naver:49e8f23db3f4c7ace63cd27c",
+        "file_ids_json": "[\"42f4a2d21694648bb0b637b3\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:faa13a404d1847e38af4799d",
+        "member_path": "원본_a936ee760b/자막/[BD] non non 07.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"불량기념물 자막 204th\"], \"body_sha256\": \"2cd21934a12a736e9524db41f47e167ff3c89da642882744dcb654ca5ac942b0\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 57313, \"reason\": \"[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -1620,6 +2285,25 @@
         "reanime_id": "non-non-biyori-2c6v77",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "638413538c1f32fb959f576585f72053e3bda30e4cefa5964e64808a82ee12b0",
+        "source": "naver",
+        "drive_id": "1n55kcQuxdZj23GXJX0clBO-PqZIp8xqG",
+        "outer_zip": "005.zip",
+        "original_path": "222277227749 (２０８)__[BD] non non.zip!/[BD] non non 08.smi",
+        "sha256": "ded473913fb71c1ffdb0c5bc17258db958b6293092564d900c121711aa4dbeb3",
+        "bundle_id": "naver:49e8f23db3f4c7ace63cd27c",
+        "file_ids_json": "[\"f575f94c3a057c92e2d8b6e5\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:faa13a404d1847e38af4799d",
+        "member_path": "원본_a936ee760b/자막/[BD] non non 08.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"불량기념물 자막 207th\"], \"body_sha256\": \"732b82f05295dbf7d2abd7354087ac5245a2b0fe583dc620d1841b568d32ef05\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 57314, \"reason\": \"[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -1665,6 +2349,25 @@
         "reanime_id": "non-non-biyori-2c6v77",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "434339c92744395f9b7425de6230eb816f6c4a211367452aa80ec7c8874ffd51",
+        "source": "naver",
+        "drive_id": "1n55kcQuxdZj23GXJX0clBO-PqZIp8xqG",
+        "outer_zip": "005.zip",
+        "original_path": "222277227749 (２０８)__[BD] non non.zip!/[BD] non non 09.smi",
+        "sha256": "8d4fefd562884163736baa7c740a4acfba80fe9d3272aa97d03e2889d8ba2315",
+        "bundle_id": "naver:49e8f23db3f4c7ace63cd27c",
+        "file_ids_json": "[\"aaab0372fdc3273907417604\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:faa13a404d1847e38af4799d",
+        "member_path": "원본_a936ee760b/자막/[BD] non non 09.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"불량기념물 자막 210th\"], \"body_sha256\": \"ea74264347bb5d24f32e8fb59f1e74f8e2ab2f08193bae10704c89d5891a9734\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 57315, \"reason\": \"[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -1710,6 +2413,25 @@
         "reanime_id": "non-non-biyori-2c6v77",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "40368b3c5025023fbfb5783c321eca72b05dc4579a061d775a625edc8d6463ba",
+        "source": "naver",
+        "drive_id": "1n55kcQuxdZj23GXJX0clBO-PqZIp8xqG",
+        "outer_zip": "005.zip",
+        "original_path": "222277227749 (２０８)__[BD] non non.zip!/[BD] non non 10.smi",
+        "sha256": "1aa65cb7649d94d468c5b43f5ed5788281eb6426ab147d19b49f79e03144ae6c",
+        "bundle_id": "naver:49e8f23db3f4c7ace63cd27c",
+        "file_ids_json": "[\"76bc0b8c6fe6efa951ab6b66\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:faa13a404d1847e38af4799d",
+        "member_path": "원본_a936ee760b/자막/[BD] non non 10.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"불량기념물 자막 213th\"], \"body_sha256\": \"e07846e27d6ebb07ee85412709ffb8d1e857c13c54728ab539d7687f7aa1ffda\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 57316, \"reason\": \"[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -1755,6 +2477,25 @@
         "reanime_id": "non-non-biyori-2c6v77",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "c104f59c4d7c1e45f3ce52649ceb5e76076eb4d289c8d8ae077041b267f2f49d",
+        "source": "naver",
+        "drive_id": "1n55kcQuxdZj23GXJX0clBO-PqZIp8xqG",
+        "outer_zip": "005.zip",
+        "original_path": "222277227749 (２０８)__[BD] non non.zip!/[BD] non non 11.smi",
+        "sha256": "870b248acc9b2d0e91a90317aa3a7a62f939cfb1c9390e0fe482741002657e12",
+        "bundle_id": "naver:49e8f23db3f4c7ace63cd27c",
+        "file_ids_json": "[\"eda014a9cc73d1fe317d921c\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:faa13a404d1847e38af4799d",
+        "member_path": "원본_a936ee760b/자막/[BD] non non 11.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"불량기념물 자막 217th\"], \"body_sha256\": \"00eb7342dac51af6867277e0187fc410ccb428f6784b585ee29090336ba089de\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 57317, \"reason\": \"[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -1800,6 +2541,25 @@
         "reanime_id": "non-non-biyori-2c6v77",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "a52400b9478cc0f12873fafb5e3bb825e8bea85ad35783d0b039678cd60c4fae",
+        "source": "naver",
+        "drive_id": "1n55kcQuxdZj23GXJX0clBO-PqZIp8xqG",
+        "outer_zip": "005.zip",
+        "original_path": "222277227749 (２０８)__[BD] non non.zip!/[BD] non non 12.smi",
+        "sha256": "f4b463d8e654bb8b7d1cf1fc517762a3ab0168dda7ee2b451e2f38c1cd6b3194",
+        "bundle_id": "naver:49e8f23db3f4c7ace63cd27c",
+        "file_ids_json": "[\"bdd9ab1abb47c62662ae5c4e\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:faa13a404d1847e38af4799d",
+        "member_path": "원본_a936ee760b/자막/[BD] non non 12.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"불량기념물 자막 219th\"], \"body_sha256\": \"71325d1851c298777b089db585a1330628e5029051565b5b278b850050c1bd30\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 57318, \"reason\": \"[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -1845,6 +2605,25 @@
         "reanime_id": "non-non-biyori-okinawa-e-ikukoto-ni-natta-w7u7je",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "ce184e2c9fc5617c50e0e03972e5462989d1852895e160c8645b9b25a077285e",
+        "source": "naver",
+        "drive_id": "1n55kcQuxdZj23GXJX0clBO-PqZIp8xqG",
+        "outer_zip": "005.zip",
+        "original_path": "222277227749 (２０８)__[BD] non non.zip!/non non 13.smi",
+        "sha256": "5c430e4d7a1204289a84ada2baad01a5f7dbe64789ed33e569f9e27260bd8b66",
+        "bundle_id": "naver:49e8f23db3f4c7ace63cd27c",
+        "file_ids_json": "[\"b1fd064e5e698bf3f8d28b4b\"]",
+        "target_source": null,
+        "target_id": null,
+        "review_status": "hold",
+        "reason": "[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.",
+        "action": "kept",
+        "pack_id": "clean_v6:naver:faa13a404d1847e38af4799d",
+        "member_path": "원본_a936ee760b/자막/non non 13.smi",
+        "duplicate_kept_pid": null,
+        "evidence_json": "{\"internal_titles\": [\"불량기념물 자막 368th\"], \"body_sha256\": \"68e5dfd20aee5e2ca5adb5505d9827f584b584aee81de9a4a6deb5e71e038766\", \"matching_review_20261011\": {\"review_batch\": \"matching-20261011\", \"original_csv_record\": 57319, \"reason\": \"[CSV 수정 2026-10-11] 축약 제목을 동명 음악/영화에 연결한 의심 사례. 실제 자막 본문 확인 전 작품을 재확정하지 않음. 원본 판정·값은 changes.jsonl에 보존.\", \"basis\": \"uploaded CSV and supplied Release metadata; subtitle bytes not re-read\", \"new_episode_assignment\": false, \"decision\": \"hold\"}}"
       }
     },
     {
@@ -1890,6 +2669,28 @@
         "reanime_id": "darker-than-black-beneath-cherry-blossoms-in-full-bloom-zy7bf4",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "subsubsub_20261009:4446c5d8df5f188dff46b4db8134c43244ddc711c6b831b91d35d1c765b7fbdc",
+        "sha256": "4446c5d8df5f188dff46b4db8134c43244ddc711c6b831b91d35d1c765b7fbdc",
+        "original_path": "매칭검토_보류/Darker than BLACK S1 - Kuro no Keiyakusha -/hhousebird__Darker than BLACK S1 - Kuro no Keiyakusha -/[Moozzi2] Darker than BLACK - Kuro no Keiyakusha - 26 END (BD 1920x1080 x.264 Flac).smi",
+        "final_path": "Darker than BLACK -흑의 계약자-/특전_26화/[Moozzi2] Darker than BLACK - Kuro no Keiyakusha - 26 END (BD 1920x1080 x.264 Flac).smi",
+        "pack_id": "subsubsub_20261009:02",
+        "member_path": "Darker than BLACK -흑의 계약자-/특전_26화/[Moozzi2] Darker than BLACK - Kuro no Keiyakusha - 26 END (BD 1920x1080 x.264 Flac).smi",
+        "size_bytes": 32661,
+        "extension": ".smi",
+        "classification": "본편",
+        "review_status": "pending_detail_id",
+        "target_source": null,
+        "target_id": null,
+        "reanime_id": null,
+        "anikoto_id": null,
+        "work_confirmed": 0,
+        "automatic_episode_assignment": 0,
+        "existing_sha_count": 0,
+        "source_episode_hint": null,
+        "target_episodes_json": "[]",
+        "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"Darker than BLACK -흑의 계약자-\",\"DB출처\":\"Onnada\",\"DB작품ID\":\"1623\",\"최종ZIP경로\":\"Darker than BLACK -흑의 계약자-/[Moozzi2] Darker than BLACK - Kuro no Keiyakusha - 26 END (BD 1920x1080 x.264 Flac).smi\",\"원본파일명\":\"[Moozzi2] Darker than BLACK - Kuro no Keiyakusha - 26 END (BD 1920x1080 x.264 Flac).smi\",\"원본ZIP경로\":\"매칭검토_보류/Darker than BLACK S1 - Kuro no Keiyakusha -/hhousebird__Darker than BLACK S1 - Kuro no Keiyakusha -/[Moozzi2] Darker than BLACK - Kuro no Keiyakusha - 26 END (BD 1920x1080 x.264 Flac).smi\",\"이번검수경로\":\"온나다_DB_연결/Darker than BLACK -흑의 계약자-/본편/hhousebird__Darker than BLACK S1 - Kuro no Keiyakusha -/[Moozzi2] Darker than BLACK - Kuro no Keiyakusha - 26 END (BD 1920x1080 x.264 Flac).smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"23\",\"분류\":\"본편\",\"SHA256\":\"4446c5d8df5f188dff46b4db8134c43244ddc711c6b831b91d35d1c765b7fbdc\",\"바이트\":\"32661\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"Darker than BLACK -흑의 계약자-/특전_26화/[Moozzi2] Darker than BLACK - Kuro no Keiyakusha - 26 END (BD 1920x1080 x.264 Flac).smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"2025\",\"ReAnime_최종추천ID\":\"darker-than-black-cxxb27\",\"Anikoto검수판정\":\"세부ID검토\",\"검수근거\":\"25화 TV와 26화 특전 분리, 개별 AniList ID 보류\",\"파일분리여부\":\"예\"},\"review_reason\":\"25화 TV와 26화 특전 분리, 개별 AniList ID 보류\",\"recommended_anilist_id\":\"2025\",\"recommended_reanime_id\":\"darker-than-black-cxxb27\",\"reanime_work_candidates\":[],\"original_source_reference\":[\"Onnada\",\"1623\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}"
       }
     },
     {
@@ -1935,6 +2736,28 @@
         "reanime_id": "amagami-ss-sister-ds66pt",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "subsubsub_20261009:6428d98cc3826c1464354e211f4f8708a7a237e1b3843630531a77bbf9539201",
+        "sha256": "6428d98cc3826c1464354e211f4f8708a7a237e1b3843630531a77bbf9539201",
+        "original_path": "온나다_DB_연결/아마가미 SS/hhousebird__아마가미 SS 1-26/Amagami SS - 26 [BD 1280x720 x264 AAC].SMI",
+        "final_path": "아마가미 SS/특전_26화/Amagami SS - 26 [BD 1280x720 x264 AAC].SMI",
+        "pack_id": "subsubsub_20261009:03",
+        "member_path": "아마가미 SS/특전_26화/Amagami SS - 26 [BD 1280x720 x264 AAC].SMI",
+        "size_bytes": 34734,
+        "extension": ".smi",
+        "classification": "기존확정",
+        "review_status": "pending_detail_id",
+        "target_source": null,
+        "target_id": null,
+        "reanime_id": null,
+        "anikoto_id": null,
+        "work_confirmed": 0,
+        "automatic_episode_assignment": 0,
+        "existing_sha_count": 0,
+        "source_episode_hint": null,
+        "target_episodes_json": "[]",
+        "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"아마가미 SS\",\"DB출처\":\"Onnada\",\"DB작품ID\":\"2108\",\"최종ZIP경로\":\"아마가미 SS/Amagami SS - 26 [BD 1280x720 x264 AAC].SMI\",\"원본파일명\":\"Amagami SS - 26 [BD 1280x720 x264 AAC].SMI\",\"원본ZIP경로\":\"온나다_DB_연결/아마가미 SS/hhousebird__아마가미 SS 1-26/Amagami SS - 26 [BD 1280x720 x264 AAC].SMI\",\"이번검수경로\":\"\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"\",\"분류\":\"기존확정\",\"SHA256\":\"6428d98cc3826c1464354e211f4f8708a7a237e1b3843630531a77bbf9539201\",\"바이트\":\"34734\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"아마가미 SS/특전_26화/Amagami SS - 26 [BD 1280x720 x264 AAC].SMI\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"8676\",\"ReAnime_최종추천ID\":\"amagami-ss-fcpdp9\",\"Anikoto검수판정\":\"세부ID검토\",\"검수근거\":\"TV 추가편 26화 구분, 개별 ID 보류\",\"파일분리여부\":\"예\"},\"review_reason\":\"TV 추가편 26화 구분, 개별 ID 보류\",\"recommended_anilist_id\":\"8676\",\"recommended_reanime_id\":\"amagami-ss-fcpdp9\",\"reanime_work_candidates\":[],\"original_source_reference\":[\"Onnada\",\"2108\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"기존확정\",\"existing_confirmed_targets\":[]}"
       }
     },
     {
@@ -1980,6 +2803,28 @@
         "reanime_id": "majestic-prince-wings-to-the-future-zcc6vk",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "subsubsub_20261009:836735492b2620ebd1fe365342fa19d94f99611da1c8e1a29d499c6606ac9ae6",
+        "sha256": "836735492b2620ebd1fe365342fa19d94f99611da1c8e1a29d499c6606ac9ae6",
+        "original_path": "온나다_DB_연결/은하기공대 마제스틱 프린스/hhousebird__은하기공대 마제스틱 프린스 25/Majestic_Prince_25_ohys.smi",
+        "final_path": "은하기공대 마제스틱 프린스/특전_25화/Majestic_Prince_25_ohys.smi",
+        "pack_id": "subsubsub_20261009:03",
+        "member_path": "은하기공대 마제스틱 프린스/특전_25화/Majestic_Prince_25_ohys.smi",
+        "size_bytes": 31516,
+        "extension": ".smi",
+        "classification": "기존확정",
+        "review_status": "pending_detail_id",
+        "target_source": null,
+        "target_id": null,
+        "reanime_id": null,
+        "anikoto_id": null,
+        "work_confirmed": 0,
+        "automatic_episode_assignment": 0,
+        "existing_sha_count": 0,
+        "source_episode_hint": null,
+        "target_episodes_json": "[]",
+        "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"은하기공대 마제스틱 프린스\",\"DB출처\":\"Onnada\",\"DB작품ID\":\"2555\",\"최종ZIP경로\":\"은하기공대 마제스틱 프린스/Majestic_Prince_25_ohys.smi\",\"원본파일명\":\"Majestic_Prince_25_ohys.smi\",\"원본ZIP경로\":\"온나다_DB_연결/은하기공대 마제스틱 프린스/hhousebird__은하기공대 마제스틱 프린스 25/Majestic_Prince_25_ohys.smi\",\"이번검수경로\":\"\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"\",\"분류\":\"기존확정\",\"SHA256\":\"836735492b2620ebd1fe365342fa19d94f99611da1c8e1a29d499c6606ac9ae6\",\"바이트\":\"31516\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"은하기공대 마제스틱 프린스/특전_25화/Majestic_Prince_25_ohys.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"15863\",\"ReAnime_최종추천ID\":\"majestic-prince-p6wk69\",\"Anikoto검수판정\":\"세부ID검토\",\"검수근거\":\"2013 TV 24화와 별도 25화 자막\",\"파일분리여부\":\"예\"},\"review_reason\":\"2013 TV 24화와 별도 25화 자막\",\"recommended_anilist_id\":\"15863\",\"recommended_reanime_id\":\"majestic-prince-p6wk69\",\"reanime_work_candidates\":[],\"original_source_reference\":[\"Onnada\",\"2555\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"기존확정\",\"existing_confirmed_targets\":[],\"onnada_review_order\":966,\"onnada_link_status\":\"single\",\"onnada_review_payload\":{\"review_order\":966,\"onnada_id\":\"2555\",\"title_ko\":\"은하기공대 마제스틱 프린스\",\"title_native\":\"銀河機攻隊 マジェスティックプリンス\",\"source_url\":\"https://onnada.com/anime/2555\",\"source_year\":2013,\"source_category\":\"TV 시리즈\",\"source_episode_label\":\"24\",\"status\":\"single\",\"anilist_ids\":[\"15863\"],\"reanime_ids\":[\"majestic-prince-p6wk69\"],\"anikoto_ids\":[],\"reanime_aliases\":{},\"targets\":[{\"source\":\"AniList\",\"id\":\"15863\",\"title_native\":\"銀河機攻隊 マジェスティックプリンス\",\"title_romaji\":\"Ginga Kikoutai Majestic Prince\",\"year\":2013,\"format\":\"TV\",\"status\":\"FINISHED\",\"episodes\":24},{\"source\":\"ReAnime\",\"id\":\"majestic-prince-p6wk69\",\"title_native\":\"銀河機攻隊 マジェスティックプリンス\",\"title_romaji\":\"Ginga Kikoutai Majestic Prince\",\"year\":2013,\"format\":\"TV\",\"status\":\"Finished\",\"episodes\":24}],\"note\":\"은하기공대 마제스틱 프린스 2013년 TV 24화. 2016년 영화 각성의 유전자 및 특별편 제외.\",\"evidence\":[{\"title\":\"Ginga Kikoutai Majestic Prince (Majestic Prince) · AniList\",\"url\":\"https://anilist.co/anime/15863/Ginga-Kikoutai-Majestic-Prince\",\"ref\":\"turn512search0\",\"search_file\":\"web_965_968.txt\"}],\"pending_components\":[],\"unconfirmed_candidates\":[],\"scope\":{},\"checked_date\":\"2026-10-09\",\"episode_mapping_changed\":false,\"target_mapping_kinds\":{},\"existing_anikoto_paths\":[{\"anikoto_id\":\"majestic-prince-oho9g\",\"target_order\":1,\"target_source\":\"AniList\",\"target_id\":\"15863\",\"mapping_kind\":\"whole\",\"link_status\":\"automatic\",\"anikoto_episode_start\":null,\"anikoto_episode_end\":null,\"target_episode_start\":null,\"target_episode_end\":null,\"scope\":\"whole\"}]}}"
       }
     },
     {
@@ -2025,6 +2870,28 @@
         "reanime_id": "mitsudomoe-oppai-ippai-mama-genki-bp3r77",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "subsubsub_20261009:c5f51c800dce4cdaca1195b338e70f6d37939d62c53ee5f08d283997f03c88da",
+        "sha256": "c5f51c800dce4cdaca1195b338e70f6d37939d62c53ee5f08d283997f03c88da",
+        "original_path": "온나다_DB_연결/미츠도모에/hhousebird__미츠도모에 1-14/[Moozzi2] Mitsudomoe - 14 SP (BD 1920x1080 x.264 FLACx2).smi",
+        "final_path": "미츠도모에/특전_SP14/[Moozzi2] Mitsudomoe - 14 SP (BD 1920x1080 x.264 FLACx2).smi",
+        "pack_id": "subsubsub_20261009:04",
+        "member_path": "미츠도모에/특전_SP14/[Moozzi2] Mitsudomoe - 14 SP (BD 1920x1080 x.264 FLACx2).smi",
+        "size_bytes": 45928,
+        "extension": ".smi",
+        "classification": "기존확정",
+        "review_status": "pending_detail_id",
+        "target_source": null,
+        "target_id": null,
+        "reanime_id": null,
+        "anikoto_id": null,
+        "work_confirmed": 0,
+        "automatic_episode_assignment": 0,
+        "existing_sha_count": 0,
+        "source_episode_hint": null,
+        "target_episodes_json": "[]",
+        "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"미츠도모에\",\"DB출처\":\"Onnada\",\"DB작품ID\":\"2101\",\"최종ZIP경로\":\"미츠도모에/[Moozzi2] Mitsudomoe - 14 SP (BD 1920x1080 x.264 FLACx2).smi\",\"원본파일명\":\"[Moozzi2] Mitsudomoe - 14 SP (BD 1920x1080 x.264 FLACx2).smi\",\"원본ZIP경로\":\"온나다_DB_연결/미츠도모에/hhousebird__미츠도모에 1-14/[Moozzi2] Mitsudomoe - 14 SP (BD 1920x1080 x.264 FLACx2).smi\",\"이번검수경로\":\"\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"\",\"분류\":\"기존확정\",\"SHA256\":\"c5f51c800dce4cdaca1195b338e70f6d37939d62c53ee5f08d283997f03c88da\",\"바이트\":\"45928\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"미츠도모에/특전_SP14/[Moozzi2] Mitsudomoe - 14 SP (BD 1920x1080 x.264 FLACx2).smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"7627\",\"ReAnime_최종추천ID\":\"mitsudomoe-pucw9t\",\"Anikoto검수판정\":\"세부ID검토\",\"검수근거\":\"2010년 1기 14 SP, 1~13 TV와 별도 보존\",\"파일분리여부\":\"예\"},\"review_reason\":\"2010년 1기 14 SP, 1~13 TV와 별도 보존\",\"recommended_anilist_id\":\"7627\",\"recommended_reanime_id\":\"mitsudomoe-pucw9t\",\"reanime_work_candidates\":[],\"original_source_reference\":[\"Onnada\",\"2101\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"기존확정\",\"existing_confirmed_targets\":[]}"
       }
     },
     {
@@ -2070,6 +2937,28 @@
         "reanime_id": "un-go-movie-524nqd",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "subsubsub_20261009:8caee1712158842971a58b8ae609181480ebed91d874aec7928417a44c865f71",
+        "sha256": "8caee1712158842971a58b8ae609181480ebed91d874aec7928417a44c865f71",
+        "original_path": "온나다_DB_연결/UN-GO/hhousebird__UN-GO 1-11/Un-Go - 00 (BD 1280x720 x264 AAC).smi",
+        "final_path": "UN-GO/별도_00화_개별ID검토/Un-Go - 00 (BD 1280x720 x264 AAC).smi",
+        "pack_id": "subsubsub_20261009:05",
+        "member_path": "UN-GO/별도_00화_개별ID검토/Un-Go - 00 (BD 1280x720 x264 AAC).smi",
+        "size_bytes": 55001,
+        "extension": ".smi",
+        "classification": "기존확정",
+        "review_status": "pending_detail_id",
+        "target_source": null,
+        "target_id": null,
+        "reanime_id": null,
+        "anikoto_id": null,
+        "work_confirmed": 0,
+        "automatic_episode_assignment": 0,
+        "existing_sha_count": 0,
+        "source_episode_hint": null,
+        "target_episodes_json": "[]",
+        "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"UN-GO\",\"DB출처\":\"Onnada\",\"DB작품ID\":\"2299\",\"최종ZIP경로\":\"UN-GO/Un-Go - 00 (BD 1280x720 x264 AAC).smi\",\"원본파일명\":\"Un-Go - 00 (BD 1280x720 x264 AAC).smi\",\"원본ZIP경로\":\"온나다_DB_연결/UN-GO/hhousebird__UN-GO 1-11/Un-Go - 00 (BD 1280x720 x264 AAC).smi\",\"이번검수경로\":\"\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"\",\"분류\":\"기존확정\",\"SHA256\":\"8caee1712158842971a58b8ae609181480ebed91d874aec7928417a44c865f71\",\"바이트\":\"55001\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"UN-GO/별도_00화_개별ID검토/Un-Go - 00 (BD 1280x720 x264 AAC).smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"10798\",\"ReAnime_최종추천ID\":\"un-go-ps29zq\",\"Anikoto검수판정\":\"세부ID검토\",\"검수근거\":\"TV 11편 이외 00화, 소스 판본 확인 전까지 합치지 않음\",\"파일분리여부\":\"예\"},\"review_reason\":\"TV 11편 이외 00화, 소스 판본 확인 전까지 합치지 않음\",\"recommended_anilist_id\":\"10798\",\"recommended_reanime_id\":\"un-go-ps29zq\",\"reanime_work_candidates\":[],\"original_source_reference\":[\"Onnada\",\"2299\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"기존확정\",\"existing_confirmed_targets\":[]}"
       }
     },
     {
@@ -2115,6 +3004,28 @@
         "reanime_id": "haganai-episode-0-f4ya2r",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "subsubsub_20261009:1a34754d77b305397a65d4578639a6ffd0febda970e31e16d507209a6cde07af",
+        "sha256": "1a34754d77b305397a65d4578639a6ffd0febda970e31e16d507209a6cde07af",
+        "original_path": "DB미연결_원본명/나친적 1기 BD(무삭제)[Zero-Raws]/hhousebird__나친적 1기 BD(무삭제)[Zero-Raws]/[한샛-Raws] Boku wa Tomodachi ga Sukunai - 00 (DVD 1280x720 x264 AAC).smi",
+        "final_path": "나는 친구가 적다/특전_회차미확정/[한샛-Raws] Boku wa Tomodachi ga Sukunai - 00 (DVD 1280x720 x264 AAC).smi",
+        "pack_id": "subsubsub_20261009:05",
+        "member_path": "나는 친구가 적다/특전_회차미확정/[한샛-Raws] Boku wa Tomodachi ga Sukunai - 00 (DVD 1280x720 x264 AAC).smi",
+        "size_bytes": 101513,
+        "extension": ".smi",
+        "classification": "특전_회차미확정",
+        "review_status": "pending_detail_id",
+        "target_source": null,
+        "target_id": null,
+        "reanime_id": null,
+        "anikoto_id": null,
+        "work_confirmed": 0,
+        "automatic_episode_assignment": 0,
+        "existing_sha_count": 0,
+        "source_episode_hint": null,
+        "target_episodes_json": "[]",
+        "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"나는 친구가 적다\",\"DB출처\":\"Onnada\",\"DB작품ID\":\"2292\",\"최종ZIP경로\":\"나는 친구가 적다/특전_회차미확정/[한샛-Raws] Boku wa Tomodachi ga Sukunai - 00 (DVD 1280x720 x264 AAC).smi\",\"원본파일명\":\"[한샛-Raws] Boku wa Tomodachi ga Sukunai - 00 (DVD 1280x720 x264 AAC).smi\",\"원본ZIP경로\":\"DB미연결_원본명/나친적 1기 BD(무삭제)[Zero-Raws]/hhousebird__나친적 1기 BD(무삭제)[Zero-Raws]/[한샛-Raws] Boku wa Tomodachi ga Sukunai - 00 (DVD 1280x720 x264 AAC).smi\",\"이번검수경로\":\"온나다_DB_연결/나는 친구가 적다/특전_회차미확정/hhousebird__나친적 1기 BD(무삭제)[Zero-Raws]/[한샛-Raws] Boku wa Tomodachi ga Sukunai - 00 (DVD 1280x720 x264 AAC).smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"53\",\"분류\":\"특전_회차미확정\",\"SHA256\":\"1a34754d77b305397a65d4578639a6ffd0febda970e31e16d507209a6cde07af\",\"바이트\":\"101513\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"나는 친구가 적다/특전_회차미확정/[한샛-Raws] Boku wa Tomodachi ga Sukunai - 00 (DVD 1280x720 x264 AAC).smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"10719\",\"ReAnime_최종추천ID\":\"haganai-w3ktcs\",\"Anikoto검수판정\":\"세부ID검토\",\"검수근거\":\"작품 및 특전 구분 확정, 개별 OVA/OAD ID는 기존 보류 유지\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"작품 및 특전 구분 확정, 개별 OVA/OAD ID는 기존 보류 유지\",\"recommended_anilist_id\":\"10719\",\"recommended_reanime_id\":\"haganai-w3ktcs\",\"reanime_work_candidates\":[],\"original_source_reference\":[\"Onnada\",\"2292\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"특전_회차미확정\",\"existing_confirmed_targets\":[]}"
       }
     },
     {
@@ -2160,6 +3071,28 @@
         "reanime_id": "haganai-add-on-disc-xuckjn",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "subsubsub_20261009:bd94843afab0bfcbc9d0be48ac180fe3a5a34b95f1dd5947b64abb26ec7d979b",
+        "sha256": "bd94843afab0bfcbc9d0be48ac180fe3a5a34b95f1dd5947b64abb26ec7d979b",
+        "original_path": "DB미연결_원본명/나친적 1기 BD(무삭제)[Zero-Raws]/hhousebird__나친적 1기 BD(무삭제)[Zero-Raws]/[Zero-Raws] Boku wa Tomodachi ga Sukunai - 13 (BD 1920x1080 x264 FLAC).smi",
+        "final_path": "나는 친구가 적다/특전_회차미확정/[Zero-Raws] Boku wa Tomodachi ga Sukunai - 13 (BD 1920x1080 x264 FLAC).smi",
+        "pack_id": "subsubsub_20261009:05",
+        "member_path": "나는 친구가 적다/특전_회차미확정/[Zero-Raws] Boku wa Tomodachi ga Sukunai - 13 (BD 1920x1080 x264 FLAC).smi",
+        "size_bytes": 83436,
+        "extension": ".smi",
+        "classification": "특전_회차미확정",
+        "review_status": "pending_detail_id",
+        "target_source": null,
+        "target_id": null,
+        "reanime_id": null,
+        "anikoto_id": null,
+        "work_confirmed": 0,
+        "automatic_episode_assignment": 0,
+        "existing_sha_count": 0,
+        "source_episode_hint": null,
+        "target_episodes_json": "[]",
+        "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"나는 친구가 적다\",\"DB출처\":\"Onnada\",\"DB작품ID\":\"2292\",\"최종ZIP경로\":\"나는 친구가 적다/특전_회차미확정/[Zero-Raws] Boku wa Tomodachi ga Sukunai - 13 (BD 1920x1080 x264 FLAC).smi\",\"원본파일명\":\"[Zero-Raws] Boku wa Tomodachi ga Sukunai - 13 (BD 1920x1080 x264 FLAC).smi\",\"원본ZIP경로\":\"DB미연결_원본명/나친적 1기 BD(무삭제)[Zero-Raws]/hhousebird__나친적 1기 BD(무삭제)[Zero-Raws]/[Zero-Raws] Boku wa Tomodachi ga Sukunai - 13 (BD 1920x1080 x264 FLAC).smi\",\"이번검수경로\":\"온나다_DB_연결/나는 친구가 적다/특전_회차미확정/hhousebird__나친적 1기 BD(무삭제)[Zero-Raws]/[Zero-Raws] Boku wa Tomodachi ga Sukunai - 13 (BD 1920x1080 x264 FLAC).smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"53\",\"분류\":\"특전_회차미확정\",\"SHA256\":\"bd94843afab0bfcbc9d0be48ac180fe3a5a34b95f1dd5947b64abb26ec7d979b\",\"바이트\":\"83436\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"나는 친구가 적다/특전_회차미확정/[Zero-Raws] Boku wa Tomodachi ga Sukunai - 13 (BD 1920x1080 x264 FLAC).smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"10719\",\"ReAnime_최종추천ID\":\"haganai-w3ktcs\",\"Anikoto검수판정\":\"세부ID검토\",\"검수근거\":\"작품 및 특전 구분 확정, 개별 OVA/OAD ID는 기존 보류 유지\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"작품 및 특전 구분 확정, 개별 OVA/OAD ID는 기존 보류 유지\",\"recommended_anilist_id\":\"10719\",\"recommended_reanime_id\":\"haganai-w3ktcs\",\"reanime_work_candidates\":[],\"original_source_reference\":[\"Onnada\",\"2292\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"특전_회차미확정\",\"existing_confirmed_targets\":[]}"
       }
     },
     {
@@ -2205,6 +3138,28 @@
         "reanime_id": "is-it-wrong-to-try-to-pick-up-girls-in-a-dungeon-is-it-wrong-to-expect-a-hot-spring-in-a-dungeon-yfqybw",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "subsubsub_20261009:e26c65a14aafa381bc838fa0646d98f218f1b40283245ba1a292da0f224f4c73",
+        "sha256": "e26c65a14aafa381bc838fa0646d98f218f1b40283245ba1a292da0f224f4c73",
+        "original_path": "DB미연결_원본명/[BD][ReinForce] 던만추S01/seok_factory__[BD][ReinForce] 던만추S01/[ReinForce] DanMachi - OVA (BDRip 1920x1080 x264 FLAC).smi",
+        "final_path": "던전에서 만남을 추구하면 안 되는 걸까 OVA/OVA_2016_ID미확인/[ReinForce] DanMachi - OVA (BDRip 1920x1080 x264 FLAC).smi",
+        "pack_id": "subsubsub_20261009:05",
+        "member_path": "던전에서 만남을 추구하면 안 되는 걸까 OVA/OVA_2016_ID미확인/[ReinForce] DanMachi - OVA (BDRip 1920x1080 x264 FLAC).smi",
+        "size_bytes": 59214,
+        "extension": ".smi",
+        "classification": "OVA_2016_ID미확인",
+        "review_status": "pending_detail_id",
+        "target_source": null,
+        "target_id": null,
+        "reanime_id": null,
+        "anikoto_id": null,
+        "work_confirmed": 0,
+        "automatic_episode_assignment": 0,
+        "existing_sha_count": 0,
+        "source_episode_hint": null,
+        "target_episodes_json": "[]",
+        "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"던전에서 만남을 추구하면 안 되는 걸까 OVA\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"919\",\"최종ZIP경로\":\"던전에서 만남을 추구하면 안 되는 걸까 OVA/OVA_2016_ID미확인/[ReinForce] DanMachi - OVA (BDRip 1920x1080 x264 FLAC).smi\",\"원본파일명\":\"[ReinForce] DanMachi - OVA (BDRip 1920x1080 x264 FLAC).smi\",\"원본ZIP경로\":\"DB미연결_원본명/[BD][ReinForce] 던만추S01/seok_factory__[BD][ReinForce] 던만추S01/[ReinForce] DanMachi - OVA (BDRip 1920x1080 x264 FLAC).smi\",\"이번검수경로\":\"애니시아_DB_연결/던전에서 만남을 추구하면 안 되는 걸까 OVA/OVA_2016_ID미확인/원본묶음_105/[ReinForce] DanMachi - OVA (BDRip 1920x1080 x264 FLAC).smi\",\"원본자료\":\"seok_factory_subtitles.7z\",\"검수묶음번호\":\"105\",\"분류\":\"OVA_2016_ID미확인\",\"SHA256\":\"e26c65a14aafa381bc838fa0646d98f218f1b40283245ba1a292da0f224f4c73\",\"바이트\":\"59214\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"던전에서 만남을 추구하면 안 되는 걸까 OVA/OVA_2016_ID미확인/[ReinForce] DanMachi - OVA (BDRip 1920x1080 x264 FLAC).smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[],\"original_source_reference\":[\"Anissia\",\"919\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"OVA_2016_ID미확인\",\"existing_confirmed_targets\":[]}"
       }
     },
     {
@@ -2250,6 +3205,28 @@
         "reanime_id": "maid-sama-it-s-an-extra-ps3v58",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "subsubsub_20261009:237ae5ad6bbeb07f8e725806d3bb677aa062ac07ef35ebf35cf1cb5d8bf8f27b",
+        "sha256": "237ae5ad6bbeb07f8e725806d3bb677aa062ac07ef35ebf35cf1cb5d8bf8f27b",
+        "original_path": "온나다_DB_연결/회장님은 메이드사마/hhousebird__회장님은 메이드사마 1-27/[YYDM-11FANS][Kaichou ha Maido Sama][27][BDrip][720P][X264-10bit_AAC][2BBA3AA4].smi",
+        "final_path": "회장님은 메이드사마/특별편_27화/[YYDM-11FANS][Kaichou ha Maido Sama][27][BDrip][720P][X264-10bit_AAC][2BBA3AA4].smi",
+        "pack_id": "subsubsub_20261009:04",
+        "member_path": "회장님은 메이드사마/특별편_27화/[YYDM-11FANS][Kaichou ha Maido Sama][27][BDrip][720P][X264-10bit_AAC][2BBA3AA4].smi",
+        "size_bytes": 22207,
+        "extension": ".smi",
+        "classification": "기존확정",
+        "review_status": "pending_catalog_backfill",
+        "target_source": null,
+        "target_id": null,
+        "reanime_id": null,
+        "anikoto_id": null,
+        "work_confirmed": 0,
+        "automatic_episode_assignment": 0,
+        "existing_sha_count": 0,
+        "source_episode_hint": null,
+        "target_episodes_json": "[]",
+        "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"회장님은 메이드사마\",\"DB출처\":\"Onnada\",\"DB작품ID\":\"2073\",\"최종ZIP경로\":\"회장님은 메이드사마/[YYDM-11FANS][Kaichou ha Maido Sama][27][BDrip][720P][X264-10bit_AAC][2BBA3AA4].smi\",\"원본파일명\":\"[YYDM-11FANS][Kaichou ha Maido Sama][27][BDrip][720P][X264-10bit_AAC][2BBA3AA4].smi\",\"원본ZIP경로\":\"온나다_DB_연결/회장님은 메이드사마/hhousebird__회장님은 메이드사마 1-27/[YYDM-11FANS][Kaichou ha Maido Sama][27][BDrip][720P][X264-10bit_AAC][2BBA3AA4].smi\",\"이번검수경로\":\"\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"\",\"분류\":\"기존확정\",\"SHA256\":\"237ae5ad6bbeb07f8e725806d3bb677aa062ac07ef35ebf35cf1cb5d8bf8f27b\",\"바이트\":\"22207\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"회장님은 메이드사마/특별편_27화/[YYDM-11FANS][Kaichou ha Maido Sama][27][BDrip][720P][X264-10bit_AAC][2BBA3AA4].smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"9366\",\"ReAnime_최종추천ID\":\"maid-sama-it-s-an-extra-ps3v58\",\"Anikoto검수판정\":\"외부특전_ID확인\",\"검수근거\":\"27화 BD 미방영편; AniList 9366은 로컬 DB 미수록\",\"파일분리여부\":\"예\"},\"review_reason\":\"27화 BD 미방영편; AniList 9366은 로컬 DB 미수록\",\"recommended_anilist_id\":\"9366\",\"recommended_reanime_id\":\"maid-sama-it-s-an-extra-ps3v58\",\"reanime_work_candidates\":[],\"original_source_reference\":[\"Onnada\",\"2073\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"기존확정\",\"existing_confirmed_targets\":[]}"
       }
     },
     {
@@ -2295,6 +3272,28 @@
         "reanime_id": "saki-episode-of-side-a-specials-5q8qma",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "subsubsub_20261009:9e2f73afc99149f1708067a8b8ed2f2eb22922b4f69ef02f66a6e6775390dcec",
+        "sha256": "9e2f73afc99149f1708067a8b8ed2f2eb22922b4f69ef02f66a6e6775390dcec",
+        "original_path": "DB미연결_원본명/[BD] Saki 아치가편 Side-A 자막/hhousebird__[BD] Saki 아치가편 Side-A 자막/Saki - Achiga-hen ~Episode of Side-A~ 13 (BDRip 1920x1080 x264 FLAC).smi",
+        "final_path": "_미매칭_로컬DB미등록/사키 아치가편 13-16화_스페셜/Saki - Achiga-hen ~Episode of Side-A~ 13 (BDRip 1920x1080 x264 FLAC).smi",
+        "pack_id": "subsubsub_20261009:05",
+        "member_path": "_미매칭_로컬DB미등록/사키 아치가편 13-16화_스페셜/Saki - Achiga-hen ~Episode of Side-A~ 13 (BDRip 1920x1080 x264 FLAC).smi",
+        "size_bytes": 50170,
+        "extension": ".smi",
+        "classification": "특별편13~16",
+        "review_status": "pending_catalog_backfill",
+        "target_source": null,
+        "target_id": null,
+        "reanime_id": null,
+        "anikoto_id": null,
+        "work_confirmed": 0,
+        "automatic_episode_assignment": 0,
+        "existing_sha_count": 0,
+        "source_episode_hint": null,
+        "target_episodes_json": "[]",
+        "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"[BD] Saki 아치가편 Side-A 자막\",\"DB출처\":\"개별ID미확정\",\"DB작품ID\":\"\",\"최종ZIP경로\":\"[BD] Saki 아치가편 Side-A 자막/특별편13~16/Saki - Achiga-hen ~Episode of Side-A~ 13 (BDRip 1920x1080 x264 FLAC).smi\",\"원본파일명\":\"Saki - Achiga-hen ~Episode of Side-A~ 13 (BDRip 1920x1080 x264 FLAC).smi\",\"원본ZIP경로\":\"DB미연결_원본명/[BD] Saki 아치가편 Side-A 자막/hhousebird__[BD] Saki 아치가편 Side-A 자막/Saki - Achiga-hen ~Episode of Side-A~ 13 (BDRip 1920x1080 x264 FLAC).smi\",\"이번검수경로\":\"기타_DB_연결/[BD] Saki 아치가편 Side-A 자막/특별편13~16/hhousebird__[BD] Saki 아치가편 Side-A 자막/Saki - Achiga-hen ~Episode of Side-A~ 13 (BDRip 1920x1080 x264 FLAC).smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"32\",\"분류\":\"특별편13~16\",\"SHA256\":\"9e2f73afc99149f1708067a8b8ed2f2eb22922b4f69ef02f66a6e6775390dcec\",\"바이트\":\"50170\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"작품ID 미확정\",\"신규ZIP경로\":\"_미매칭_로컬DB미등록/사키 아치가편 13-16화_스페셜/Saki - Achiga-hen ~Episode of Side-A~ 13 (BDRip 1920x1080 x264 FLAC).smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"15989\",\"ReAnime_최종추천ID\":\"saki-episode-of-side-a-specials-5q8qma\",\"Anikoto검수판정\":\"로컬DB등록대기\",\"검수근거\":\"13~16화 스페셜 확인, AniList 15989가 로컬 DB에 없음. 배포 전 backfill 필요\",\"파일분리여부\":\"예\"},\"review_reason\":\"13~16화 스페셜 확인, AniList 15989가 로컬 DB에 없음. 배포 전 backfill 필요\",\"recommended_anilist_id\":\"15989\",\"recommended_reanime_id\":\"saki-episode-of-side-a-specials-5q8qma\",\"reanime_work_candidates\":[],\"original_source_reference\":null,\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"특별편13~16\",\"existing_confirmed_targets\":[]}"
       }
     },
     {
@@ -2340,6 +3339,28 @@
         "reanime_id": "saki-episode-of-side-a-specials-5q8qma",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "subsubsub_20261009:04e1b95fc880034e26cfc7df3f6a979907838aac10ffe7e8b4992c3dd9043bfe",
+        "sha256": "04e1b95fc880034e26cfc7df3f6a979907838aac10ffe7e8b4992c3dd9043bfe",
+        "original_path": "DB미연결_원본명/[BD] Saki 아치가편 Side-A 자막/hhousebird__[BD] Saki 아치가편 Side-A 자막/[ohys] Saki Episode of Side A - 14 (AT-X HD! 1280x720 x264 AAC).mp4.smi",
+        "final_path": "_미매칭_로컬DB미등록/사키 아치가편 13-16화_스페셜/[ohys] Saki Episode of Side A - 14 (AT-X HD! 1280x720 x264 AAC).mp4.smi",
+        "pack_id": "subsubsub_20261009:05",
+        "member_path": "_미매칭_로컬DB미등록/사키 아치가편 13-16화_스페셜/[ohys] Saki Episode of Side A - 14 (AT-X HD! 1280x720 x264 AAC).mp4.smi",
+        "size_bytes": 52194,
+        "extension": ".smi",
+        "classification": "특별편13~16",
+        "review_status": "pending_catalog_backfill",
+        "target_source": null,
+        "target_id": null,
+        "reanime_id": null,
+        "anikoto_id": null,
+        "work_confirmed": 0,
+        "automatic_episode_assignment": 0,
+        "existing_sha_count": 0,
+        "source_episode_hint": null,
+        "target_episodes_json": "[]",
+        "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"[BD] Saki 아치가편 Side-A 자막\",\"DB출처\":\"개별ID미확정\",\"DB작품ID\":\"\",\"최종ZIP경로\":\"[BD] Saki 아치가편 Side-A 자막/특별편13~16/[ohys] Saki Episode of Side A - 14 (AT-X HD! 1280x720 x264 AAC).mp4.smi\",\"원본파일명\":\"[ohys] Saki Episode of Side A - 14 (AT-X HD! 1280x720 x264 AAC).mp4.smi\",\"원본ZIP경로\":\"DB미연결_원본명/[BD] Saki 아치가편 Side-A 자막/hhousebird__[BD] Saki 아치가편 Side-A 자막/[ohys] Saki Episode of Side A - 14 (AT-X HD! 1280x720 x264 AAC).mp4.smi\",\"이번검수경로\":\"기타_DB_연결/[BD] Saki 아치가편 Side-A 자막/특별편13~16/hhousebird__[BD] Saki 아치가편 Side-A 자막/[ohys] Saki Episode of Side A - 14 (AT-X HD! 1280x720 x264 AAC).mp4.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"32\",\"분류\":\"특별편13~16\",\"SHA256\":\"04e1b95fc880034e26cfc7df3f6a979907838aac10ffe7e8b4992c3dd9043bfe\",\"바이트\":\"52194\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"작품ID 미확정\",\"신규ZIP경로\":\"_미매칭_로컬DB미등록/사키 아치가편 13-16화_스페셜/[ohys] Saki Episode of Side A - 14 (AT-X HD! 1280x720 x264 AAC).mp4.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"15989\",\"ReAnime_최종추천ID\":\"saki-episode-of-side-a-specials-5q8qma\",\"Anikoto검수판정\":\"로컬DB등록대기\",\"검수근거\":\"13~16화 스페셜 확인, AniList 15989가 로컬 DB에 없음. 배포 전 backfill 필요\",\"파일분리여부\":\"예\"},\"review_reason\":\"13~16화 스페셜 확인, AniList 15989가 로컬 DB에 없음. 배포 전 backfill 필요\",\"recommended_anilist_id\":\"15989\",\"recommended_reanime_id\":\"saki-episode-of-side-a-specials-5q8qma\",\"reanime_work_candidates\":[],\"original_source_reference\":null,\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"특별편13~16\",\"existing_confirmed_targets\":[]}"
       }
     },
     {
@@ -2385,6 +3406,28 @@
         "reanime_id": "saki-episode-of-side-a-specials-5q8qma",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "subsubsub_20261009:44499ecc48175d378f51f1638dd1af43fb534740e4655cb7e0e7dc88aa474968",
+        "sha256": "44499ecc48175d378f51f1638dd1af43fb534740e4655cb7e0e7dc88aa474968",
+        "original_path": "DB미연결_원본명/[BD] Saki 아치가편 Side-A 자막/hhousebird__[BD] Saki 아치가편 Side-A 자막/[ohys] Saki Episode of Side A - 15 (AT-X HD! 1280x720 x264 AAC).mp4.smi",
+        "final_path": "_미매칭_로컬DB미등록/사키 아치가편 13-16화_스페셜/[ohys] Saki Episode of Side A - 15 (AT-X HD! 1280x720 x264 AAC).mp4.smi",
+        "pack_id": "subsubsub_20261009:05",
+        "member_path": "_미매칭_로컬DB미등록/사키 아치가편 13-16화_스페셜/[ohys] Saki Episode of Side A - 15 (AT-X HD! 1280x720 x264 AAC).mp4.smi",
+        "size_bytes": 86866,
+        "extension": ".smi",
+        "classification": "특별편13~16",
+        "review_status": "pending_catalog_backfill",
+        "target_source": null,
+        "target_id": null,
+        "reanime_id": null,
+        "anikoto_id": null,
+        "work_confirmed": 0,
+        "automatic_episode_assignment": 0,
+        "existing_sha_count": 0,
+        "source_episode_hint": null,
+        "target_episodes_json": "[]",
+        "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"[BD] Saki 아치가편 Side-A 자막\",\"DB출처\":\"개별ID미확정\",\"DB작품ID\":\"\",\"최종ZIP경로\":\"[BD] Saki 아치가편 Side-A 자막/특별편13~16/[ohys] Saki Episode of Side A - 15 (AT-X HD! 1280x720 x264 AAC).mp4.smi\",\"원본파일명\":\"[ohys] Saki Episode of Side A - 15 (AT-X HD! 1280x720 x264 AAC).mp4.smi\",\"원본ZIP경로\":\"DB미연결_원본명/[BD] Saki 아치가편 Side-A 자막/hhousebird__[BD] Saki 아치가편 Side-A 자막/[ohys] Saki Episode of Side A - 15 (AT-X HD! 1280x720 x264 AAC).mp4.smi\",\"이번검수경로\":\"기타_DB_연결/[BD] Saki 아치가편 Side-A 자막/특별편13~16/hhousebird__[BD] Saki 아치가편 Side-A 자막/[ohys] Saki Episode of Side A - 15 (AT-X HD! 1280x720 x264 AAC).mp4.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"32\",\"분류\":\"특별편13~16\",\"SHA256\":\"44499ecc48175d378f51f1638dd1af43fb534740e4655cb7e0e7dc88aa474968\",\"바이트\":\"86866\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"작품ID 미확정\",\"신규ZIP경로\":\"_미매칭_로컬DB미등록/사키 아치가편 13-16화_스페셜/[ohys] Saki Episode of Side A - 15 (AT-X HD! 1280x720 x264 AAC).mp4.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"15989\",\"ReAnime_최종추천ID\":\"saki-episode-of-side-a-specials-5q8qma\",\"Anikoto검수판정\":\"로컬DB등록대기\",\"검수근거\":\"13~16화 스페셜 확인, AniList 15989가 로컬 DB에 없음. 배포 전 backfill 필요\",\"파일분리여부\":\"예\"},\"review_reason\":\"13~16화 스페셜 확인, AniList 15989가 로컬 DB에 없음. 배포 전 backfill 필요\",\"recommended_anilist_id\":\"15989\",\"recommended_reanime_id\":\"saki-episode-of-side-a-specials-5q8qma\",\"reanime_work_candidates\":[],\"original_source_reference\":null,\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"특별편13~16\",\"existing_confirmed_targets\":[]}"
       }
     },
     {
@@ -2430,6 +3473,28 @@
         "reanime_id": "saki-episode-of-side-a-specials-5q8qma",
         "content_extension": ".smi",
         "work_confirmed": "t"
+      },
+      "release_before": {
+        "pid": "subsubsub_20261009:b6d00cfc1ffbb409a4a878a18b515e8d496658103ec180d41dfadec46a29dc28",
+        "sha256": "b6d00cfc1ffbb409a4a878a18b515e8d496658103ec180d41dfadec46a29dc28",
+        "original_path": "DB미연결_원본명/[BD] Saki 아치가편 Side-A 자막/hhousebird__[BD] Saki 아치가편 Side-A 자막/[ohys] Saki Episode of Side A - 16 (AT-X HD! 1280x720 x264 AAC).smi",
+        "final_path": "_미매칭_로컬DB미등록/사키 아치가편 13-16화_스페셜/[ohys] Saki Episode of Side A - 16 (AT-X HD! 1280x720 x264 AAC).smi",
+        "pack_id": "subsubsub_20261009:05",
+        "member_path": "_미매칭_로컬DB미등록/사키 아치가편 13-16화_스페셜/[ohys] Saki Episode of Side A - 16 (AT-X HD! 1280x720 x264 AAC).smi",
+        "size_bytes": 104042,
+        "extension": ".smi",
+        "classification": "특별편13~16",
+        "review_status": "pending_catalog_backfill",
+        "target_source": null,
+        "target_id": null,
+        "reanime_id": null,
+        "anikoto_id": null,
+        "work_confirmed": 0,
+        "automatic_episode_assignment": 0,
+        "existing_sha_count": 0,
+        "source_episode_hint": null,
+        "target_episodes_json": "[]",
+        "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"[BD] Saki 아치가편 Side-A 자막\",\"DB출처\":\"개별ID미확정\",\"DB작품ID\":\"\",\"최종ZIP경로\":\"[BD] Saki 아치가편 Side-A 자막/특별편13~16/[ohys] Saki Episode of Side A - 16 (AT-X HD! 1280x720 x264 AAC).smi\",\"원본파일명\":\"[ohys] Saki Episode of Side A - 16 (AT-X HD! 1280x720 x264 AAC).smi\",\"원본ZIP경로\":\"DB미연결_원본명/[BD] Saki 아치가편 Side-A 자막/hhousebird__[BD] Saki 아치가편 Side-A 자막/[ohys] Saki Episode of Side A - 16 (AT-X HD! 1280x720 x264 AAC).smi\",\"이번검수경로\":\"기타_DB_연결/[BD] Saki 아치가편 Side-A 자막/특별편13~16/hhousebird__[BD] Saki 아치가편 Side-A 자막/[ohys] Saki Episode of Side A - 16 (AT-X HD! 1280x720 x264 AAC).smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"32\",\"분류\":\"특별편13~16\",\"SHA256\":\"b6d00cfc1ffbb409a4a878a18b515e8d496658103ec180d41dfadec46a29dc28\",\"바이트\":\"104042\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"작품ID 미확정\",\"신규ZIP경로\":\"_미매칭_로컬DB미등록/사키 아치가편 13-16화_스페셜/[ohys] Saki Episode of Side A - 16 (AT-X HD! 1280x720 x264 AAC).smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"15989\",\"ReAnime_최종추천ID\":\"saki-episode-of-side-a-specials-5q8qma\",\"Anikoto검수판정\":\"로컬DB등록대기\",\"검수근거\":\"13~16화 스페셜 확인, AniList 15989가 로컬 DB에 없음. 배포 전 backfill 필요\",\"파일분리여부\":\"예\"},\"review_reason\":\"13~16화 스페셜 확인, AniList 15989가 로컬 DB에 없음. 배포 전 backfill 필요\",\"recommended_anilist_id\":\"15989\",\"recommended_reanime_id\":\"saki-episode-of-side-a-specials-5q8qma\",\"reanime_work_candidates\":[],\"original_source_reference\":null,\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"특별편13~16\",\"existing_confirmed_targets\":[]}"
       }
     }
   ],
@@ -2459,6 +3524,17 @@
         "source_episode": "06",
         "target_episode": "6",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "095745659e56515f1854afc88013c64825cbcf7e3b5e149aa905c5d31b7ebb78",
+      "release_map_id": 20263,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "de37dd8baedc9793bcbf40e8",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "06",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -2486,6 +3562,17 @@
         "source_episode": "06",
         "target_episode": "6",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "095745659e56515f1854afc88013c64825cbcf7e3b5e149aa905c5d31b7ebb78",
+      "release_map_id": 20323,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "de37dd8baedc9793bcbf40e8",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "06",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -2513,6 +3600,17 @@
         "source_episode": "02",
         "target_episode": "2",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "11899b3fc99363e6124bd9c070a519a118818fa451cad14e2dc736c7c7d2532d",
+      "release_map_id": 20255,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "62ca4aea96193a80c05e36b0",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "02",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -2540,6 +3638,17 @@
         "source_episode": "02",
         "target_episode": "2",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "11899b3fc99363e6124bd9c070a519a118818fa451cad14e2dc736c7c7d2532d",
+      "release_map_id": 20315,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "62ca4aea96193a80c05e36b0",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "02",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -2567,6 +3676,17 @@
         "source_episode": "07",
         "target_episode": "7",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "3518ab4fc2fb9fc811a1a7caf978cd8d0a4f93ece04cffd70bfa779356333c0a",
+      "release_map_id": 20265,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "21216d6096e5b0b48d6814f0",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "07",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -2594,6 +3714,17 @@
         "source_episode": "07",
         "target_episode": "7",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "3518ab4fc2fb9fc811a1a7caf978cd8d0a4f93ece04cffd70bfa779356333c0a",
+      "release_map_id": 20325,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "21216d6096e5b0b48d6814f0",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "07",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -2621,6 +3752,17 @@
         "source_episode": "04",
         "target_episode": "4",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "6b76c81df7cd31bcee0751464ba46d108f467dd2f524a22b062164da351ca483",
+      "release_map_id": 20259,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "eeb45944072c7cf739863054",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "04",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -2648,6 +3790,17 @@
         "source_episode": "04",
         "target_episode": "4",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "6b76c81df7cd31bcee0751464ba46d108f467dd2f524a22b062164da351ca483",
+      "release_map_id": 20319,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "eeb45944072c7cf739863054",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "04",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -2675,6 +3828,17 @@
         "source_episode": "11",
         "target_episode": "11",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "7ce85307a3a930f7b90671387e84fdd147213c4a3ccb492cbc743aa2d14aa2a7",
+      "release_map_id": 20249,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "b171e09fc03e943ed5c8fa0b",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "11",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -2702,6 +3866,17 @@
         "source_episode": "11",
         "target_episode": "11",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "7ce85307a3a930f7b90671387e84fdd147213c4a3ccb492cbc743aa2d14aa2a7",
+      "release_map_id": 20309,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "b171e09fc03e943ed5c8fa0b",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "11",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -2729,6 +3904,17 @@
         "source_episode": "09",
         "target_episode": "9",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "ad29a2b9cbda1b87c55bf15b47d5d8b22fa36916921cec007ee1c3d3af71eff5",
+      "release_map_id": 20269,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "057e958847f624151af2c48b",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "09",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -2756,6 +3942,17 @@
         "source_episode": "09",
         "target_episode": "9",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "ad29a2b9cbda1b87c55bf15b47d5d8b22fa36916921cec007ee1c3d3af71eff5",
+      "release_map_id": 20329,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "057e958847f624151af2c48b",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "09",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -2783,6 +3980,17 @@
         "source_episode": "08",
         "target_episode": "8",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "b59e4e7ebcec5b9454561fc2fa94ef333623846ce50906b07bed7ef207b95c2a",
+      "release_map_id": 20267,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "3db835fa55d5a51fa22ef76a",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "08",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -2810,6 +4018,17 @@
         "source_episode": "08",
         "target_episode": "8",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "b59e4e7ebcec5b9454561fc2fa94ef333623846ce50906b07bed7ef207b95c2a",
+      "release_map_id": 20327,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "3db835fa55d5a51fa22ef76a",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "08",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -2837,6 +4056,17 @@
         "source_episode": "10",
         "target_episode": "10",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "b8959da4f8c8ed5547b7cc9c1eedb7fe29f24c4999359212249527b37697a3c0",
+      "release_map_id": 20271,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "1701c6b8d5dde5c0554939ec",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "10",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -2864,6 +4094,17 @@
         "source_episode": "10",
         "target_episode": "10",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "b8959da4f8c8ed5547b7cc9c1eedb7fe29f24c4999359212249527b37697a3c0",
+      "release_map_id": 20331,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "1701c6b8d5dde5c0554939ec",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "10",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -2891,6 +4132,17 @@
         "source_episode": "12",
         "target_episode": "12",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "bc855618367b83a2c5fa9114e63dc08b1e92d0b7d93ab6227c46037cb08b7013",
+      "release_map_id": 20251,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "868296f0c3e1264570254de3",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "12",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -2918,6 +4170,17 @@
         "source_episode": "12",
         "target_episode": "12",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "bc855618367b83a2c5fa9114e63dc08b1e92d0b7d93ab6227c46037cb08b7013",
+      "release_map_id": 20311,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "868296f0c3e1264570254de3",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "12",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -2945,6 +4208,17 @@
         "source_episode": "03",
         "target_episode": "3",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "bd9424bfc192680445566f875f2a9203991f665950a0179d80e55aa7129d240e",
+      "release_map_id": 20257,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "1100d0736657395398d5aa44",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "03",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -2972,6 +4246,17 @@
         "source_episode": "03",
         "target_episode": "3",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "bd9424bfc192680445566f875f2a9203991f665950a0179d80e55aa7129d240e",
+      "release_map_id": 20317,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "1100d0736657395398d5aa44",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "03",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -2999,6 +4284,17 @@
         "source_episode": "05",
         "target_episode": "5",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "c867b380cbb5a84e09b3d596602111c0f49897b174478c35aec4bd0115f69dbc",
+      "release_map_id": 20261,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "f236a9fd98690adf61e2fa6b",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "05",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -3026,6 +4322,17 @@
         "source_episode": "05",
         "target_episode": "5",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "c867b380cbb5a84e09b3d596602111c0f49897b174478c35aec4bd0115f69dbc",
+      "release_map_id": 20321,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "f236a9fd98690adf61e2fa6b",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "05",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -3053,6 +4360,17 @@
         "source_episode": "01",
         "target_episode": "1",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "e187f31c35bde6fb50a09c99776b3c73b2b9190c801317d670cb017c702bfe45",
+      "release_map_id": 20253,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "0f7103d47124ad7f6e88f616",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "01",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -3080,6 +4398,17 @@
         "source_episode": "01",
         "target_episode": "1",
         "status": "confirmed_episode"
+      },
+      "owner_pid": "e187f31c35bde6fb50a09c99776b3c73b2b9190c801317d670cb017c702bfe45",
+      "release_map_id": 20313,
+      "release_before": {
+        "bundle_id": "naver:99e0b3dfe25cf66d47199fb1",
+        "file_id": "0f7103d47124ad7f6e88f616",
+        "target_source": null,
+        "target_id": null,
+        "source_episode": "01",
+        "status": "hold",
+        "target_episode": null
       }
     },
     {
@@ -3096,7 +4425,9 @@
         "source_episode": "1",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "ea77901cb7830afba10d6fde57932bf9dbe30d7e1c1ad9872456f9e472a7111c",
+      "release_map_id": 901011000033
     },
     {
       "case": "C17",
@@ -3112,7 +4443,9 @@
         "source_episode": "1",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "ea77901cb7830afba10d6fde57932bf9dbe30d7e1c1ad9872456f9e472a7111c",
+      "release_map_id": 901011000034
     },
     {
       "case": "C17",
@@ -3128,7 +4461,9 @@
         "source_episode": "1",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "8861671fba9919edc42e39238f7320532f92624cfa50336785c4fa6dff797ffd",
+      "release_map_id": 901011000013
     },
     {
       "case": "C17",
@@ -3144,7 +4479,9 @@
         "source_episode": "1",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "8861671fba9919edc42e39238f7320532f92624cfa50336785c4fa6dff797ffd",
+      "release_map_id": 901011000014
     },
     {
       "case": "C17",
@@ -3160,7 +4497,9 @@
         "source_episode": "1",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "7c90ccd5bbf7650ed33999cb870956e4856b1d3ba7f7fc3f6aacdfb349d766de",
+      "release_map_id": 901011000011
     },
     {
       "case": "C17",
@@ -3176,7 +4515,9 @@
         "source_episode": "1",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "7c90ccd5bbf7650ed33999cb870956e4856b1d3ba7f7fc3f6aacdfb349d766de",
+      "release_map_id": 901011000012
     },
     {
       "case": "C17",
@@ -3192,7 +4533,9 @@
         "source_episode": "1",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "a761d8edcfa79bc3816467b3671961961995c4902023d63f5d5869d3cdca11de",
+      "release_map_id": 901011000021
     },
     {
       "case": "C17",
@@ -3208,7 +4551,9 @@
         "source_episode": "1",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "a761d8edcfa79bc3816467b3671961961995c4902023d63f5d5869d3cdca11de",
+      "release_map_id": 901011000022
     },
     {
       "case": "C18",
@@ -3224,7 +4569,9 @@
         "source_episode": "1",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "b9e0563840ab84323724c4f792ed30e8bc1627ce1dd7118d6699f6bfc5426b0a",
+      "release_map_id": 901011000023
     },
     {
       "case": "C18",
@@ -3240,7 +4587,9 @@
         "source_episode": "1",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "b9e0563840ab84323724c4f792ed30e8bc1627ce1dd7118d6699f6bfc5426b0a",
+      "release_map_id": 901011000024
     },
     {
       "case": "C18",
@@ -3256,7 +4605,9 @@
         "source_episode": "2",
         "target_episode": "2",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "bee0f004d61f4fe4eaddbf2ab7b4edd7978d9c793dd390dc0c6d6c88881b2e58",
+      "release_map_id": 901011000027
     },
     {
       "case": "C18",
@@ -3272,7 +4623,9 @@
         "source_episode": "2",
         "target_episode": "2",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "bee0f004d61f4fe4eaddbf2ab7b4edd7978d9c793dd390dc0c6d6c88881b2e58",
+      "release_map_id": 901011000028
     },
     {
       "case": "C18",
@@ -3288,7 +4641,9 @@
         "source_episode": "3",
         "target_episode": "3",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "1c50eb9ae5d1d29c9b7b5ab189c391ae1d6610ba57ad67bcf3a2bbbcc295cc5e",
+      "release_map_id": 901011000001
     },
     {
       "case": "C18",
@@ -3304,7 +4659,9 @@
         "source_episode": "3",
         "target_episode": "3",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "1c50eb9ae5d1d29c9b7b5ab189c391ae1d6610ba57ad67bcf3a2bbbcc295cc5e",
+      "release_map_id": 901011000002
     },
     {
       "case": "C18",
@@ -3320,7 +4677,9 @@
         "source_episode": "4",
         "target_episode": "4",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "1df10af65ff2ed40a15bf9959c93fecffdb2a1446ec453df54ae2e5caa73b2a1",
+      "release_map_id": 901011000003
     },
     {
       "case": "C18",
@@ -3336,7 +4695,9 @@
         "source_episode": "4",
         "target_episode": "4",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "1df10af65ff2ed40a15bf9959c93fecffdb2a1446ec453df54ae2e5caa73b2a1",
+      "release_map_id": 901011000004
     },
     {
       "case": "C18",
@@ -3352,7 +4713,9 @@
         "source_episode": "5",
         "target_episode": "5",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "a2edf6c7070ed0f02a622b126f1c6bb9e09ebe3d907139a4d1a6deb274479e7a",
+      "release_map_id": 901011000017
     },
     {
       "case": "C18",
@@ -3368,7 +4731,9 @@
         "source_episode": "5",
         "target_episode": "5",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "a2edf6c7070ed0f02a622b126f1c6bb9e09ebe3d907139a4d1a6deb274479e7a",
+      "release_map_id": 901011000018
     },
     {
       "case": "C18",
@@ -3384,7 +4749,9 @@
         "source_episode": "6",
         "target_episode": "6",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "90d0dbc63c82b6b6c5df238fc8bdc98e62b078ab69bfebaea98f0f92a93a91f4",
+      "release_map_id": 901011000015
     },
     {
       "case": "C18",
@@ -3400,7 +4767,9 @@
         "source_episode": "6",
         "target_episode": "6",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "90d0dbc63c82b6b6c5df238fc8bdc98e62b078ab69bfebaea98f0f92a93a91f4",
+      "release_map_id": 901011000016
     },
     {
       "case": "C18",
@@ -3416,7 +4785,9 @@
         "source_episode": "7",
         "target_episode": "7",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "ba016241daed9ddad9ac44d7be474c70083321bf045ce1e0ad416eb029fd031f",
+      "release_map_id": 901011000025
     },
     {
       "case": "C18",
@@ -3432,7 +4803,9 @@
         "source_episode": "7",
         "target_episode": "7",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "ba016241daed9ddad9ac44d7be474c70083321bf045ce1e0ad416eb029fd031f",
+      "release_map_id": 901011000026
     },
     {
       "case": "C18",
@@ -3448,7 +4821,9 @@
         "source_episode": "8",
         "target_episode": "8",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "638413538c1f32fb959f576585f72053e3bda30e4cefa5964e64808a82ee12b0",
+      "release_map_id": 901011000009
     },
     {
       "case": "C18",
@@ -3464,7 +4839,9 @@
         "source_episode": "8",
         "target_episode": "8",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "638413538c1f32fb959f576585f72053e3bda30e4cefa5964e64808a82ee12b0",
+      "release_map_id": 901011000010
     },
     {
       "case": "C18",
@@ -3480,7 +4857,9 @@
         "source_episode": "9",
         "target_episode": "9",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "434339c92744395f9b7425de6230eb816f6c4a211367452aa80ec7c8874ffd51",
+      "release_map_id": 901011000007
     },
     {
       "case": "C18",
@@ -3496,7 +4875,9 @@
         "source_episode": "9",
         "target_episode": "9",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "434339c92744395f9b7425de6230eb816f6c4a211367452aa80ec7c8874ffd51",
+      "release_map_id": 901011000008
     },
     {
       "case": "C18",
@@ -3512,7 +4893,9 @@
         "source_episode": "10",
         "target_episode": "10",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "40368b3c5025023fbfb5783c321eca72b05dc4579a061d775a625edc8d6463ba",
+      "release_map_id": 901011000005
     },
     {
       "case": "C18",
@@ -3528,7 +4911,9 @@
         "source_episode": "10",
         "target_episode": "10",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "40368b3c5025023fbfb5783c321eca72b05dc4579a061d775a625edc8d6463ba",
+      "release_map_id": 901011000006
     },
     {
       "case": "C18",
@@ -3544,7 +4929,9 @@
         "source_episode": "11",
         "target_episode": "11",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "c104f59c4d7c1e45f3ce52649ceb5e76076eb4d289c8d8ae077041b267f2f49d",
+      "release_map_id": 901011000029
     },
     {
       "case": "C18",
@@ -3560,7 +4947,9 @@
         "source_episode": "11",
         "target_episode": "11",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "c104f59c4d7c1e45f3ce52649ceb5e76076eb4d289c8d8ae077041b267f2f49d",
+      "release_map_id": 901011000030
     },
     {
       "case": "C18",
@@ -3576,7 +4965,9 @@
         "source_episode": "12",
         "target_episode": "12",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "a52400b9478cc0f12873fafb5e3bb825e8bea85ad35783d0b039678cd60c4fae",
+      "release_map_id": 901011000019
     },
     {
       "case": "C18",
@@ -3592,7 +4983,9 @@
         "source_episode": "12",
         "target_episode": "12",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "a52400b9478cc0f12873fafb5e3bb825e8bea85ad35783d0b039678cd60c4fae",
+      "release_map_id": 901011000020
     },
     {
       "case": "C18",
@@ -3608,7 +5001,9 @@
         "source_episode": "13",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "ce184e2c9fc5617c50e0e03972e5462989d1852895e160c8645b9b25a077285e",
+      "release_map_id": 901011000031
     },
     {
       "case": "C18",
@@ -3624,7 +5019,9 @@
         "source_episode": "13",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "ce184e2c9fc5617c50e0e03972e5462989d1852895e160c8645b9b25a077285e",
+      "release_map_id": 901011000032
     },
     {
       "case": "C19",
@@ -3640,7 +5037,9 @@
         "source_episode": "26",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:4446c5d8df5f188dff46b4db8134c43244ddc711c6b831b91d35d1c765b7fbdc",
+      "release_map_id": 901011000041
     },
     {
       "case": "C19",
@@ -3656,7 +5055,9 @@
         "source_episode": "26",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:4446c5d8df5f188dff46b4db8134c43244ddc711c6b831b91d35d1c765b7fbdc",
+      "release_map_id": 901011000042
     },
     {
       "case": "C19",
@@ -3672,7 +5073,9 @@
         "source_episode": "26",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:6428d98cc3826c1464354e211f4f8708a7a237e1b3843630531a77bbf9539201",
+      "release_map_id": 901011000045
     },
     {
       "case": "C19",
@@ -3688,7 +5091,9 @@
         "source_episode": "26",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:6428d98cc3826c1464354e211f4f8708a7a237e1b3843630531a77bbf9539201",
+      "release_map_id": 901011000046
     },
     {
       "case": "C19",
@@ -3704,7 +5109,9 @@
         "source_episode": "25",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:836735492b2620ebd1fe365342fa19d94f99611da1c8e1a29d499c6606ac9ae6",
+      "release_map_id": 901011000047
     },
     {
       "case": "C19",
@@ -3720,7 +5127,9 @@
         "source_episode": "25",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:836735492b2620ebd1fe365342fa19d94f99611da1c8e1a29d499c6606ac9ae6",
+      "release_map_id": 901011000048
     },
     {
       "case": "C19",
@@ -3736,7 +5145,9 @@
         "source_episode": "14",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:c5f51c800dce4cdaca1195b338e70f6d37939d62c53ee5f08d283997f03c88da",
+      "release_map_id": 901011000057
     },
     {
       "case": "C19",
@@ -3752,7 +5163,9 @@
         "source_episode": "14",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:c5f51c800dce4cdaca1195b338e70f6d37939d62c53ee5f08d283997f03c88da",
+      "release_map_id": 901011000058
     },
     {
       "case": "C19",
@@ -3768,7 +5181,9 @@
         "source_episode": "0",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:8caee1712158842971a58b8ae609181480ebed91d874aec7928417a44c865f71",
+      "release_map_id": 901011000049
     },
     {
       "case": "C19",
@@ -3784,7 +5199,9 @@
         "source_episode": "0",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:8caee1712158842971a58b8ae609181480ebed91d874aec7928417a44c865f71",
+      "release_map_id": 901011000050
     },
     {
       "case": "C19",
@@ -3800,7 +5217,9 @@
         "source_episode": "0",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:1a34754d77b305397a65d4578639a6ffd0febda970e31e16d507209a6cde07af",
+      "release_map_id": 901011000037
     },
     {
       "case": "C19",
@@ -3816,7 +5235,9 @@
         "source_episode": "0",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:1a34754d77b305397a65d4578639a6ffd0febda970e31e16d507209a6cde07af",
+      "release_map_id": 901011000038
     },
     {
       "case": "C19",
@@ -3832,7 +5253,9 @@
         "source_episode": "13",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:bd94843afab0bfcbc9d0be48ac180fe3a5a34b95f1dd5947b64abb26ec7d979b",
+      "release_map_id": 901011000055
     },
     {
       "case": "C19",
@@ -3848,7 +5271,9 @@
         "source_episode": "13",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:bd94843afab0bfcbc9d0be48ac180fe3a5a34b95f1dd5947b64abb26ec7d979b",
+      "release_map_id": 901011000056
     },
     {
       "case": "C19",
@@ -3864,7 +5289,9 @@
         "source_episode": "1",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:e26c65a14aafa381bc838fa0646d98f218f1b40283245ba1a292da0f224f4c73",
+      "release_map_id": 901011000059
     },
     {
       "case": "C19",
@@ -3880,7 +5307,9 @@
         "source_episode": "1",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:e26c65a14aafa381bc838fa0646d98f218f1b40283245ba1a292da0f224f4c73",
+      "release_map_id": 901011000060
     },
     {
       "case": "C19",
@@ -3896,7 +5325,9 @@
         "source_episode": "27",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:237ae5ad6bbeb07f8e725806d3bb677aa062ac07ef35ebf35cf1cb5d8bf8f27b",
+      "release_map_id": 901011000039
     },
     {
       "case": "C19",
@@ -3912,7 +5343,9 @@
         "source_episode": "27",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:237ae5ad6bbeb07f8e725806d3bb677aa062ac07ef35ebf35cf1cb5d8bf8f27b",
+      "release_map_id": 901011000040
     },
     {
       "case": "C19",
@@ -3928,7 +5361,9 @@
         "source_episode": "13",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:9e2f73afc99149f1708067a8b8ed2f2eb22922b4f69ef02f66a6e6775390dcec",
+      "release_map_id": 901011000051
     },
     {
       "case": "C19",
@@ -3944,7 +5379,9 @@
         "source_episode": "13",
         "target_episode": "1",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:9e2f73afc99149f1708067a8b8ed2f2eb22922b4f69ef02f66a6e6775390dcec",
+      "release_map_id": 901011000052
     },
     {
       "case": "C19",
@@ -3960,7 +5397,9 @@
         "source_episode": "14",
         "target_episode": "2",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:04e1b95fc880034e26cfc7df3f6a979907838aac10ffe7e8b4992c3dd9043bfe",
+      "release_map_id": 901011000035
     },
     {
       "case": "C19",
@@ -3976,7 +5415,9 @@
         "source_episode": "14",
         "target_episode": "2",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:04e1b95fc880034e26cfc7df3f6a979907838aac10ffe7e8b4992c3dd9043bfe",
+      "release_map_id": 901011000036
     },
     {
       "case": "C19",
@@ -3992,7 +5433,9 @@
         "source_episode": "15",
         "target_episode": "3",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:44499ecc48175d378f51f1638dd1af43fb534740e4655cb7e0e7dc88aa474968",
+      "release_map_id": 901011000043
     },
     {
       "case": "C19",
@@ -4008,7 +5451,9 @@
         "source_episode": "15",
         "target_episode": "3",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:44499ecc48175d378f51f1638dd1af43fb534740e4655cb7e0e7dc88aa474968",
+      "release_map_id": 901011000044
     },
     {
       "case": "C19",
@@ -4024,7 +5469,9 @@
         "source_episode": "16",
         "target_episode": "4",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:b6d00cfc1ffbb409a4a878a18b515e8d496658103ec180d41dfadec46a29dc28",
+      "release_map_id": 901011000053
     },
     {
       "case": "C19",
@@ -4040,7 +5487,9 @@
         "source_episode": "16",
         "target_episode": "4",
         "status": "confirmed_episode"
-      }
+      },
+      "owner_pid": "subsubsub_20261009:b6d00cfc1ffbb409a4a878a18b515e8d496658103ec180d41dfadec46a29dc28",
+      "release_map_id": 901011000054
     }
   ],
   "entries": [
@@ -4152,5 +5601,9 @@
     }
   ],
   "source_snapshot_sha256": "95493bc3bbd38006c965daeef2b6a0746ecfb345c63aef797cf31ca5ad7b4e87",
-  "corrected_snapshot_sha256": "c0885169d8ae2e125597a2d562437fd5ac54d2fb1c38e21de29d1e9b407eed84"
+  "corrected_snapshot_sha256": "c0885169d8ae2e125597a2d562437fd5ac54d2fb1c38e21de29d1e9b407eed84",
+  "expected_assets": {
+    "anime_four_sources_multilingual_prepared.zip": "22e6df3b4d0d3036176c0ae9583f24051d2f39dde6db2678f16b5340597e23a0",
+    "anime_reviewed_subtitle_registry_v1.zip": "649d5804562f9d4209a9a8b8ce6993a1e9949f713f064697f6ec72592ddf78ef"
+  }
 }
