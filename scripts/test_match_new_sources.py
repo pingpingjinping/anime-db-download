@@ -82,6 +82,33 @@ class NewSourceMatchingTests(unittest.TestCase):
     def reasons(self):
         return {r[0] for r in self.db.execute('SELECT reason FROM monthly_match_candidates')}
 
+    def test_october_correction_hold_is_reserved_without_year_match(self):
+        self.source(native='同名作品', ko='동명작', year=2025,
+                    meta={'reviewed_matching_20261011': {
+                        'decision': 'hold', 'new_episode_assignment': False}})
+        add(self.db, 'ReAnime', 'wrong-same-name-movie',
+            native='同名作品', year=2025, fmt='MOVIE')
+        add(self.db, 'ReAnime', 'wrong-same-name-tv',
+            native='同名作品', year=2025, fmt='TV')
+        matcher.refresh_auto_matches(self.db)
+        self.assertEqual(self.auto(), [])
+        self.assertEqual(self.db.execute(
+            "SELECT COUNT(*) FROM monthly_match_candidates WHERE anissia_no=1").fetchone()[0], 0)
+
+    def test_october_reviewed_season_keeps_approved_link(self):
+        self.source(native='同名作品 2nd Season', ko='동명작 2기', year=2025,
+                    meta={'reviewed_matching_20261011': {
+                        'decision': 'correct_work', 'new_episode_assignment': False}})
+        self.db.execute("UPDATE entries SET cross_source_ids_json=? "
+                        "WHERE source='Anissia' AND source_record_id='1'",
+                        (json.dumps({'reanime_ids': ['approved-s2']}),))
+        add(self.db, 'ReAnime', 'approved-s2', native='同名作品 Season 2', year=2025)
+        add(self.db, 'ReAnime', 'wrong-s1', native='同名作品', year=2025)
+        matcher.refresh_auto_matches(self.db)
+        self.assertEqual(self.auto(), [])
+        self.assertEqual(self.db.execute(
+            "SELECT COUNT(*) FROM monthly_match_candidates WHERE anissia_no=1").fetchone()[0], 0)
+
     def test_bracketed_short_kanji_reading_is_review_only(self):
         self.source(native='神統記 〈テオゴニア〉', ko='신통기〈테오고니아〉', year=2025)
         add(self.db, 'ReAnime', 'teogonia', native='神統記', year=2025)
