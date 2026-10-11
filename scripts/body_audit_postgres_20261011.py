@@ -37,7 +37,6 @@ def emit(plan):
    out.append('INSERT INTO anime_subtitle_confirmed_episodes ('+','.join(vals)+') SELECT '+','.join(sql(v) for v in vals.values())+f' WHERE {eligible} ON CONFLICT(dataset_key,map_id) DO NOTHING;')
  for v in plan['entries']:
   payload=dict(v)
-  for k in ('source_metadata_json','cross_source_ids_json'):payload[k]=json.loads(payload[k])
   out.append('INSERT INTO anime_catalog_entries(source,source_record_id,payload) VALUES ('+','.join([sql(v['source']),sql(v['source_record_id']),sql(json.dumps(payload,ensure_ascii=False))+'::jsonb'])+') ON CONFLICT(source,source_record_id) DO NOTHING;')
  for l in plan['links']:
   v={k:l[k] for k in ('dataset_key','target_source','target_id','reanime_id','link_status')};v['automatic_eligible']=l['automatic_eligible']=='t'
