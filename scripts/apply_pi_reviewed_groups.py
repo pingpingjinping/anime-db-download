@@ -15,6 +15,7 @@ import re
 import sqlite3
 import tempfile
 import zipfile
+from apply_pi_manual_work_matches import checked_overrides, apply_overrides
 
 ID = re.compile(r"^(?:ani_[1-9]\d*|re_[A-Za-z0-9_-]+|ak_[A-Za-z0-9_-]+|db_(?:AniList|Onnada)_[A-Za-z0-9_-]+)$")
 KINDS = {"main", "ova", "special", "movie", "preview", "drama", "unknown"}
@@ -33,6 +34,11 @@ def checked_manifest(payload, month):
     groups = payload.get("groups")
     if not isinstance(groups,list) or len(groups)>10000 or payload.get("count") != len(groups):
         raise ValueError("Manifest group counts are invalid")
+    if "manual_work_matches" not in payload or type(payload.get("manual_match_count")) is not int:
+        raise ValueError("Monthly manifest is missing explicit manual DB work matches")
+    manual = checked_overrides(payload["manual_work_matches"])
+    if len(manual) != payload["manual_match_count"]:
+        raise ValueError("Manual DB work match count mismatch")
     used = {}
     for group in groups:
         if not isinstance(group,dict): raise ValueError("Invalid group")
@@ -124,7 +130,9 @@ def patch_archive(archive, manifest_path, month):
         try:
             if db.execute("PRAGMA quick_check").fetchone()[0]!="ok":
                 raise ValueError("Existing catalog failed integrity check")
-            result = apply_overlay(db,groups,month)
+            with db:
+                result = apply_overlay(db,groups,month)
+                apply_overrides(db, manifest, month)
             if db.execute("PRAGMA quick_check").fetchone()[0]!="ok":
                 raise ValueError("Reviewed catalog failed integrity check")
         finally:
