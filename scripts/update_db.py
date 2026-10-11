@@ -19,6 +19,9 @@ from bs4 import BeautifulSoup
 from match_new_sources import prepare_tables, refresh_auto_matches
 from work_identity import positive_int
 from reviewed_subtitle_runtime import refresh_runtime_work_links
+from reviewed_matching_guard import (
+    assert_reviewed_state, capture_reviewed_state, is_reviewed_source, reviewed_source_ids,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SNAPSHOT = ROOT / "snapshot" / "anime.db.gz"
@@ -461,6 +464,10 @@ def main():
         prepare_tables(db)
         if args.online:
             prepare_onnada_checks(db)
+        # Preserve the actual incoming manual selections, including subsequent
+        # Pi corrections. A monthly updater must not replay stale 2026 targets.
+        protected_before = capture_reviewed_state(db)
+        reviewed_anissia = reviewed_source_ids(db)
         db.execute("BEGIN")
         counts = {}
         state_changed = False
@@ -510,9 +517,14 @@ def main():
                         previous = dict(zip(("source", "source_record_id", *FIELDS, "cross_source_ids_json", "existing_match_status", "source_metadata_json"), previous))
                         # Keep reviewed links/status; preserve metadata that the recent listing omits.
                         old_cross = json.loads(previous["cross_source_ids_json"])
-                        for k, ids in cross.items():
-                            old_cross[k] = list(dict.fromkeys([*old_cross.get(k, []), *ids]))
-                        cross = old_cross
+                        if is_reviewed_source(source, source_id, previous, reviewed_anissia):
+                            # A provider hint cannot resurrect a rejected cross-source
+                            # URL/season on an explicitly reviewed record.
+                            cross = old_cross
+                        else:
+                            for k, ids in cross.items():
+                                old_cross[k] = list(dict.fromkeys([*old_cross.get(k, []), *ids]))
+                            cross = old_cross
                         cross_changed = cross != json.loads(previous["cross_source_ids_json"])
                         old_metadata = json.loads(previous["source_metadata_json"])
                         metadata_changed = any(old_metadata.get(k) != v for k, v in metadata.items())
@@ -562,6 +574,9 @@ def main():
             db.execute("INSERT OR REPLACE INTO metadata VALUES ('sources', ?)",
                        (json.dumps([r[0] for r in db.execute("SELECT DISTINCT source FROM entries ORDER BY source")], ensure_ascii=False),))
             db.execute("INSERT OR REPLACE INTO metadata VALUES ('last_monthly_refresh', ?)", (dt.date.today().isoformat(),))
+            # Fail the entire snapshot before any ZIP is repacked if manual
+            # work links, holds or episode allocations drifted.
+            assert_reviewed_state(db, protected_before)
             db.commit()
             assert db.execute("PRAGMA quick_check").fetchone()[0] == "ok"
             db.close()

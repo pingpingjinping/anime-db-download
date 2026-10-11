@@ -48,6 +48,11 @@ jobs:
               --output "$RUNNER_TEMP/split" \
               | tee "$RUNNER_TEMP/release-layout.json"
           fi
+      - name: Verify October reviewed mappings and 36 held episode decisions
+        run: |
+          python scripts/reviewed_matching_guard.py \
+            --catalog "$RUNNER_TEMP/current/anime_four_sources_multilingual_prepared.zip" \
+            --registry "$RUNNER_TEMP/current/anime_reviewed_subtitle_registry_v1.zip"
       - name: Publish size summary
         run: |
           python - <<'PY'

@@ -71,6 +71,13 @@ def reviewed_ids(db, anissia):
     """The initial reviewed links, including rejected alternatives, stay reserved."""
     tables = {r[0] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
     ani = {str(r[0]) for r in db.execute("SELECT anime_no FROM anissia_year_match")} if 'anissia_year_match' in tables else set()
+    # Today's explicit corrections may have a hold with no prior
+    # anissia_year_match row. The embedded review marker is authoritative:
+    # do not send these works through automatic matching again.
+    for aid, row in anissia.items():
+        metadata = json.loads(row.get('source_metadata_json') or '{}')
+        if metadata.get('reviewed_matching_20261011'):
+            ani.add(str(aid))
     reserved = set()
     # Administrator work-ID overrides are authoritative, even where there is
     # no historical anissia_year_match row. Preserve an Anikoto-only choice

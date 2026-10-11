@@ -39,7 +39,7 @@ jobs:
           PYTHONPATH="$GITHUB_WORKSPACE:$GITHUB_WORKSPACE/scripts" python3 -m unittest -v \
             scripts.test_update_db scripts.test_match_new_sources \
             scripts.test_reviewed_subtitle_runtime scripts.test_apply_pi_reviewed_groups \
-            scripts.test_apply_pi_search_posters
+            scripts.test_apply_pi_search_posters scripts.test_reviewed_matching_guard
       - name: Download published catalog and Pi's 04:00 monthly review
         env:
           GH_TOKEN: ${{ github.token }}
@@ -48,6 +48,8 @@ jobs:
           set -euo pipefail
           gh release download db-v1 --repo "$GITHUB_REPOSITORY" \
             --pattern anime_four_sources_multilingual_prepared.zip --dir "$RUNNER_TEMP"
+          gh release download db-v1 --repo "$GITHUB_REPOSITORY" \
+            --pattern anime_reviewed_subtitle_registry_v1.zip --dir "$RUNNER_TEMP"
           gh release download db-v1 --repo "$GITHUB_REPOSITORY" \
             --pattern "pi-reviewed-work-groups-$MONTH.json" --dir "$RUNNER_TEMP"
           gh release download db-v1 --repo "$GITHUB_REPOSITORY" \
@@ -96,8 +98,18 @@ jobs:
               with gzip.GzipFile(fileobj=dst,mode="wb",mtime=0,compresslevel=6) as zipout:
                   zipout.write(db)
           PY
+      - name: Verify original reviewed work/file/episode decisions before update
+        run: |
+          python3 scripts/reviewed_matching_guard.py \
+            --catalog "$RUNNER_TEMP/anime.db.gz" \
+            --registry "$RUNNER_TEMP/anime_reviewed_subtitle_registry_v1.zip"
       - name: Refresh sources and new-work matches, retaining reviewed overlay
         run: python3 scripts/update_db.py --snapshot "$RUNNER_TEMP/anime.db.gz" --online
+      - name: Verify corrected links and holds survived monthly update
+        run: |
+          python3 scripts/reviewed_matching_guard.py \
+            --catalog "$RUNNER_TEMP/anime.db.gz" \
+            --registry "$RUNNER_TEMP/anime_reviewed_subtitle_registry_v1.zip"
       - name: Assert manual ReAnime and Anikoto mappings still match Pi
         env:
           MONTH: ${{ steps.calendar.outputs.month }}
