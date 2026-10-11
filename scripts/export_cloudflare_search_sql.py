@@ -214,6 +214,39 @@ def reviewed_korean_search_aliases(entries):
     return aliases
 
 
+def canonical_search_targets(entries, registry_db):
+    """Mirror Pi cards: one eligible ReAnime, then one Anissia registration."""
+    if not table_exists(registry_db, "subtitle_work_reanime_links"):
+        return {}
+    links = defaultdict(set)
+    for source, rid, reanime_id in registry_db.execute(
+            "SELECT target_source,target_id,reanime_id FROM subtitle_work_reanime_links WHERE automatic_eligible=1"):
+        links[(str(source), str(rid))].add(str(reanime_id))
+    unique = {key: next(iter(ids)) for key, ids in links.items()
+              if len(ids) == 1 and ("ReAnime", next(iter(ids))) in entries}
+    registrations = defaultdict(set)
+    for key, rid in unique.items():
+        if key[0] == "Anissia" and key in entries:
+            registrations[rid].add(key)
+    targets = {}
+    for key in entries:
+        if key[0] == "Anissia":
+            continue
+        rid = key[1] if key[0] == "ReAnime" else unique.get(key)
+        if not rid or ("ReAnime", rid) not in entries:
+            continue
+        sources = registrations.get(rid, set())
+        targets[key] = next(iter(sources)) if len(sources) == 1 else ("ReAnime", rid)
+    return targets
+
+
+def unique_korean_title(values):
+    choices = {printable(v) for v in values if any('가' <= c <= '힣' for c in printable(v))}
+    if len({normalized_title(v) for v in choices}) == 1:
+        return sorted(choices)[0]
+    return ""
+
+
 def build(catalog_db, registry_db):
     entries = {}
     counts = Counter()
@@ -243,43 +276,65 @@ def build(catalog_db, registry_db):
 
     posters=reviewed_artwork(catalog_db,entries)
     korean_aliases = reviewed_korean_search_aliases(entries)
+    targets = canonical_search_targets(entries, registry_db)
+    groups = defaultdict(lambda: {"keys": set(), "files": set(), "titles": set(), "providers": set()})
+    for key in entries:
+        if key[0] != "Anissia" and key not in confirmed:
+            continue
+        group = groups[targets.get(key, key)]
+        group["keys"].add(key)
+        if key[0] == "Anissia":
+            group["providers"].add(LABELS[key[0]])
+        if key in confirmed:
+            group["files"].update(confirmed[key]["files"])
+            group["titles"].update(confirmed[key]["titles"])
+            group["providers"].update(LABELS.get(p, p) for p in confirmed[key]["providers"])
     works = []
     aliases = set()
-    for (source, rid), row in sorted(entries.items()):
+    for (source, rid), group in sorted(groups.items()):
         key = (source, rid)
-        if source != "Anissia" and key not in confirmed:
-            continue
-        verified = confirmed.get(key)
-        from_registry = verified["titles"] if verified else set()
+        row = entries[key]
+        from_registry = group["titles"]
         # Multiple different registry titles may signal a work/season conflict:
         # keep the canonical source title instead of choosing arbitrarily.
         reviewed_title = next(iter(from_registry)) if len(from_registry) == 1 else ""
         main_title = printable(row.get("title_ko"))
         title = reviewed_title if (reviewed_title and any('가' <= c <= '힣' for c in reviewed_title)
                     and not any('가' <= c <= '힣' for c in main_title)) else main_title or reviewed_title
+        borrowed = set().union(*(korean_aliases.get(member, set()) for member in group["keys"] | {key}))
+        if not any('가' <= c <= '힣' for c in title):
+            title = unique_korean_title(borrowed) or title
         title = title or next((printable(row.get(k)) for k in TITLES if printable(row.get(k))), "")
         if not title:
             continue
         work_id, detail = identity(source, rid)
-        providers = {LABELS.get(source, source)} if source == "Anissia" else set()
-        if verified:
-            providers.update(LABELS.get(p, p) for p in verified["providers"])
-        caption_count = len(verified["files"]) if verified else 0
+        providers = group["providers"]
+        caption_count = len(group["files"])
         if source == "Anissia":
             try:
                 metadata = json.loads(row.get("source_metadata_json") or "{}")
             except (TypeError, ValueError):
                 metadata = {}
             caption_count += number(metadata.get("captionCount"))
-        title_set = {printable(row.get(field)) for field in TITLES} | {title} | korean_aliases.get(key, set())
+        reviewed_aliases = set()
+        for member in group["keys"]:
+            names = confirmed.get(member, {}).get("titles", set())
+            if len(names) == 1:
+                reviewed_aliases.update(names)
+        title_set = {printable(entries[member].get(field))
+                     for member in group["keys"] | {key} for field in TITLES} | {title} | borrowed | reviewed_aliases
         if reviewed_title:
             title_set.add(reviewed_title)
         for candidate in title_set:
             norm = normalized_title(candidate)
             if norm and len(norm) <= 300:
                 aliases.add((work_id, norm))
+        poster = posters.get(work_id, "")
+        if not poster:
+            images = {posters.get(work_ref(*member), "") for member in group["keys"]} - {""}
+            poster = next(iter(images)) if len(images) == 1 else ""
         works.append((work_id, title, number(row.get("year")) or None,
-                      " · ".join(sorted(providers)), caption_count, detail, posters.get(work_id,"")))
+                      " · ".join(sorted(providers)), caption_count, detail, poster))
     if len(works) < 1000 or len(aliases) < len(works):
         raise ValueError(f"Suspiciously small export: {len(works)} works / {len(aliases)} aliases")
     return works, sorted(aliases), dict(counts), len(confirmed)
@@ -332,4 +387,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
