@@ -444,9 +444,9 @@ class SnapshotSaveTests(unittest.TestCase):
             input_path.write_text(json.dumps({
                 'reanime_id': 'approved', 'anilist_id': 'wrong-movie',
                 'title_japanese': '検証アニメーション',
-                'season_year': 2025, 'format': 'TV'}, ensure_ascii=False) + '\\n')
+                'season_year': 2025, 'format': 'TV'}, ensure_ascii=False) + '\n')
             with mock.patch('sys.argv', ['update_db','--snapshot',str(snapshot),
-                                         '--input', 'ReAnime='+str(input_path)]), \\
+                                         '--input', 'ReAnime='+str(input_path)]), \
                  contextlib.redirect_stdout(io.StringIO()):
                 update_db.main()
             with gzip.open(snapshot, 'rb') as stream:
