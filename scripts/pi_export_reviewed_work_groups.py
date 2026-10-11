@@ -93,8 +93,11 @@ def export_manual_work_matches(streaming_repo):
     if proc.returncode:
         raise RuntimeError("Pi manual work match export failed: " + proc.stderr[:240])
     rows = json.loads(proc.stdout)
-    from apply_pi_manual_work_matches import checked_overrides
-    checked_overrides(rows)
+    from apply_pi_manual_work_matches import checked_overrides, checked_anikoto
+    if not isinstance(rows, dict) or set(rows) != {"reanime", "anikoto"}:
+        raise ValueError("Manual export must supply both provider lists")
+    checked_overrides(rows["reanime"])
+    checked_anikoto(rows["anikoto"])
     return rows
 
 
@@ -144,8 +147,11 @@ def prepare_snapshot(streaming_repo, month, directory, *, dry_run=False):
     """At 03:00, merge reviewed Pi IDs into a validated SQLite release candidate."""
     from apply_pi_reviewed_groups import patch_archive
     manifest = build_manifest(export_rows(streaming_repo), month)
-    manifest["manual_work_matches"] = export_manual_work_matches(streaming_repo)
-    manifest["manual_match_count"] = len(manifest["manual_work_matches"])
+    manual = export_manual_work_matches(streaming_repo)
+    manifest["manual_work_matches"] = manual["reanime"]
+    manifest["manual_match_count"] = len(manual["reanime"])
+    manifest["manual_anikoto_matches"] = manual["anikoto"]
+    manifest["manual_anikoto_match_count"] = len(manual["anikoto"])
     if dry_run:
         print("Validated", manifest["count"], "Pi reviewed groups for", month,
               "(no stage/download/upload)")
