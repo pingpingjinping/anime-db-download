@@ -79,3 +79,25 @@ journalctl -u anime-monthly-sync.service -n 80 --no-pager
 첫째 날 03시와 04시는 서로 다른 Pi systemd 서비스이며
 GitHub Actions가 아니다. GitHub의 10:17 월간 작업은
 `.github/workflows/monthly-db.yml` 하나로 관리한다.
+
+## 작품 상세 DB 수동 연결의 월간 전송
+
+Anissia↔ReAnime 작품 상세의 `anime_work_match_overrides`와
+Anissia↔Anikoto 작품 상세의 `anime_anikoto_work_overrides`를
+Pi의 03:00 검수 후보에 같이 반영한다. 기존 자막 파일 연결
+(`anime_admin_subtitle_links`)과는 별개의 관리자 결정이다.
+
+* 03:00 Pi: 두 테이블을 **전체 스냅샷**으로 읽고, ID/충돌/Anikoto
+  시즌 범위를 확인한다. 0개도 유효한 정상 스냅샷이다.
+* 04:00 Pi: 원본 계정·경로·파일명 없이 ReAnime/Anikoto 작품 ID와
+  (있다면) 이미 확정한 Anikoto 회차 범위만 포함한 manifest/후보 DB를
+  기존 Release 작업에 같이 업로드한다.
+* 10:17 GitHub: source SQLite에 `pi_manual_work_match_overrides`,
+  `pi_manual_anikoto_work_overrides`로 분리 보관한다. 정식
+  `entries` 행이나 자막파일을 추정값으로 덮어쓰지 않는다.
+  월간 업데이트 전후 수동 연결 전체가 입력과 정확히 같아야 게시한다.
+* 수동 해제·변경: 매월 **전체** 상태를 대체하므로 다음 성공한 월간
+  릴리즈에 삭제·변경이 반영된다. 조용히 기존 매칭으로 되살리지 않는다.
+
+양쪽 저장소를 모두 머지하고 Pi에 최신 checkout과 기존 월간 systemd
+타이머가 실제 설치/활성화되어 있어야 이 동작이 시작된다.
