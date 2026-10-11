@@ -83,6 +83,21 @@ def export_rows(streaming_repo):
     return rows
 
 
+def export_manual_work_matches(streaming_repo):
+    """Read only explicit admin work-to-work IDs; no subtitles or user data."""
+    script = streaming_repo / "scripts" / "export-manual-work-match-overrides.py"
+    if not script.is_file():
+        raise RuntimeError("Missing manual work match exporter in streaming-project")
+    proc = subprocess.run([sys.executable, str(script)], cwd=streaming_repo,
+                          capture_output=True, text=True)
+    if proc.returncode:
+        raise RuntimeError("Pi manual work match export failed: " + proc.stderr[:240])
+    rows = json.loads(proc.stdout)
+    from apply_pi_manual_work_matches import checked_overrides
+    checked_overrides(rows)
+    return rows
+
+
 def candidate_name(month):
     return "anime_four_sources_multilingual_prepared_pi_reviewed_" + month + ".zip"
 
@@ -129,6 +144,8 @@ def prepare_snapshot(streaming_repo, month, directory, *, dry_run=False):
     """At 03:00, merge reviewed Pi IDs into a validated SQLite release candidate."""
     from apply_pi_reviewed_groups import patch_archive
     manifest = build_manifest(export_rows(streaming_repo), month)
+    manifest["manual_work_matches"] = export_manual_work_matches(streaming_repo)
+    manifest["manual_match_count"] = len(manifest["manual_work_matches"])
     if dry_run:
         print("Validated", manifest["count"], "Pi reviewed groups for", month,
               "(no stage/download/upload)")
