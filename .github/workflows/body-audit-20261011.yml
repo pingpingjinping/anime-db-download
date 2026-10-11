@@ -1,0 +1,53 @@
+name: Build body-reviewed release 20261011
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: db-v1-body-audit-publish
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: audit_test
+          POSTGRES_DB: body_audit_test
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download pinned release inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p body-input
+          gh release download db-v1 --repo "$GITHUB_REPOSITORY" --pattern anime_four_sources_multilingual_prepared.zip --pattern anime_reviewed_subtitle_registry_v1.zip --dir body-input
+      - name: Build and verify exact body corrections
+        run: python scripts/build_body_audit_release_20261011.py --input body-input --output body-output
+      - name: Verify PostgreSQL delta and produce Pi SQL
+        env:
+          PGHOST: localhost
+          PGUSER: postgres
+          PGPASSWORD: audit_test
+          PGDATABASE: body_audit_test
+        run: |
+          python scripts/test_body_audit_postgres_20261011.py
+          python scripts/body_audit_postgres_20261011.py data/matching/body-audit-20261011.json body-output/body-audit-20261011.sql
+      - name: Verify revised monthly review guard
+        run: |
+          cp body-output/reviewed-corrections-20261011.json data/matching/reviewed-corrections-20261011.json
+          python -m unittest discover -s scripts -p test_reviewed_matching_guard.py
+      - name: Preserve revised decision ledger on branch
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add data/matching/reviewed-corrections-20261011.json
+          git commit -m "Preserve body-reviewed decisions and 60 explicit episode mappings"
+          git push origin HEAD:codex/body-audit-release-20261011
+      - name: Publish and redownload verified release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/publish_body_audit_release_20261011.py

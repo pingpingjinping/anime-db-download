@@ -1,0 +1,48 @@
+name: Verify Pi catalog payload contract and finalize SQL
+on:
+  push:
+    branches: [codex/body-audit-release-20261011]
+    paths:
+      - scripts/body_audit_postgres_20261011.py
+      - scripts/test_body_audit_postgres_20261011.py
+      - .github/workflows/body-audit-pi-sql-20261011.yml
+permissions:
+  contents: write
+jobs:
+  sql:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env: {POSTGRES_PASSWORD: audit_test, POSTGRES_DB: body_audit_test}
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test Pi delta including exact catalog JSON field types
+        env: {PGHOST: localhost, PGUSER: postgres, PGPASSWORD: audit_test, PGDATABASE: body_audit_test}
+        run: |
+          python scripts/test_body_audit_postgres_20261011.py
+          mkdir -p body-sql-final
+          python scripts/body_audit_postgres_20261011.py data/matching/body-audit-20261011.json body-sql-final/body-audit-20261011.sql
+      - name: Finalize published Pi SQL and verify downloaded hashes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p body-sql-before
+          gh release download body-audit-20261011 --repo "$GITHUB_REPOSITORY" --pattern body-audit-20261011.sql --pattern body-audit-sha256.json --dir body-sql-before
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          b=Path('body-sql-before');o=Path('body-sql-final')
+          assert hashlib.sha256((b/'body-audit-20261011.sql').read_bytes()).hexdigest()=='4900b6f6dcf823fdd6610926b610386f2187fb285db6477c139857f63018f015'
+          m=json.loads((b/'body-audit-sha256.json').read_text());m['body-audit-20261011.sql']=hashlib.sha256((o/'body-audit-20261011.sql').read_bytes()).hexdigest()
+          (o/'body-audit-sha256.json').write_text(json.dumps(m,indent=2))
+          print('FINAL_SQL_SHA256',m['body-audit-20261011.sql'])
+          PY
+          gh release upload body-audit-20261011 --repo "$GITHUB_REPOSITORY" body-sql-final/* --clobber
+          gh release upload db-v1 --repo "$GITHUB_REPOSITORY" body-sql-final/* --clobber
+          mkdir -p body-sql-verify
+          gh release download body-audit-20261011 --repo "$GITHUB_REPOSITORY" --pattern body-audit-20261011.sql --pattern body-audit-sha256.json --dir body-sql-verify
+          diff body-sql-final/body-audit-20261011.sql body-sql-verify/body-audit-20261011.sql
+          diff body-sql-final/body-audit-sha256.json body-sql-verify/body-audit-sha256.json

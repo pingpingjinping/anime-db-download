@@ -22,6 +22,7 @@ MANUAL_TABLES = (
     "anikoto_work_link_targets",
     "packaged_files_v6",
     "subtitle_confirmed_episodes",
+    "body_audit_confirmed_episodes_v1",
     "subtitle_review_details",
     "subsubsub_file_registry_v1",
     "subsubsub_file_targets_v1",
