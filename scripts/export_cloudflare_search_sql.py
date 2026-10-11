@@ -188,6 +188,32 @@ def reviewed_artwork(catalog_db, entries):
     return output
 
 
+def reviewed_korean_search_aliases(entries):
+    """Carry Korean names across saved reviewed IDs without merging work rows."""
+    aliases = defaultdict(set)
+    for (source, _), row in entries.items():
+        title = printable(row.get("title_ko"))
+        if source not in {"Onnada", "Anissia"} or not any('가' <= c <= '힣' for c in title):
+            continue
+        metadata = json_obj(row.get("source_metadata_json"))
+        review = json_obj(metadata.get("onnada_manual_review_v1")) if source == "Onnada" else {}
+        # A later explicit hold overrides an older exact-match declaration.
+        approved = (review.get("status") in {"single", "multi"} if review
+                    else row.get("existing_match_status") == "strong_exact")
+        if not approved:
+            continue
+        cross = json_obj(row.get("cross_source_ids_json"))
+        for field, target_source in (("anilist_ids", "AniList"), ("reanime_ids", "ReAnime")):
+            ids = cross.get(field)
+            if not isinstance(ids, list):
+                continue
+            for rid in ids:
+                target = (target_source, str(rid))
+                if target in entries:
+                    aliases[target].add(title)
+    return aliases
+
+
 def build(catalog_db, registry_db):
     entries = {}
     counts = Counter()
@@ -216,6 +242,7 @@ def build(catalog_db, registry_db):
             item["titles"].add(title)
 
     posters=reviewed_artwork(catalog_db,entries)
+    korean_aliases = reviewed_korean_search_aliases(entries)
     works = []
     aliases = set()
     for (source, rid), row in sorted(entries.items()):
@@ -244,7 +271,7 @@ def build(catalog_db, registry_db):
             except (TypeError, ValueError):
                 metadata = {}
             caption_count += number(metadata.get("captionCount"))
-        title_set = {printable(row.get(field)) for field in TITLES} | {title}
+        title_set = {printable(row.get(field)) for field in TITLES} | {title} | korean_aliases.get(key, set())
         if reviewed_title:
             title_set.add(reviewed_title)
         for candidate in title_set:
@@ -305,3 +332,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
