@@ -1,0 +1,30 @@
+name: Verify published registry against October CSV comparison target
+on:
+  push:
+    branches: [codex/body-audit-release-20261011]
+    paths: [.github/workflows/verify-october-csv-20261011.yml]
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download current published registry
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: gh release download db-v1 --repo "$GITHUB_REPOSITORY" --pattern anime_reviewed_subtitle_registry_v1.zip --dir registry-comparison
+      - name: Match every playback file with the CSV-compared corrected snapshot
+        run: |
+          PYTHONPATH=scripts python - <<'PY'
+          import hashlib,json,sqlite3
+          from pathlib import Path
+          from split_db_v1_release import extract_database
+          p=Path('registry-comparison');z=p/'anime_reviewed_subtitle_registry_v1.zip'
+          assert hashlib.sha256(z.read_bytes()).hexdigest()=='20d51422593b2a05ad2377c17c044550a7fee4d6b1dfe98d040f630cfd3b3f81'
+          extract_database(z,p/'registry.db');c=sqlite3.connect(p/'registry.db');h=hashlib.sha256();n=0
+          q="""SELECT f.pid,f.sha256,a.zip_relative_path,f.member_path,f.target_source,f.target_id,f.review_status FROM packaged_files_v6 f JOIN packaged_archives_v6 a USING(pack_id) WHERE f.action='kept' AND (lower(f.member_path) LIKE '%.smi' OR lower(f.member_path) LIKE '%.srt' OR lower(f.member_path) LIKE '%.ass' OR lower(f.member_path) LIKE '%.ssa' OR lower(f.member_path) LIKE '%.sub' OR lower(f.member_path) LIKE '%.vtt') ORDER BY f.pid"""
+          for row in c.execute(q):h.update((json.dumps(list(row),ensure_ascii=False,separators=(',',':'))+'\n').encode());n+=1
+          assert n==55530,n
+          assert h.hexdigest()=='0f07e07df728724f388040cd401275b6b68b275159b25bd86a488acf220930d6',h.hexdigest()
+          print('PASS: published registry matches all 55,530 CSV-compared corrected snapshot file identities, targets and statuses',h.hexdigest())
+          PY
