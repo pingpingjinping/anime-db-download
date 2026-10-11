@@ -82,6 +82,27 @@ class NewSourceMatchingTests(unittest.TestCase):
     def reasons(self):
         return {r[0] for r in self.db.execute('SELECT reason FROM monthly_match_candidates')}
 
+    def test_manual_anikoto_choice_reserves_anissia_from_new_reanime(self):
+        self.source(native='Manual Only Title', ko='수동 영상 작품', year=2025)
+        add(self.db, 'ReAnime', 'same-title', native='Manual Only Title', year=2025)
+        self.db.execute("CREATE TABLE pi_manual_anikoto_work_overrides (anissia_no INTEGER)")
+        self.db.execute("INSERT INTO pi_manual_anikoto_work_overrides VALUES (1)")
+        matcher.refresh_auto_matches(self.db)
+        self.assertEqual(self.auto(), [])
+        self.assertEqual(self.db.execute(
+            "SELECT COUNT(*) FROM monthly_match_candidates WHERE anissia_no=1").fetchone()[0], 0)
+
+    def test_manual_reanime_choice_reserves_both_source_ids(self):
+        self.source(native='Manual Work Title', year=2025)
+        add(self.db, 'ReAnime', 'correct', native='Manual Work Title', year=2025)
+        self.db.execute("CREATE TABLE pi_manual_work_match_overrides "
+                        "(reanime_id TEXT,anissia_no INTEGER)")
+        self.db.execute("INSERT INTO pi_manual_work_match_overrides VALUES ('correct',1)")
+        matcher.refresh_auto_matches(self.db)
+        self.assertEqual(self.auto(), [])
+        self.assertEqual(self.db.execute(
+            "SELECT COUNT(*) FROM monthly_match_candidates WHERE anissia_no=1").fetchone()[0], 0)
+
     def test_bracketed_short_kanji_reading_is_review_only(self):
         self.source(native='神統記 〈テオゴニア〉', ko='신통기〈테오고니아〉', year=2025)
         add(self.db, 'ReAnime', 'teogonia', native='神統記', year=2025)

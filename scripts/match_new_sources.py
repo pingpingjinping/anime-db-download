@@ -72,6 +72,17 @@ def reviewed_ids(db, anissia):
     tables = {r[0] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
     ani = {str(r[0]) for r in db.execute("SELECT anime_no FROM anissia_year_match")} if 'anissia_year_match' in tables else set()
     reserved = set()
+    # Administrator work-ID overrides are authoritative, even where there is
+    # no historical anissia_year_match row. Preserve an Anikoto-only choice
+    # against speculative new ReAnime matching until the admin resets it.
+    if "pi_manual_work_match_overrides" in tables:
+        for rid, aid in db.execute(
+                "SELECT reanime_id,anissia_no FROM pi_manual_work_match_overrides"):
+            ani.add(str(aid))
+            reserved.add(str(rid))
+    if "pi_manual_anikoto_work_overrides" in tables:
+        ani.update(str(r[0]) for r in db.execute(
+            "SELECT anissia_no FROM pi_manual_anikoto_work_overrides"))
     for aid in ani:
         row = anissia.get(aid)
         if row:
