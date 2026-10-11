@@ -1,0 +1,44 @@
+name: Publish reviewed matching corrections 20261011
+
+on:
+  push:
+    branches: [codex/publish-matching-20261011]
+    paths: [review-artifacts/20261011/publish-request.json]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: anime-db-refresh
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply, verify rollback, back up and publish the requested Release
+        run: python review-artifacts/20261011/publish_release.py
+      - name: Save publication result for verification through Git
+        if: always()
+        run: |
+          if [ -f review-artifacts/20261011/publication.json ]; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add review-artifacts/20261011/publication.json
+            git commit -m 'Record matching Release publication result'
+            git push origin HEAD:codex/publish-matching-20261011
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: matching-release-publication-20261011
+          path: |
+            review-artifacts/20261011/publication.json
+            ${{ runner.temp }}/matching-20261011/output/matching-release-validation.json

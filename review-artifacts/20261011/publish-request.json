@@ -1,0 +1,10 @@
+{
+  "release_tag": "db-v1",
+  "review_batch": "matching-20261011",
+  "new_episode_assignments": 0,
+  "baseline_assets": {
+    "anime_four_sources_multilingual_prepared.zip": "8b7e9a14bbe17988d34efef781dc2c59dfc5adaaaeffde7f3fb1bd3152b07416",
+    "anime_reviewed_subtitle_registry_v1.zip": "5cf501ea6346b2fd95fd11dfc08836e3c8e1de246d5457182c96d9c60cdaa486"
+  },
+  "plan_sha256": "2fc9e0d65e5a954fd20bef006b5da5dc4ed559140733d72bf7034c8957ecc58c"
+}
