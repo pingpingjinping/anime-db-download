@@ -157,6 +157,16 @@ class MonthlyReviewedGroupsTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"range"):
             checked_anikoto([row])
 
+    def test_shared_anikoto_seasons_require_disjoint_reviewed_ranges(self):
+        from scripts.apply_pi_manual_work_matches import checked_anikoto
+        def row(aid, start, end):
+            return {"anikoto_id":"shared","anissia_no":aid,"mapping_kind":"range",
+                    "anikoto_episode_start":start,"anikoto_episode_end":end,
+                    "target_episode_start":1,"target_episode_end":end-start+1}
+        self.assertEqual(len(checked_anikoto([row(1,1,12),row(2,13,24)])),2)
+        with self.assertRaisesRegex(ValueError,"Overlapping"):
+            checked_anikoto([row(1,1,12),row(2,12,23)])
+
     def test_invalid_identity_fails_before_overwriting_release(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=pathlib.Path(tmp)
