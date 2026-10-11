@@ -1,0 +1,27 @@
+{
+  "status": "published_verified",
+  "repository": "pingpingjinping/anime-db-download",
+  "release_tag": "db-v1",
+  "run_id": "38114272050",
+  "backup_asset": "anime_matching_20261011_original_release_backup.zip",
+  "new_episode_assignments": 0,
+  "assets": {
+    "anime_four_sources_multilingual_prepared.zip": {
+      "before_sha256": "8b7e9a14bbe17988d34efef781dc2c59dfc5adaaaeffde7f3fb1bd3152b07416",
+      "after_sha256": "22e6df3b4d0d3036176c0ae9583f24051d2f39dde6db2678f16b5340597e23a0",
+      "counts": {
+        "entries": 43566,
+        "anikoto_catalog": 8836
+      }
+    },
+    "anime_reviewed_subtitle_registry_v1.zip": {
+      "before_sha256": "5cf501ea6346b2fd95fd11dfc08836e3c8e1de246d5457182c96d9c60cdaa486",
+      "after_sha256": "649d5804562f9d4209a9a8b8ce6993a1e9949f713f064697f6ec72592ddf78ef",
+      "counts": {
+        "subtitle_files": 55530,
+        "confirmed_episodes": 12055,
+        "completed_bundles": 1109
+      }
+    }
+  }
+}
