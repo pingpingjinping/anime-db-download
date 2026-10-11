@@ -420,6 +420,44 @@ class SnapshotSaveTests(unittest.TestCase):
             self.addCleanup(check.close)
             self.assertEqual(check.execute('SELECT reason FROM monthly_match_candidates').fetchone()[0], 'year_missing')
 
+    def test_reviewed_cross_source_id_cannot_be_extended_by_provider(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            db = catalog()
+            add(db, 'ReAnime', 'approved', year=2025,
+                meta={'reviewed_matching_20261011': {
+                    'decision': 'correct_work', 'new_episode_assignment': False}})
+            approved = {'anilist_ids': ['approved-anilist'], 'reanime_ids': ['approved']}
+            db.execute("UPDATE entries SET cross_source_ids_json=?,existing_match_status='strong_exact' "
+                       "WHERE source='ReAnime' AND source_record_id='approved'",
+                       (json.dumps(approved),))
+            db.execute('CREATE TABLE year_summary (year INTEGER,source TEXT,record_count INTEGER)')
+            db.execute('CREATE TABLE metadata (key TEXT PRIMARY KEY,value TEXT)')
+            db.commit()
+            source_db = root/'source.db'
+            with sqlite3.connect(source_db) as disk:
+                db.backup(disk)
+            db.close()
+            snapshot = root/'snapshot.db.gz'
+            update_db.pack_snapshot(source_db, snapshot)
+            input_path = root/'incoming.jsonl'
+            input_path.write_text(json.dumps({
+                'reanime_id': 'approved', 'anilist_id': 'wrong-movie',
+                'title_japanese': '検証アニメーション',
+                'season_year': 2025, 'format': 'TV'}, ensure_ascii=False) + '\\n')
+            with mock.patch('sys.argv', ['update_db','--snapshot',str(snapshot),
+                                         '--input', 'ReAnime='+str(input_path)]), \\
+                 contextlib.redirect_stdout(io.StringIO()):
+                update_db.main()
+            with gzip.open(snapshot, 'rb') as stream:
+                (root/'output.db').write_bytes(stream.read())
+            with sqlite3.connect(root/'output.db') as result:
+                cross, status = result.execute(
+                    "SELECT cross_source_ids_json,existing_match_status FROM entries "
+                    "WHERE source='ReAnime' AND source_record_id='approved'").fetchone()
+                self.assertEqual(json.loads(cross), approved)
+                self.assertEqual(status, 'strong_exact')
+
     def test_incomplete_online_listing_does_not_replace_snapshot(self):
         with tempfile.TemporaryDirectory() as temp:
             path = Path(temp)/'snapshot.db.gz'
