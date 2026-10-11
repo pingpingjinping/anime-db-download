@@ -144,6 +144,49 @@ class CloudflareSearchExportTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'format or completion'):
             build(self.cat,self.reg)
 
+    def add_reviewed_arrest_fixture(self, status='multi'):
+        self.add('Onnada','1073','체포하겠어',native='逮捕しちゃうぞ',year='1996')
+        self.add('Onnada','1001','체포하겠어 SECOND SEASON',year='2001')
+        self.add('AniList','1372','',native='逮捕しちゃうぞ (TV)',english="You're Under Arrest! (TV)",year='1996')
+        self.add('AniList','1577','',native='逮捕しちゃうぞ',year='1994')
+        self.add('AniList','2014','',native='逮捕しちゃうぞ SECOND SEASON',year='2001')
+        self.cat.execute('ALTER TABLE entries ADD COLUMN cross_source_ids_json TEXT')
+        self.cat.execute('ALTER TABLE entries ADD COLUMN existing_match_status TEXT')
+        self.cat.execute("UPDATE entries SET cross_source_ids_json=?,existing_match_status='review',source_metadata_json=? WHERE source='Onnada' AND source_record_id='1073'",
+                         (json.dumps({'anilist_ids':['1372','1577']}),json.dumps({'onnada_manual_review_v1':{'status':status}})))
+        self.cat.execute("UPDATE entries SET cross_source_ids_json=?,existing_match_status='strong_exact' WHERE source='Onnada' AND source_record_id='1001'",
+                         (json.dumps({'anilist_ids':['2014']}),))
+        self.reg.executemany('INSERT INTO subtitle_runtime_files_export VALUES (?,?,?,?,?,?)',[
+            ('tv','naver','AniList','1372',None,1),('ova','naver','AniList','1577',None,1),
+            ('s2','naver','AniList','2014',None,1)])
+
+    def test_reviewed_korean_name_reaches_tv_ova_and_separate_second_season(self):
+        self.add_reviewed_arrest_fixture()
+        before,_,_,_=build(self.cat,self.reg)
+        # Main titles, caption counts, links and every work identity remain unchanged.
+        self.cat.execute("UPDATE entries SET cross_source_ids_json='{}'")
+        without_aliases,_,_,_=build(self.cat,self.reg)
+        self.assertEqual(before,without_aliases)
+        self.cat.execute("UPDATE entries SET cross_source_ids_json=? WHERE source='Onnada' AND source_record_id='1073'",(json.dumps({'anilist_ids':['1372','1577']}),))
+        self.cat.execute("UPDATE entries SET cross_source_ids_json=? WHERE source='Onnada' AND source_record_id='1001'",(json.dumps({'anilist_ids':['2014']}),))
+        works,aliases,_,_=build(self.cat,self.reg)
+        hits={wid for wid,a in aliases if '체포하겠어' in a}
+        self.assertEqual(hits,{'db_AniList_1372','db_AniList_1577','db_AniList_2014'})
+        self.assertNotIn(('db_AniList_1372',normalized_title('체포하겠어 SECOND SEASON')),aliases)
+        self.assertNotIn(('db_AniList_1577',normalized_title('체포하겠어 SECOND SEASON')),aliases)
+        self.assertEqual(next(w for w in works if w[0]=='db_AniList_1372')[5],'/catalog/AniList/1372')
+
+    def test_unreviewed_or_explicitly_held_links_do_not_lend_korean_names(self):
+        self.add_reviewed_arrest_fixture(status='hold')
+        self.cat.execute("UPDATE entries SET existing_match_status='strong_exact' WHERE source='Onnada' AND source_record_id='1073'")
+        _,aliases,_,_=build(self.cat,self.reg)
+        self.assertNotIn(('db_AniList_1372',normalized_title('체포하겠어')),aliases)
+        self.assertNotIn(('db_AniList_1577',normalized_title('체포하겠어')),aliases)
+        self.cat.execute("UPDATE entries SET existing_match_status='review',source_metadata_json='{}' WHERE source='Onnada' AND source_record_id='1073'")
+        _,aliases,_,_=build(self.cat,self.reg)
+        self.assertNotIn(('db_AniList_1372',normalized_title('체포하겠어')),aliases)
+
 
 if __name__=='__main__':
     unittest.main()
+
