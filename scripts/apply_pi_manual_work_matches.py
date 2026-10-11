@@ -42,7 +42,7 @@ ANIKOTO_COLUMNS = (
 def checked_anikoto(rows):
     if not isinstance(rows, list) or len(rows) > MAX_OVERRIDES:
         raise ValueError("Invalid manual Anikoto work match snapshot")
-    used_ak, used_ani = set(), set()
+    used_ak, used_ani = {}, set()
     validated = []
     for row in rows:
         if not isinstance(row, dict) or set(row) != set(ANIKOTO_COLUMNS):
@@ -51,9 +51,8 @@ def checked_anikoto(rows):
         if (not isinstance(akid, str)
                 or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,199}", akid)
                 or type(aid) is not int or not 1 <= aid <= 2147483647
-                or akid in used_ak or aid in used_ani):
+                or aid in used_ani):
             raise ValueError("Invalid or conflicting Anikoto override")
-        used_ak.add(akid)
         used_ani.add(aid)
         kind = row["mapping_kind"]
         episodes = tuple(row[x] for x in ANIKOTO_COLUMNS[3:])
@@ -67,6 +66,12 @@ def checked_anikoto(rows):
                 raise ValueError("Invalid Anikoto reviewed episode range")
         else:
             raise ValueError("Invalid Anikoto manual mapping kind")
+        for previous in used_ak.get(akid, []):
+            if (kind != "range" or previous["mapping_kind"] != "range"
+                    or not (episodes[1] < previous["anikoto_episode_start"]
+                            or episodes[0] > previous["anikoto_episode_end"])):
+                raise ValueError("Overlapping manual Anikoto season ranges")
+        used_ak.setdefault(akid, []).append(row)
         validated.append(tuple(row[k] for k in ANIKOTO_COLUMNS))
     if validated != sorted(validated, key=lambda row: row[1]):
         raise ValueError("Manual Anikoto links must be sorted by Anissia ID")
@@ -98,7 +103,7 @@ def apply_overrides(db, manifest, month):
             raise ValueError("Manual Anikoto ID is absent from canonical catalog: " + row[0])
     db.execute("""CREATE TABLE IF NOT EXISTS pi_manual_anikoto_work_overrides (
       anissia_no INTEGER PRIMARY KEY CHECK(anissia_no>0),
-      anikoto_id TEXT NOT NULL UNIQUE, mapping_kind TEXT NOT NULL,
+      anikoto_id TEXT NOT NULL, mapping_kind TEXT NOT NULL,
       anikoto_episode_start INTEGER, anikoto_episode_end INTEGER,
       target_episode_start INTEGER, target_episode_end INTEGER,
       reviewed_month TEXT NOT NULL
