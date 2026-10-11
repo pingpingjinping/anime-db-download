@@ -13,6 +13,15 @@ class ReviewRulesTests(unittest.TestCase):
     def test_release_rules_are_complete_and_do_not_assign_episodes(self):
         rules = read_rules()
         self.assertEqual(rules["new_episode_assignments"], 0)
+        if rules.get('body_audit_batch'):
+            self.assertEqual(rules['manual_episode_assignments'],60)
+            episodes=rules['roles']['registry']['subtitle_confirmed_episodes']['rows']
+            self.assertEqual(len(episodes),36)
+            self.assertEqual(sum(r['expected']['status']=='hold' for r in episodes),12)
+            manual=rules['roles']['registry']['body_audit_confirmed_episodes_v1']['rows']
+            self.assertEqual(len(manual),60)
+            self.assertTrue(all(r['expected']['status']=='confirmed_episode' for r in manual))
+            return
         self.assertEqual(
             {role: {table: len(group["rows"]) for table, group in groups.items()}
              for role, groups in rules["roles"].items()},

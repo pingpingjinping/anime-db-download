@@ -32,7 +32,7 @@ def build(inputs,out):
   assert sha256(inputs/asset)==digest,('Release asset changed',asset)
  catpath=out/'anime_four_sources_multilingual_prepared.db';regpath=out/'anime_reviewed_subtitle_registry_v1.db'
  extract_database(inputs/CAT,catpath);extract_database(inputs/REG,regpath)
- rules=copy.deepcopy(read_rules());cats=sqlite3.connect(catpath);regs=sqlite3.connect(regpath)
+ rules=copy.deepcopy(read_rules(ROOT/'data/matching/before-body-audit-20261011.json'));cats=sqlite3.connect(catpath);regs=sqlite3.connect(regpath)
  for db in (cats,regs):db.row_factory=sqlite3.Row
  verify_role(cats,'catalog',rules);verify_role(regs,'registry',rules)
  before={role:{r[0]:table_digest(db,r[0]) for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")} for role,db in [('catalog',cats),('registry',regs)]}
