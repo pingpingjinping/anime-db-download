@@ -15,7 +15,7 @@ import re
 import sqlite3
 import tempfile
 import zipfile
-from apply_pi_manual_work_matches import checked_overrides, apply_overrides
+from apply_pi_manual_work_matches import checked_overrides, checked_anikoto, apply_overrides
 
 ID = re.compile(r"^(?:ani_[1-9]\d*|re_[A-Za-z0-9_-]+|ak_[A-Za-z0-9_-]+|db_(?:AniList|Onnada)_[A-Za-z0-9_-]+)$")
 KINDS = {"main", "ova", "special", "movie", "preview", "drama", "unknown"}
@@ -39,6 +39,10 @@ def checked_manifest(payload, month):
     manual = checked_overrides(payload["manual_work_matches"])
     if len(manual) != payload["manual_match_count"]:
         raise ValueError("Manual DB work match count mismatch")
+    ak = checked_anikoto(payload.get("manual_anikoto_matches"))
+    if (type(payload.get("manual_anikoto_match_count")) is not int
+            or len(ak) != payload["manual_anikoto_match_count"]):
+        raise ValueError("Manual Anikoto match count mismatch")
     used = {}
     for group in groups:
         if not isinstance(group,dict): raise ValueError("Invalid group")
