@@ -71,7 +71,7 @@ class ReviewRulesTests(unittest.TestCase):
             db.execute("DELETE FROM subtitle_work_reanime_links")
             db.execute("UPDATE subtitle_confirmed_episodes SET status='confirmed_episode',"
                        "target_episode=11 WHERE map_id=12")
-            with self.assertRaisesRegex(ValueError, "reviewed"):
+            with self.assertRaisesRegex(ValueError, "Reviewed matching regression"):
                 verify_role(db, "registry", rules)
 
     def test_monthly_snapshot_preserves_later_manual_overrides_and_episodes(self):
