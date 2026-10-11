@@ -1,7 +1,5 @@
 name: Build body-reviewed release 20261011
 on:
-  push:
-    branches: [codex/body-audit-release-20261011]
   workflow_dispatch:
 permissions:
   contents: write

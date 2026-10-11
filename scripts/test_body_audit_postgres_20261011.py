@@ -24,8 +24,10 @@ def setup(plan):
    v=dict(e['release_before'],dataset_key=a['dataset_key'],map_id=e['release_map_id']);s.append('INSERT INTO anime_subtitle_confirmed_episodes ('+','.join(v)+') VALUES ('+','.join(sql(x) for x in v.values())+');')
  run('\n'.join(s))
 def signature():return run("SELECT md5(string_agg(row_to_json(f)::text,'' ORDER BY pid)) FROM anime_subtitle_files f; SELECT md5(string_agg(row_to_json(e)::text,'' ORDER BY map_id)) FROM anime_subtitle_confirmed_episodes e;")
-plan=json.loads(PLAN.read_text());delta=emit(plan);setup(plan);run(delta);assert run('SELECT count(*) FROM anime_subtitle_confirmed_episodes;')==['84'];before=signature();run(delta);assert signature()==before
-setup(plan);manual=next(f for f in plan['files'] if f['case']=='C18');run("UPDATE anime_subtitle_files SET is_manual=TRUE,target_id='user_choice' WHERE pid="+sql(manual['pid'])+';');run(delta);assert run('SELECT count(*) FROM anime_subtitle_confirmed_episodes;')==['82'];assert run('SELECT target_id FROM anime_subtitle_files WHERE pid='+sql(manual['pid'])+';')==['user_choice']
-setup(plan);conflict=plan['files'][-1];run("UPDATE anime_subtitle_files SET sha256='changed' WHERE pid="+sql(conflict['pid'])+';');before=signature();run(delta,False);assert signature()==before
-setup(plan);e=next(e for e in plan['episodes'] if not e['before']);run('INSERT INTO anime_subtitle_confirmed_episodes(dataset_key,map_id,file_id,status) VALUES ('+','.join(sql(x) for x in [e['after']['dataset_key'],e['release_map_id'],'conflict','manual'])+');');before=signature();run(delta,False);assert signature()==before
-print('PASS: exact apply, idempotent rerun, preserved manual file and episodes, hash conflict rollback, numeric map collision rollback')
+def main():
+ plan=json.loads(PLAN.read_text());delta=emit(plan);setup(plan);run(delta);assert run('SELECT count(*) FROM anime_subtitle_confirmed_episodes;')==['84'];before=signature();run(delta);assert signature()==before
+ setup(plan);manual=next(f for f in plan['files'] if f['case']=='C18');run("UPDATE anime_subtitle_files SET is_manual=TRUE,target_id='user_choice' WHERE pid="+sql(manual['pid'])+';');run(delta);assert run('SELECT count(*) FROM anime_subtitle_confirmed_episodes;')==['82'];assert run('SELECT target_id FROM anime_subtitle_files WHERE pid='+sql(manual['pid'])+';')==['user_choice']
+ setup(plan);conflict=plan['files'][-1];run("UPDATE anime_subtitle_files SET sha256='changed' WHERE pid="+sql(conflict['pid'])+';');before=signature();run(delta,False);assert signature()==before
+ setup(plan);e=next(e for e in plan['episodes'] if not e['before']);run('INSERT INTO anime_subtitle_confirmed_episodes(dataset_key,map_id,file_id,status) VALUES ('+','.join(sql(x) for x in [e['after']['dataset_key'],e['release_map_id'],'conflict','manual'])+');');before=signature();run(delta,False);assert signature()==before
+ print('PASS: exact apply, idempotent rerun, preserved manual file and episodes, hash conflict rollback, numeric map collision rollback')
+if __name__=='__main__':main()
