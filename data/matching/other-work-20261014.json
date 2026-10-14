@@ -1,0 +1,2123 @@
+{
+  "schema": 1,
+  "batch": "other-work-20261014",
+  "expected_assets": {
+    "anime_four_sources_multilingual_prepared.zip": "2f1608edc9a131c0a0022299b95473a5159d01adf693933300b781db218ba1e4",
+    "anime_reviewed_subtitle_registry_v1.zip": "20d51422593b2a05ad2377c17c044550a7fee4d6b1dfe98d040f630cfd3b3f81"
+  },
+  "new_episode_assignments": 0,
+  "changes": {
+    "catalog": [
+      {
+        "table": "entries",
+        "key": {
+          "source": "Anissia",
+          "source_record_id": "827"
+        },
+        "before": {
+          "cross_source_ids_json": "{\"anilist_ids\":[\"275\"],\"reanime_ids\":[\"love-love-nc43au\"],\"onnada_ids\":[\"3381\"]}",
+          "existing_match_status": "onnada_exact_unverified",
+          "source_metadata_json": "{\"week\":\"5\",\"time\":\"02:35\",\"startDate\":\"2016-07-08\",\"endDate\":\"2016-09-23\",\"captionCount\":\"1\",\"website\":\"http://boueibu.com/\",\"x\":\"\",\"combined_confidence\":\"85\",\"review_label\":\"주의\"}",
+          "title_ko": "미남 고교 지구 방위부 LOVE! LOVE!",
+          "title_native": "",
+          "year": 2016
+        },
+        "after": {
+          "cross_source_ids_json": "{\"anilist_ids\":[\"21293\"],\"reanime_ids\":[\"cute-high-earth-defense-club-love-love-y747k3\"],\"onnada_ids\":[\"3381\"]}",
+          "existing_match_status": "strong_exact",
+          "source_metadata_json": "{\"week\":\"5\",\"time\":\"02:35\",\"startDate\":\"2016-07-08\",\"endDate\":\"2016-09-23\",\"captionCount\":\"1\",\"website\":\"http://boueibu.com/\",\"x\":\"\",\"combined_confidence\":\"85\",\"review_label\":\"검토된 사항\",\"reviewed_matching_20261011\":{\"batch\":\"other-work-20261014\",\"reason\":\"2016 방위부 TV 2기를 2004 LOVE LOVE와 구분. 기존 Onnada 3381 검수 및 AniList 21293 제목·연도·포맷이 일치.\",\"urls\":[\"https://anilist.co/anime/21293\",\"https://boueibu.com/2nd/\",\"https://onnada.com/anime/3381\"]}}"
+        },
+        "pin": [
+          "cross_source_ids_json",
+          "existing_match_status"
+        ],
+        "reason": "2016 방위부 TV 2기를 2004 LOVE LOVE와 구분. 기존 Onnada 3381 검수 및 AniList 21293 제목·연도·포맷이 일치.",
+        "urls": [
+          "https://anilist.co/anime/21293",
+          "https://boueibu.com/2nd/",
+          "https://onnada.com/anime/3381"
+        ]
+      },
+      {
+        "table": "anissia_year_match",
+        "key": {
+          "anime_no": 827
+        },
+        "before": {
+          "same_year_match_status": "exact_title_same_year",
+          "previous_combined_status": "onnada_exact_unverified",
+          "previous_anilist_id": "275",
+          "previous_reanime_id": "love-love-nc43au",
+          "review_bucket": "exact_title_same_year"
+        },
+        "after": {
+          "same_year_match_status": "reviewed_work_correction",
+          "previous_combined_status": "strong_exact",
+          "previous_anilist_id": "21293",
+          "previous_reanime_id": "cute-high-earth-defense-club-love-love-y747k3",
+          "review_bucket": "other-work-20261014"
+        },
+        "pin": [
+          "same_year_match_status",
+          "previous_combined_status",
+          "previous_anilist_id",
+          "previous_reanime_id",
+          "review_bucket"
+        ],
+        "reason": "2016 방위부 TV 2기를 2004 LOVE LOVE와 구분. 기존 Onnada 3381 검수 및 AniList 21293 제목·연도·포맷이 일치.",
+        "urls": [
+          "https://anilist.co/anime/21293",
+          "https://boueibu.com/2nd/",
+          "https://onnada.com/anime/3381"
+        ]
+      },
+      {
+        "table": "entries",
+        "key": {
+          "source": "Anissia",
+          "source_record_id": "1097"
+        },
+        "before": {
+          "cross_source_ids_json": "{\"anilist_ids\":[\"275\"],\"reanime_ids\":[\"love-love-nc43au\"],\"onnada_ids\":[]}",
+          "existing_match_status": "review",
+          "source_metadata_json": "{\"week\":\"7\",\"time\":\"00:00\",\"startDate\":\"2017-08-26\",\"endDate\":\"2017-08-26\",\"captionCount\":\"0\",\"website\":\"http://boueibu.com/\",\"x\":\"\",\"combined_confidence\":\"89.5\",\"review_label\":\"주의\"}",
+          "title_ko": "미남 고교 지구 방위부 LOVE! LOVE! LOVE!",
+          "title_native": "",
+          "year": 2017
+        },
+        "after": {
+          "cross_source_ids_json": "{\"anilist_ids\":[\"98599\"],\"reanime_ids\":[\"cute-high-earth-defense-club-love-love-love-qn7q2p\"],\"onnada_ids\":[]}",
+          "existing_match_status": "strong_exact",
+          "source_metadata_json": "{\"week\":\"7\",\"time\":\"00:00\",\"startDate\":\"2017-08-26\",\"endDate\":\"2017-08-26\",\"captionCount\":\"0\",\"website\":\"http://boueibu.com/\",\"x\":\"\",\"combined_confidence\":\"89.5\",\"review_label\":\"검토된 사항\",\"reviewed_matching_20261011\":{\"batch\":\"other-work-20261014\",\"reason\":\"2017 방위부 OVA를 2004 LOVE LOVE와 구분. AniList 98599 및 ReAnime의 제목·연도·OVA 포맷 일치.\",\"urls\":[\"https://anilist.co/anime/98599\",\"https://boueibu.com/\"]}}"
+        },
+        "pin": [
+          "cross_source_ids_json",
+          "existing_match_status"
+        ],
+        "reason": "2017 방위부 OVA를 2004 LOVE LOVE와 구분. AniList 98599 및 ReAnime의 제목·연도·OVA 포맷 일치.",
+        "urls": [
+          "https://anilist.co/anime/98599",
+          "https://boueibu.com/"
+        ]
+      },
+      {
+        "table": "anissia_year_match",
+        "key": {
+          "anime_no": 1097
+        },
+        "before": {
+          "same_year_match_status": "no_title_match_same_year",
+          "previous_combined_status": "review",
+          "previous_anilist_id": "275",
+          "previous_reanime_id": "love-love-nc43au",
+          "review_label": "기존 검토 후보",
+          "review_bucket": "cross_year_or_no_title_candidate"
+        },
+        "after": {
+          "same_year_match_status": "reviewed_work_correction",
+          "previous_combined_status": "strong_exact",
+          "previous_anilist_id": "98599",
+          "previous_reanime_id": "cute-high-earth-defense-club-love-love-love-qn7q2p",
+          "review_label": "검토된 사항",
+          "review_bucket": "other-work-20261014"
+        },
+        "pin": [
+          "same_year_match_status",
+          "previous_combined_status",
+          "previous_anilist_id",
+          "previous_reanime_id",
+          "review_label",
+          "review_bucket"
+        ],
+        "reason": "2017 방위부 OVA를 2004 LOVE LOVE와 구분. AniList 98599 및 ReAnime의 제목·연도·OVA 포맷 일치.",
+        "urls": [
+          "https://anilist.co/anime/98599",
+          "https://boueibu.com/"
+        ]
+      },
+      {
+        "table": "entries",
+        "key": {
+          "source": "Anissia",
+          "source_record_id": "3170"
+        },
+        "before": {
+          "cross_source_ids_json": "{\"anilist_ids\":[\"2199\"],\"reanime_ids\":[\"ringing-bell-q8xgdx\"],\"onnada_ids\":[]}",
+          "existing_match_status": "review",
+          "source_metadata_json": "{\"week\":\"3\",\"time\":\"01:25\",\"startDate\":\"2025-01-08\",\"endDate\":\"2025-03-26\",\"captionCount\":\"1\",\"website\":\"https://b8station.tv/ringingfate\",\"x\":\"https://x.com/b8station\",\"combined_confidence\":\"72.7\",\"review_label\":\"주의\"}",
+          "title_ko": "운명권대",
+          "title_native": "RINGING FATE",
+          "year": 2025
+        },
+        "after": {
+          "cross_source_ids_json": "{\"anilist_ids\":[],\"reanime_ids\":[\"ringing-fate-47styg\"],\"onnada_ids\":[]}",
+          "existing_match_status": "strong_exact",
+          "source_metadata_json": "{\"week\":\"3\",\"time\":\"01:25\",\"startDate\":\"2025-01-08\",\"endDate\":\"2025-03-26\",\"captionCount\":\"1\",\"website\":\"https://b8station.tv/ringingfate\",\"x\":\"https://x.com/b8station\",\"combined_confidence\":\"72.7\",\"review_label\":\"검토된 사항\",\"reviewed_matching_20261011\":{\"batch\":\"other-work-20261014\",\"reason\":\"RINGING FATE와 1978 Ringing Bell은 다른 작품. 기존 정확한 ReAnime Ringing Fate 레코드로 교정. 로컬에 없는 AniList 행은 생성하지 않음.\",\"urls\":[\"https://b8station.tv/ringingfate\",\"https://anilist.co/anime/141862\"]}}"
+        },
+        "pin": [
+          "cross_source_ids_json",
+          "existing_match_status"
+        ],
+        "reason": "RINGING FATE와 1978 Ringing Bell은 다른 작품. 기존 정확한 ReAnime Ringing Fate 레코드로 교정. 로컬에 없는 AniList 행은 생성하지 않음.",
+        "urls": [
+          "https://b8station.tv/ringingfate",
+          "https://anilist.co/anime/141862"
+        ]
+      },
+      {
+        "table": "anissia_year_match",
+        "key": {
+          "anime_no": 3170
+        },
+        "before": {
+          "same_year_match_status": "no_title_match_same_year",
+          "previous_combined_status": "review",
+          "previous_anilist_id": "2199",
+          "previous_reanime_id": "ringing-bell-q8xgdx",
+          "review_label": "기존 검토 후보",
+          "review_bucket": "cross_year_or_no_title_candidate"
+        },
+        "after": {
+          "same_year_match_status": "reviewed_work_correction",
+          "previous_combined_status": "strong_exact",
+          "previous_anilist_id": "",
+          "previous_reanime_id": "ringing-fate-47styg",
+          "review_label": "검토된 사항",
+          "review_bucket": "other-work-20261014"
+        },
+        "pin": [
+          "same_year_match_status",
+          "previous_combined_status",
+          "previous_anilist_id",
+          "previous_reanime_id",
+          "review_label",
+          "review_bucket"
+        ],
+        "reason": "RINGING FATE와 1978 Ringing Bell은 다른 작품. 기존 정확한 ReAnime Ringing Fate 레코드로 교정. 로컬에 없는 AniList 행은 생성하지 않음.",
+        "urls": [
+          "https://b8station.tv/ringingfate",
+          "https://anilist.co/anime/141862"
+        ]
+      },
+      {
+        "table": "entries",
+        "key": {
+          "source": "Anissia",
+          "source_record_id": "2961"
+        },
+        "before": {
+          "cross_source_ids_json": "{\"anilist_ids\":[\"198113\"],\"reanime_ids\":[\"kill-blue-9qpdu6\"],\"onnada_ids\":[]}",
+          "existing_match_status": "review",
+          "source_metadata_json": "{\"week\":\"7\",\"time\":\"00:00\",\"startDate\":\"2026-99-99\",\"endDate\":\"\",\"captionCount\":\"0\",\"website\":\"https://www.killtu.be\",\"x\":\"https://x.com/KILLTUBEJP\",\"combined_confidence\":\"83.0\",\"review_label\":\"주의\"}",
+          "title_ko": "킬튜브",
+          "title_native": "KILLTUBE",
+          "year": 2026
+        },
+        "after": {
+          "cross_source_ids_json": "{\"anilist_ids\":[],\"reanime_ids\":[\"killtube-g4fay4\"],\"onnada_ids\":[]}",
+          "existing_match_status": "strong_exact",
+          "source_metadata_json": "{\"week\":\"7\",\"time\":\"00:00\",\"startDate\":\"2026-99-99\",\"endDate\":\"\",\"captionCount\":\"0\",\"website\":\"https://www.killtu.be\",\"x\":\"https://x.com/KILLTUBEJP\",\"combined_confidence\":\"83.0\",\"review_label\":\"검토된 사항\",\"reviewed_matching_20261011\":{\"batch\":\"other-work-20261014\",\"reason\":\"KILLTUBE와 Kill Ao는 다른 작품. 기존 KILLTUBE Movie 레코드로 교정. 로컬에 없는 AniList 행은 생성하지 않음.\",\"urls\":[\"https://www.killtu.be\",\"https://anilist.co/anime/176910\"]}}"
+        },
+        "pin": [
+          "cross_source_ids_json",
+          "existing_match_status"
+        ],
+        "reason": "KILLTUBE와 Kill Ao는 다른 작품. 기존 KILLTUBE Movie 레코드로 교정. 로컬에 없는 AniList 행은 생성하지 않음.",
+        "urls": [
+          "https://www.killtu.be",
+          "https://anilist.co/anime/176910"
+        ]
+      },
+      {
+        "table": "anissia_year_match",
+        "key": {
+          "anime_no": 2961
+        },
+        "before": {
+          "same_year_match_status": "review_candidate_same_year",
+          "previous_combined_status": "review",
+          "previous_anilist_id": "198113",
+          "previous_reanime_id": "kill-blue-9qpdu6",
+          "review_label": "주의",
+          "review_bucket": "low_title_similarity"
+        },
+        "after": {
+          "same_year_match_status": "reviewed_work_correction",
+          "previous_combined_status": "strong_exact",
+          "previous_anilist_id": "",
+          "previous_reanime_id": "killtube-g4fay4",
+          "review_label": "검토된 사항",
+          "review_bucket": "other-work-20261014"
+        },
+        "pin": [
+          "same_year_match_status",
+          "previous_combined_status",
+          "previous_anilist_id",
+          "previous_reanime_id",
+          "review_label",
+          "review_bucket"
+        ],
+        "reason": "KILLTUBE와 Kill Ao는 다른 작품. 기존 KILLTUBE Movie 레코드로 교정. 로컬에 없는 AniList 행은 생성하지 않음.",
+        "urls": [
+          "https://www.killtu.be",
+          "https://anilist.co/anime/176910"
+        ]
+      },
+      {
+        "table": "entries",
+        "key": {
+          "source": "Anissia",
+          "source_record_id": "3592"
+        },
+        "before": {
+          "cross_source_ids_json": "{\"anilist_ids\": [\"180292\"], \"reanime_ids\": [\"the-daily-life-of-a-middle-aged-online-shopper-in-another-world-gxzurt\"], \"onnada_ids\": []}",
+          "existing_match_status": "review",
+          "source_metadata_json": "{\"week\": \"8\", \"time\": \"00:00\", \"startDate\": \"2027-01-99\", \"endDate\": \"\", \"captionCount\": 0, \"website\": \"https://arafo-kenja.com\", \"x\": \"https://x.com/arafokenja\", \"combined_confidence\": \"75.9\", \"review_label\": \"주의\", \"animeNo\": 3592, \"status\": \"ON\", \"note\": \"\", \"agendaNo\": 0}",
+          "title_ko": "아라포 현자의 이세계 생활 일기",
+          "title_native": "アラフォー賢者の異世界生活日記",
+          "year": 2027
+        },
+        "after": {
+          "cross_source_ids_json": "{\"anilist_ids\":[],\"reanime_ids\":[\"arafou-kenja-no-isekai-seikatsu-nikki-62swwc\"],\"onnada_ids\":[]}",
+          "existing_match_status": "strong_exact",
+          "source_metadata_json": "{\"week\":\"8\",\"time\":\"00:00\",\"startDate\":\"2027-01-99\",\"endDate\":\"\",\"captionCount\":0,\"website\":\"https://arafo-kenja.com\",\"x\":\"https://x.com/arafokenja\",\"combined_confidence\":\"75.9\",\"review_label\":\"검토된 사항\",\"animeNo\":3592,\"status\":\"ON\",\"note\":\"\",\"agendaNo\":0,\"reviewed_matching_20261011\":{\"batch\":\"other-work-20261014\",\"reason\":\"아라포 현자 생활 일기와 아라포 남자 통판은 다른 작품. 정확한 일본어 제목의 기존 ReAnime 레코드로 교정.\",\"urls\":[\"https://arafo-kenja.com\",\"https://anilist.co/anime/211258\"]}}"
+        },
+        "pin": [
+          "cross_source_ids_json",
+          "existing_match_status"
+        ],
+        "reason": "아라포 현자 생활 일기와 아라포 남자 통판은 다른 작품. 정확한 일본어 제목의 기존 ReAnime 레코드로 교정.",
+        "urls": [
+          "https://arafo-kenja.com",
+          "https://anilist.co/anime/211258"
+        ]
+      },
+      {
+        "table": "anissia_year_match",
+        "key": {
+          "anime_no": 3592
+        },
+        "before": {
+          "same_year_match_status": "no_title_match_same_year",
+          "previous_combined_status": "review",
+          "previous_anilist_id": "180292",
+          "previous_reanime_id": "the-daily-life-of-a-middle-aged-online-shopper-in-another-world-gxzurt",
+          "review_label": "기존 검토 후보",
+          "review_bucket": "cross_year_or_no_title_candidate"
+        },
+        "after": {
+          "same_year_match_status": "reviewed_work_correction",
+          "previous_combined_status": "strong_exact",
+          "previous_anilist_id": "",
+          "previous_reanime_id": "arafou-kenja-no-isekai-seikatsu-nikki-62swwc",
+          "review_label": "검토된 사항",
+          "review_bucket": "other-work-20261014"
+        },
+        "pin": [
+          "same_year_match_status",
+          "previous_combined_status",
+          "previous_anilist_id",
+          "previous_reanime_id",
+          "review_label",
+          "review_bucket"
+        ],
+        "reason": "아라포 현자 생활 일기와 아라포 남자 통판은 다른 작품. 정확한 일본어 제목의 기존 ReAnime 레코드로 교정.",
+        "urls": [
+          "https://arafo-kenja.com",
+          "https://anilist.co/anime/211258"
+        ]
+      },
+      {
+        "table": "entries",
+        "key": {
+          "source": "Anissia",
+          "source_record_id": "2468"
+        },
+        "before": {
+          "cross_source_ids_json": "{\"anilist_ids\":[\"21732\"],\"reanime_ids\":[\"planetarian-fmuv2d\"],\"onnada_ids\":[]}",
+          "source_metadata_json": "{\"week\":\"8\",\"time\":\"00:00\",\"startDate\":\"\",\"endDate\":\"\",\"captionCount\":\"0\",\"website\":\"https://plantopia.jp\",\"x\":\"\",\"combined_confidence\":\"0\",\"review_label\":\"미매칭\"}",
+          "title_ko": "Plantopia",
+          "title_native": "",
+          "year": null
+        },
+        "after": {
+          "cross_source_ids_json": "{\"anilist_ids\":[],\"reanime_ids\":[],\"onnada_ids\":[]}",
+          "source_metadata_json": "{\"week\":\"8\",\"time\":\"00:00\",\"startDate\":\"\",\"endDate\":\"\",\"captionCount\":\"0\",\"website\":\"https://plantopia.jp\",\"x\":\"\",\"combined_confidence\":\"0\",\"review_label\":\"미매칭\",\"reviewed_matching_20261011\":{\"batch\":\"other-work-20261014\",\"reason\":\"Plantopia와 planetarian의 오연결 제거. 동명 음악 MV를 예정 작품과 임의 통합하지 않고 미매칭 유지.\",\"urls\":[\"https://plantopia.jp\",\"https://anilist.co/anime/21732\"]}}"
+        },
+        "pin": [
+          "cross_source_ids_json",
+          "existing_match_status"
+        ],
+        "reason": "Plantopia와 planetarian의 오연결 제거. 동명 음악 MV를 예정 작품과 임의 통합하지 않고 미매칭 유지.",
+        "urls": [
+          "https://plantopia.jp",
+          "https://anilist.co/anime/21732"
+        ]
+      },
+      {
+        "table": "anissia_year_match",
+        "key": {
+          "anime_no": 2468
+        },
+        "before": {
+          "same_year_match_status": "no_title_match_same_year",
+          "previous_anilist_id": "21732",
+          "previous_reanime_id": "planetarian-fmuv2d",
+          "review_label": "연도 미상",
+          "review_bucket": "year_unknown"
+        },
+        "after": {
+          "same_year_match_status": "reviewed_work_hold",
+          "previous_anilist_id": "",
+          "previous_reanime_id": "",
+          "review_label": "미매칭",
+          "review_bucket": "other-work-20261014"
+        },
+        "pin": [
+          "same_year_match_status",
+          "previous_anilist_id",
+          "previous_reanime_id",
+          "review_label",
+          "review_bucket"
+        ],
+        "reason": "Plantopia와 planetarian의 오연결 제거. 동명 음악 MV를 예정 작품과 임의 통합하지 않고 미매칭 유지.",
+        "urls": [
+          "https://plantopia.jp",
+          "https://anilist.co/anime/21732"
+        ]
+      },
+      {
+        "table": "entries",
+        "key": {
+          "source": "Anissia",
+          "source_record_id": "3195"
+        },
+        "before": {
+          "cross_source_ids_json": "{\"anilist_ids\":[\"142274\"],\"reanime_ids\":[\"ninjala-the-animation-8p3jt3\"],\"onnada_ids\":[]}",
+          "source_metadata_json": "{\"week\":\"8\",\"time\":\"00:00\",\"startDate\":\"\",\"endDate\":\"\",\"captionCount\":\"0\",\"website\":\"https://kinemacitrus.biz/ninjaskooler\",\"x\":\"\",\"combined_confidence\":\"0\",\"review_label\":\"미매칭\"}",
+          "title_ko": "닌자 스쿨러",
+          "title_native": "ニンジャ スクーラー",
+          "year": null
+        },
+        "after": {
+          "cross_source_ids_json": "{\"anilist_ids\":[],\"reanime_ids\":[],\"onnada_ids\":[]}",
+          "source_metadata_json": "{\"week\":\"8\",\"time\":\"00:00\",\"startDate\":\"\",\"endDate\":\"\",\"captionCount\":\"0\",\"website\":\"https://kinemacitrus.biz/ninjaskooler\",\"x\":\"\",\"combined_confidence\":\"0\",\"review_label\":\"미매칭\",\"reviewed_matching_20261011\":{\"batch\":\"other-work-20261014\",\"reason\":\"Ninja Skooler와 Ninjala는 다른 작품. 잘못된 기존 연결 제거, 신규 연결은 보류.\",\"urls\":[\"https://kinemacitrus.biz/ninjaskooler\",\"https://anilist.co/anime/142274\"]}}"
+        },
+        "pin": [
+          "cross_source_ids_json",
+          "existing_match_status"
+        ],
+        "reason": "Ninja Skooler와 Ninjala는 다른 작품. 잘못된 기존 연결 제거, 신규 연결은 보류.",
+        "urls": [
+          "https://kinemacitrus.biz/ninjaskooler",
+          "https://anilist.co/anime/142274"
+        ]
+      },
+      {
+        "table": "anissia_year_match",
+        "key": {
+          "anime_no": 3195
+        },
+        "before": {
+          "same_year_match_status": "no_title_match_same_year",
+          "previous_anilist_id": "142274",
+          "previous_reanime_id": "ninjala-the-animation-8p3jt3",
+          "review_label": "연도 미상",
+          "review_bucket": "year_unknown"
+        },
+        "after": {
+          "same_year_match_status": "reviewed_work_hold",
+          "previous_anilist_id": "",
+          "previous_reanime_id": "",
+          "review_label": "미매칭",
+          "review_bucket": "other-work-20261014"
+        },
+        "pin": [
+          "same_year_match_status",
+          "previous_anilist_id",
+          "previous_reanime_id",
+          "review_label",
+          "review_bucket"
+        ],
+        "reason": "Ninja Skooler와 Ninjala는 다른 작품. 잘못된 기존 연결 제거, 신규 연결은 보류.",
+        "urls": [
+          "https://kinemacitrus.biz/ninjaskooler",
+          "https://anilist.co/anime/142274"
+        ]
+      },
+      {
+        "table": "entries",
+        "key": {
+          "source": "Anissia",
+          "source_record_id": "1437"
+        },
+        "before": {
+          "cross_source_ids_json": "{\"anilist_ids\":[\"104750\",\"21256\"],\"reanime_ids\":[\"dimension-high-school-kyqbes\"],\"onnada_ids\":[\"4080\"]}",
+          "existing_match_status": "strong_onnada_bridge",
+          "source_metadata_json": "{\"week\":\"4\",\"time\":\"22:00\",\"startDate\":\"2019-01-10\",\"endDate\":\"2019-03-28\",\"captionCount\":\"0\",\"website\":\"http://dimension-hs.com\",\"x\":\"\",\"combined_confidence\":\"100\",\"review_label\":\"검토된 사항\"}",
+          "title_ko": "Dimension 하이 스쿨",
+          "title_native": "",
+          "year": 2019
+        },
+        "after": {
+          "cross_source_ids_json": "{\"anilist_ids\":[\"104750\"],\"reanime_ids\":[\"dimension-high-school-kyqbes\"],\"onnada_ids\":[\"4080\"]}",
+          "existing_match_status": "strong_exact",
+          "source_metadata_json": "{\"week\":\"4\",\"time\":\"22:00\",\"startDate\":\"2019-01-10\",\"endDate\":\"2019-03-28\",\"captionCount\":\"0\",\"website\":\"http://dimension-hs.com\",\"x\":\"\",\"combined_confidence\":\"100\",\"review_label\":\"검토된 사항\",\"reviewed_matching_20261011\":{\"batch\":\"other-work-20261014\",\"reason\":\"Dimension High School의 연결에서 다른 작품 Dimension W 21256만 제거.\",\"urls\":[\"https://anilist.co/anime/104750\",\"https://anilist.co/anime/21256\"]}}"
+        },
+        "pin": [
+          "cross_source_ids_json",
+          "existing_match_status"
+        ],
+        "reason": "Dimension High School의 연결에서 다른 작품 Dimension W 21256만 제거.",
+        "urls": [
+          "https://anilist.co/anime/104750",
+          "https://anilist.co/anime/21256"
+        ]
+      },
+      {
+        "table": "anissia_year_match",
+        "key": {
+          "anime_no": 1437
+        },
+        "before": {
+          "same_year_match_status": "exact_title_same_year",
+          "previous_combined_status": "strong_onnada_bridge",
+          "previous_anilist_id": "104750|21256",
+          "review_bucket": "exact_title_same_year"
+        },
+        "after": {
+          "same_year_match_status": "reviewed_work_correction",
+          "previous_combined_status": "strong_exact",
+          "previous_anilist_id": "104750",
+          "review_bucket": "other-work-20261014"
+        },
+        "pin": [
+          "same_year_match_status",
+          "previous_combined_status",
+          "previous_anilist_id",
+          "review_bucket"
+        ],
+        "reason": "Dimension High School의 연결에서 다른 작품 Dimension W 21256만 제거.",
+        "urls": [
+          "https://anilist.co/anime/104750",
+          "https://anilist.co/anime/21256"
+        ]
+      },
+      {
+        "table": "entries",
+        "key": {
+          "source": "Anissia",
+          "source_record_id": "2780"
+        },
+        "before": {
+          "cross_source_ids_json": "{\"anilist_ids\":[\"165159\",\"21236\"],\"reanime_ids\":[\"beyblade-burst-drm6bn\",\"beyblade-x-x7fzzg\"],\"onnada_ids\":[\"5864\"]}",
+          "existing_match_status": "strong_onnada_bridge",
+          "source_metadata_json": "{\"week\":\"5\",\"time\":\"18:25\",\"startDate\":\"2023-10-06\",\"endDate\":\"\",\"captionCount\":\"1\",\"website\":\"https://beyblade.takaratomy.co.jp/anime\",\"x\":\"https://x.com/beyblade_info\",\"combined_confidence\":\"100\",\"review_label\":\"검토된 사항\"}",
+          "title_ko": "베이블레이드 X",
+          "title_native": "ベイブレードエックス X",
+          "year": 2023
+        },
+        "after": {
+          "cross_source_ids_json": "{\"anilist_ids\":[\"165159\"],\"reanime_ids\":[\"beyblade-x-x7fzzg\"],\"onnada_ids\":[\"5864\"]}",
+          "existing_match_status": "strong_exact",
+          "source_metadata_json": "{\"week\":\"5\",\"time\":\"18:25\",\"startDate\":\"2023-10-06\",\"endDate\":\"\",\"captionCount\":\"1\",\"website\":\"https://beyblade.takaratomy.co.jp/anime\",\"x\":\"https://x.com/beyblade_info\",\"combined_confidence\":\"100\",\"review_label\":\"검토된 사항\",\"reviewed_matching_20261011\":{\"batch\":\"other-work-20261014\",\"reason\":\"Beyblade X의 연결에서 이전 시리즈 Beyblade Burst 21236 및 해당 ReAnime ID 제거.\",\"urls\":[\"https://anilist.co/anime/165159\",\"https://anilist.co/anime/21236\"]}}"
+        },
+        "pin": [
+          "cross_source_ids_json",
+          "existing_match_status"
+        ],
+        "reason": "Beyblade X의 연결에서 이전 시리즈 Beyblade Burst 21236 및 해당 ReAnime ID 제거.",
+        "urls": [
+          "https://anilist.co/anime/165159",
+          "https://anilist.co/anime/21236"
+        ]
+      },
+      {
+        "table": "anissia_year_match",
+        "key": {
+          "anime_no": 2780
+        },
+        "before": {
+          "same_year_match_status": "exact_title_same_year",
+          "previous_combined_status": "strong_onnada_bridge",
+          "previous_anilist_id": "165159|21236",
+          "previous_reanime_id": "beyblade-burst-drm6bn|beyblade-x-x7fzzg",
+          "review_bucket": "exact_title_same_year"
+        },
+        "after": {
+          "same_year_match_status": "reviewed_work_correction",
+          "previous_combined_status": "strong_exact",
+          "previous_anilist_id": "165159",
+          "previous_reanime_id": "beyblade-x-x7fzzg",
+          "review_bucket": "other-work-20261014"
+        },
+        "pin": [
+          "same_year_match_status",
+          "previous_combined_status",
+          "previous_anilist_id",
+          "previous_reanime_id",
+          "review_bucket"
+        ],
+        "reason": "Beyblade X의 연결에서 이전 시리즈 Beyblade Burst 21236 및 해당 ReAnime ID 제거.",
+        "urls": [
+          "https://anilist.co/anime/165159",
+          "https://anilist.co/anime/21236"
+        ]
+      },
+      {
+        "table": "anikoto_work_links",
+        "key": {
+          "anikoto_id": "case-closed-movie-4-captured-in-her-eyes-k6rcw"
+        },
+        "before": {
+          "target_id": "1362",
+          "payload_json": "{\"manual_review\":true,\"review_order\":525,\"source_refs\":[{\"source\":\"AniList\",\"id\":\"1362\"}]}"
+        },
+        "after": {
+          "target_id": "1363",
+          "payload_json": "{\"manual_review\":true,\"review_order\":525,\"source_refs\":[{\"source\":\"AniList\",\"id\":\"1363\"}]}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "status"
+        ],
+        "reason": "코난 극장판 4기 2000 Movie는 AniList 1363. 1362는 1994 Street Fighter II Movie로 수동 ID 오기입.",
+        "urls": [
+          "https://anilist.co/anime/1363",
+          "https://anilist.co/anime/1362"
+        ]
+      },
+      {
+        "table": "anikoto_work_link_targets",
+        "key": {
+          "anikoto_id": "case-closed-movie-4-captured-in-her-eyes-k6rcw",
+          "target_order": 1
+        },
+        "before": {
+          "target_id": "1362"
+        },
+        "after": {
+          "target_id": "1363"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "link_status",
+          "mapping_kind",
+          "anikoto_episode_start",
+          "anikoto_episode_end",
+          "target_episode_start",
+          "target_episode_end"
+        ],
+        "reason": "코난 극장판 4기 2000 Movie는 AniList 1363. 1362는 1994 Street Fighter II Movie로 수동 ID 오기입.",
+        "urls": [
+          "https://anilist.co/anime/1363",
+          "https://anilist.co/anime/1362"
+        ]
+      },
+      {
+        "table": "anikoto_catalog",
+        "key": {
+          "source_record_id": "case-closed-movie-4-captured-in-her-eyes-k6rcw"
+        },
+        "before": {
+          "payload_json": "{\"source_record_id\":\"case-closed-movie-4-captured-in-her-eyes-k6rcw\",\"title\":\"Case Closed Movie 4: Captured In Her Eyes\",\"title_romaji\":\"Detective Conan Movie 04: Captured in Her Eyes\",\"format\":\"Movie\",\"genres\":[\"Adventure\",\"Comedy\",\"Shounen\",\"Mystery\",\"Police\"],\"poster_url\":\"https://cdn.anipixcdn.co/thumbnail/0353ab4cbed5beae847a7ff6e220b5cf.jpg\",\"sub_episodes\":1,\"dub_episodes\":1,\"year\":1994}"
+        },
+        "after": {
+          "payload_json": "{\"source_record_id\":\"case-closed-movie-4-captured-in-her-eyes-k6rcw\",\"title\":\"Case Closed Movie 4: Captured In Her Eyes\",\"title_romaji\":\"Detective Conan Movie 04: Captured in Her Eyes\",\"format\":\"Movie\",\"genres\":[\"Adventure\",\"Comedy\",\"Shounen\",\"Mystery\",\"Police\"],\"poster_url\":\"https://cdn.anipixcdn.co/thumbnail/0353ab4cbed5beae847a7ff6e220b5cf.jpg\",\"sub_episodes\":1,\"dub_episodes\":1,\"year\":2000}"
+        },
+        "pin": [],
+        "reason": "코난 극장판 4기 2000 Movie는 AniList 1363. 1362는 1994 Street Fighter II Movie로 수동 ID 오기입.",
+        "urls": [
+          "https://anilist.co/anime/1363",
+          "https://anilist.co/anime/1362"
+        ]
+      }
+    ],
+    "registry": [
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:6fcccde33a005c9530470935e3e7b201b497cb744fe13a4a91ae16e7ca58716b"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 01.smi\",\"원본파일명\":\"BECK 01.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 01.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 01.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"6fcccde33a005c9530470935e3e7b201b497cb744fe13a4a91ae16e7ca58716b\",\"바이트\":\"47532\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 01.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "6fcccde33a005c9530470935e3e7b201b497cb744fe13a4a91ae16e7ca58716b",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 01.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 01.smi\",\"원본파일명\":\"BECK 01.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 01.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 01.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"6fcccde33a005c9530470935e3e7b201b497cb744fe13a4a91ae16e7ca58716b\",\"바이트\":\"47532\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 01.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:6fcccde33a005c9530470935e3e7b201b497cb744fe13a4a91ae16e7ca58716b",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:753574d3b4e7380e04840eba9ac569abb74807e038f7e23c03a08a7df8a964e1"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 02.smi\",\"원본파일명\":\"BECK 02.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 02.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 02.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"753574d3b4e7380e04840eba9ac569abb74807e038f7e23c03a08a7df8a964e1\",\"바이트\":\"39272\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 02.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "753574d3b4e7380e04840eba9ac569abb74807e038f7e23c03a08a7df8a964e1",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 02.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 02.smi\",\"원본파일명\":\"BECK 02.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 02.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 02.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"753574d3b4e7380e04840eba9ac569abb74807e038f7e23c03a08a7df8a964e1\",\"바이트\":\"39272\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 02.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:753574d3b4e7380e04840eba9ac569abb74807e038f7e23c03a08a7df8a964e1",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:63e6a290cf201f2b93dc013e7238433810c7a3b87161543f1a123aa7be787730"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 03.smi\",\"원본파일명\":\"BECK 03.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 03.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 03.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"63e6a290cf201f2b93dc013e7238433810c7a3b87161543f1a123aa7be787730\",\"바이트\":\"45457\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 03.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "63e6a290cf201f2b93dc013e7238433810c7a3b87161543f1a123aa7be787730",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 03.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 03.smi\",\"원본파일명\":\"BECK 03.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 03.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 03.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"63e6a290cf201f2b93dc013e7238433810c7a3b87161543f1a123aa7be787730\",\"바이트\":\"45457\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 03.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:63e6a290cf201f2b93dc013e7238433810c7a3b87161543f1a123aa7be787730",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:a80facb12fb817c108a8c68d6cca567a5a8d1eecaaa93c5bdc3209b85e871b38"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 04.smi\",\"원본파일명\":\"BECK 04.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 04.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 04.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"a80facb12fb817c108a8c68d6cca567a5a8d1eecaaa93c5bdc3209b85e871b38\",\"바이트\":\"38500\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 04.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "a80facb12fb817c108a8c68d6cca567a5a8d1eecaaa93c5bdc3209b85e871b38",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 04.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 04.smi\",\"원본파일명\":\"BECK 04.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 04.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 04.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"a80facb12fb817c108a8c68d6cca567a5a8d1eecaaa93c5bdc3209b85e871b38\",\"바이트\":\"38500\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 04.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:a80facb12fb817c108a8c68d6cca567a5a8d1eecaaa93c5bdc3209b85e871b38",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:929298343e6a3ffa5bb09cdb9626e6f4971aae75722f04df12ae70de07210a1f"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 05.smi\",\"원본파일명\":\"BECK 05.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 05.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 05.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"929298343e6a3ffa5bb09cdb9626e6f4971aae75722f04df12ae70de07210a1f\",\"바이트\":\"37700\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 05.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "929298343e6a3ffa5bb09cdb9626e6f4971aae75722f04df12ae70de07210a1f",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 05.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 05.smi\",\"원본파일명\":\"BECK 05.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 05.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 05.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"929298343e6a3ffa5bb09cdb9626e6f4971aae75722f04df12ae70de07210a1f\",\"바이트\":\"37700\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 05.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:929298343e6a3ffa5bb09cdb9626e6f4971aae75722f04df12ae70de07210a1f",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:34d06785af89c5a6b4438ab52d62976c92eb42badfc848e92d7ce1e05d6df242"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 06.smi\",\"원본파일명\":\"BECK 06.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 06.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 06.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"34d06785af89c5a6b4438ab52d62976c92eb42badfc848e92d7ce1e05d6df242\",\"바이트\":\"40349\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 06.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "34d06785af89c5a6b4438ab52d62976c92eb42badfc848e92d7ce1e05d6df242",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 06.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 06.smi\",\"원본파일명\":\"BECK 06.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 06.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 06.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"34d06785af89c5a6b4438ab52d62976c92eb42badfc848e92d7ce1e05d6df242\",\"바이트\":\"40349\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 06.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:34d06785af89c5a6b4438ab52d62976c92eb42badfc848e92d7ce1e05d6df242",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:dfadd1e2a86ad9880754ebda118201304cd317369e384024bea9375d57cea9b1"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 07.smi\",\"원본파일명\":\"BECK 07.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 07.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 07.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"dfadd1e2a86ad9880754ebda118201304cd317369e384024bea9375d57cea9b1\",\"바이트\":\"40012\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 07.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "dfadd1e2a86ad9880754ebda118201304cd317369e384024bea9375d57cea9b1",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 07.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 07.smi\",\"원본파일명\":\"BECK 07.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 07.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 07.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"dfadd1e2a86ad9880754ebda118201304cd317369e384024bea9375d57cea9b1\",\"바이트\":\"40012\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 07.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:dfadd1e2a86ad9880754ebda118201304cd317369e384024bea9375d57cea9b1",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:2e7f0e12f7e5d72d93678660b867a6b73de9233fdf501eec2f1485abca6f90d5"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 08.smi\",\"원본파일명\":\"BECK 08.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 08.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 08.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"2e7f0e12f7e5d72d93678660b867a6b73de9233fdf501eec2f1485abca6f90d5\",\"바이트\":\"41375\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 08.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "2e7f0e12f7e5d72d93678660b867a6b73de9233fdf501eec2f1485abca6f90d5",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 08.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 08.smi\",\"원본파일명\":\"BECK 08.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 08.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 08.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"2e7f0e12f7e5d72d93678660b867a6b73de9233fdf501eec2f1485abca6f90d5\",\"바이트\":\"41375\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 08.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:2e7f0e12f7e5d72d93678660b867a6b73de9233fdf501eec2f1485abca6f90d5",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:7ec1e0d6b43a35d84802bbc9af3f13ca9ea4a773145a9afa7bc0b8158d55323e"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 09.smi\",\"원본파일명\":\"BECK 09.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 09.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 09.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"7ec1e0d6b43a35d84802bbc9af3f13ca9ea4a773145a9afa7bc0b8158d55323e\",\"바이트\":\"45191\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 09.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "7ec1e0d6b43a35d84802bbc9af3f13ca9ea4a773145a9afa7bc0b8158d55323e",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 09.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 09.smi\",\"원본파일명\":\"BECK 09.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 09.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 09.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"7ec1e0d6b43a35d84802bbc9af3f13ca9ea4a773145a9afa7bc0b8158d55323e\",\"바이트\":\"45191\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 09.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:7ec1e0d6b43a35d84802bbc9af3f13ca9ea4a773145a9afa7bc0b8158d55323e",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:c62f89f1244fa7441e1af4c99c3bc217db4ca611fdf8a532a4904a9991113baa"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 10.smi\",\"원본파일명\":\"BECK 10.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 10.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 10.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"c62f89f1244fa7441e1af4c99c3bc217db4ca611fdf8a532a4904a9991113baa\",\"바이트\":\"31894\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 10.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "c62f89f1244fa7441e1af4c99c3bc217db4ca611fdf8a532a4904a9991113baa",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 10.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 10.smi\",\"원본파일명\":\"BECK 10.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 10.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 10.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"c62f89f1244fa7441e1af4c99c3bc217db4ca611fdf8a532a4904a9991113baa\",\"바이트\":\"31894\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 10.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:c62f89f1244fa7441e1af4c99c3bc217db4ca611fdf8a532a4904a9991113baa",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:e6aa2dd74eb849e3dc89cb82359bc70cf0e35860f2247a7835bffc4b92515ae3"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 11.smi\",\"원본파일명\":\"BECK 11.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 11.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 11.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"e6aa2dd74eb849e3dc89cb82359bc70cf0e35860f2247a7835bffc4b92515ae3\",\"바이트\":\"41463\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 11.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "e6aa2dd74eb849e3dc89cb82359bc70cf0e35860f2247a7835bffc4b92515ae3",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 11.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 11.smi\",\"원본파일명\":\"BECK 11.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 11.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 11.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"e6aa2dd74eb849e3dc89cb82359bc70cf0e35860f2247a7835bffc4b92515ae3\",\"바이트\":\"41463\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 11.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:e6aa2dd74eb849e3dc89cb82359bc70cf0e35860f2247a7835bffc4b92515ae3",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:981a432fcf6352bbb3e638311428e24b4c2eabca90db37a50107e93ed871dc63"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 12.smi\",\"원본파일명\":\"BECK 12.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 12.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 12.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"981a432fcf6352bbb3e638311428e24b4c2eabca90db37a50107e93ed871dc63\",\"바이트\":\"31629\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 12.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "981a432fcf6352bbb3e638311428e24b4c2eabca90db37a50107e93ed871dc63",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 12.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 12.smi\",\"원본파일명\":\"BECK 12.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 12.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 12.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"981a432fcf6352bbb3e638311428e24b4c2eabca90db37a50107e93ed871dc63\",\"바이트\":\"31629\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 12.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:981a432fcf6352bbb3e638311428e24b4c2eabca90db37a50107e93ed871dc63",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:bb434a171d5fb47c66be8072bbf0da05ed99f1de36ecbf4c64e6cdd5b6284b50"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 13.smi\",\"원본파일명\":\"BECK 13.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 13.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 13.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"bb434a171d5fb47c66be8072bbf0da05ed99f1de36ecbf4c64e6cdd5b6284b50\",\"바이트\":\"29333\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 13.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "bb434a171d5fb47c66be8072bbf0da05ed99f1de36ecbf4c64e6cdd5b6284b50",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 13.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 13.smi\",\"원본파일명\":\"BECK 13.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 13.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 13.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"bb434a171d5fb47c66be8072bbf0da05ed99f1de36ecbf4c64e6cdd5b6284b50\",\"바이트\":\"29333\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 13.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:bb434a171d5fb47c66be8072bbf0da05ed99f1de36ecbf4c64e6cdd5b6284b50",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:767dd6e666aaa89c131503e2e247b121e066ab6f3d249ca115fa66b28aff863a"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 14.smi\",\"원본파일명\":\"BECK 14.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 14.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 14.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"767dd6e666aaa89c131503e2e247b121e066ab6f3d249ca115fa66b28aff863a\",\"바이트\":\"24511\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 14.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "767dd6e666aaa89c131503e2e247b121e066ab6f3d249ca115fa66b28aff863a",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 14.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 14.smi\",\"원본파일명\":\"BECK 14.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 14.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 14.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"767dd6e666aaa89c131503e2e247b121e066ab6f3d249ca115fa66b28aff863a\",\"바이트\":\"24511\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 14.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:767dd6e666aaa89c131503e2e247b121e066ab6f3d249ca115fa66b28aff863a",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:cc4ed78373f9b7ed54c944c6f588e71f1817d9ed018cbd13758d9b557495ee01"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 15.smi\",\"원본파일명\":\"BECK 15.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 15.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 15.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"cc4ed78373f9b7ed54c944c6f588e71f1817d9ed018cbd13758d9b557495ee01\",\"바이트\":\"31446\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 15.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "cc4ed78373f9b7ed54c944c6f588e71f1817d9ed018cbd13758d9b557495ee01",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 15.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 15.smi\",\"원본파일명\":\"BECK 15.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 15.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 15.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"cc4ed78373f9b7ed54c944c6f588e71f1817d9ed018cbd13758d9b557495ee01\",\"바이트\":\"31446\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 15.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:cc4ed78373f9b7ed54c944c6f588e71f1817d9ed018cbd13758d9b557495ee01",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:a08b698fc134b85426f57a15c64b36d7c5d121f4cdc6b0b4d8326757a36cb37e"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 16.smi\",\"원본파일명\":\"BECK 16.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 16.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 16.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"a08b698fc134b85426f57a15c64b36d7c5d121f4cdc6b0b4d8326757a36cb37e\",\"바이트\":\"38532\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 16.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "a08b698fc134b85426f57a15c64b36d7c5d121f4cdc6b0b4d8326757a36cb37e",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 16.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 16.smi\",\"원본파일명\":\"BECK 16.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 16.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 16.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"a08b698fc134b85426f57a15c64b36d7c5d121f4cdc6b0b4d8326757a36cb37e\",\"바이트\":\"38532\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 16.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:a08b698fc134b85426f57a15c64b36d7c5d121f4cdc6b0b4d8326757a36cb37e",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:1b5d12a0498b1361e8c1274312f297b2293cbe9f98863ae31fd2ceec73308f17"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 17.smi\",\"원본파일명\":\"BECK 17.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 17.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 17.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"1b5d12a0498b1361e8c1274312f297b2293cbe9f98863ae31fd2ceec73308f17\",\"바이트\":\"35603\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 17.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "1b5d12a0498b1361e8c1274312f297b2293cbe9f98863ae31fd2ceec73308f17",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 17.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 17.smi\",\"원본파일명\":\"BECK 17.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 17.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 17.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"1b5d12a0498b1361e8c1274312f297b2293cbe9f98863ae31fd2ceec73308f17\",\"바이트\":\"35603\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 17.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:1b5d12a0498b1361e8c1274312f297b2293cbe9f98863ae31fd2ceec73308f17",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:019b1a2d8f0e5110e575309cdaa9301208297412d52c41ca2c8eba22c94b5e15"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 18.smi\",\"원본파일명\":\"BECK 18.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 18.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 18.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"019b1a2d8f0e5110e575309cdaa9301208297412d52c41ca2c8eba22c94b5e15\",\"바이트\":\"35470\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 18.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "019b1a2d8f0e5110e575309cdaa9301208297412d52c41ca2c8eba22c94b5e15",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 18.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 18.smi\",\"원본파일명\":\"BECK 18.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 18.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 18.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"019b1a2d8f0e5110e575309cdaa9301208297412d52c41ca2c8eba22c94b5e15\",\"바이트\":\"35470\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 18.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:019b1a2d8f0e5110e575309cdaa9301208297412d52c41ca2c8eba22c94b5e15",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:48808b945572d1e426386c19960cb7ea5d58dc8a8eb1b3ee8fb3abd64fdae104"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 19.smi\",\"원본파일명\":\"BECK 19.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 19.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 19.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"48808b945572d1e426386c19960cb7ea5d58dc8a8eb1b3ee8fb3abd64fdae104\",\"바이트\":\"44423\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 19.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "48808b945572d1e426386c19960cb7ea5d58dc8a8eb1b3ee8fb3abd64fdae104",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 19.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 19.smi\",\"원본파일명\":\"BECK 19.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 19.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 19.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"48808b945572d1e426386c19960cb7ea5d58dc8a8eb1b3ee8fb3abd64fdae104\",\"바이트\":\"44423\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 19.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:48808b945572d1e426386c19960cb7ea5d58dc8a8eb1b3ee8fb3abd64fdae104",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:9f998bbfe745a116f4e78b391d9a2a6369eb5664a19b17b37e5746fff1a3311c"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 20.smi\",\"원본파일명\":\"BECK 20.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 20.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 20.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"9f998bbfe745a116f4e78b391d9a2a6369eb5664a19b17b37e5746fff1a3311c\",\"바이트\":\"39457\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 20.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "9f998bbfe745a116f4e78b391d9a2a6369eb5664a19b17b37e5746fff1a3311c",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 20.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 20.smi\",\"원본파일명\":\"BECK 20.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 20.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 20.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"9f998bbfe745a116f4e78b391d9a2a6369eb5664a19b17b37e5746fff1a3311c\",\"바이트\":\"39457\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 20.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:9f998bbfe745a116f4e78b391d9a2a6369eb5664a19b17b37e5746fff1a3311c",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:9785f3b9b0929e959225e196929679473d855de83a290ea339309d6311306da9"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 21.smi\",\"원본파일명\":\"BECK 21.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 21.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 21.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"9785f3b9b0929e959225e196929679473d855de83a290ea339309d6311306da9\",\"바이트\":\"40533\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 21.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "9785f3b9b0929e959225e196929679473d855de83a290ea339309d6311306da9",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 21.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 21.smi\",\"원본파일명\":\"BECK 21.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 21.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 21.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"9785f3b9b0929e959225e196929679473d855de83a290ea339309d6311306da9\",\"바이트\":\"40533\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 21.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:9785f3b9b0929e959225e196929679473d855de83a290ea339309d6311306da9",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:cf31fcd6e5ddc099f2552383f0c068185ec04b4ffa1366316a37ad60fe2d3ce0"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 22.smi\",\"원본파일명\":\"BECK 22.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 22.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 22.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"cf31fcd6e5ddc099f2552383f0c068185ec04b4ffa1366316a37ad60fe2d3ce0\",\"바이트\":\"42076\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 22.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "cf31fcd6e5ddc099f2552383f0c068185ec04b4ffa1366316a37ad60fe2d3ce0",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 22.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 22.smi\",\"원본파일명\":\"BECK 22.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 22.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 22.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"cf31fcd6e5ddc099f2552383f0c068185ec04b4ffa1366316a37ad60fe2d3ce0\",\"바이트\":\"42076\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 22.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:cf31fcd6e5ddc099f2552383f0c068185ec04b4ffa1366316a37ad60fe2d3ce0",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:5491d0908969ce5dca21ccfed512b7142ac52e0051e2403b28b8319bc8f7c4be"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 23.smi\",\"원본파일명\":\"BECK 23.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 23.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 23.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"5491d0908969ce5dca21ccfed512b7142ac52e0051e2403b28b8319bc8f7c4be\",\"바이트\":\"45323\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 23.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "5491d0908969ce5dca21ccfed512b7142ac52e0051e2403b28b8319bc8f7c4be",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 23.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 23.smi\",\"원본파일명\":\"BECK 23.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 23.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 23.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"5491d0908969ce5dca21ccfed512b7142ac52e0051e2403b28b8319bc8f7c4be\",\"바이트\":\"45323\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 23.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:5491d0908969ce5dca21ccfed512b7142ac52e0051e2403b28b8319bc8f7c4be",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:887b040dc9be32dd2e59549ce4080513ff529be89b6e0a2a7b21a168edb6989e"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 24.smi\",\"원본파일명\":\"BECK 24.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 24.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 24.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"887b040dc9be32dd2e59549ce4080513ff529be89b6e0a2a7b21a168edb6989e\",\"바이트\":\"42188\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 24.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "887b040dc9be32dd2e59549ce4080513ff529be89b6e0a2a7b21a168edb6989e",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 24.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 24.smi\",\"원본파일명\":\"BECK 24.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 24.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 24.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"887b040dc9be32dd2e59549ce4080513ff529be89b6e0a2a7b21a168edb6989e\",\"바이트\":\"42188\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 24.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:887b040dc9be32dd2e59549ce4080513ff529be89b6e0a2a7b21a168edb6989e",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:a8d3eac2e0f97643c6b65fdbbbfbf56aaa14874449f07589a1150fc3dc6ea621"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 25.smi\",\"원본파일명\":\"BECK 25.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 25.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 25.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"a8d3eac2e0f97643c6b65fdbbbfbf56aaa14874449f07589a1150fc3dc6ea621\",\"바이트\":\"42668\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 25.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "a8d3eac2e0f97643c6b65fdbbbfbf56aaa14874449f07589a1150fc3dc6ea621",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 25.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 25.smi\",\"원본파일명\":\"BECK 25.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 25.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 25.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"a8d3eac2e0f97643c6b65fdbbbfbf56aaa14874449f07589a1150fc3dc6ea621\",\"바이트\":\"42668\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 25.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:a8d3eac2e0f97643c6b65fdbbbfbf56aaa14874449f07589a1150fc3dc6ea621",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_registry_v1",
+        "key": {
+          "pid": "subsubsub_20261009:4494840a18c942ac36645d6414b50b933e0d2afc37eea1835fda648bc617dd28"
+        },
+        "before": {
+          "target_source": "Anissia",
+          "reanime_id": "nakaimo-my-little-sister-is-among-them-r7be25",
+          "review_status": "work_reviewed",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 26.smi\",\"원본파일명\":\"BECK 26.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 26.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 26.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"4494840a18c942ac36645d6414b50b933e0d2afc37eea1835fda648bc617dd28\",\"바이트\":\"45473\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 26.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[]}",
+          "sha256": "4494840a18c942ac36645d6414b50b933e0d2afc37eea1835fda648bc617dd28",
+          "pack_id": "subsubsub_20261009:04",
+          "member_path": "이 중에 1명, 여동생이 있다!/BECK 26.smi",
+          "target_id": "57"
+        },
+        "after": {
+          "target_source": "AniList",
+          "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+          "review_status": "other_work_reviewed_20261014",
+          "payload_json": "{\"source_row\":{\"DB작품명_최상위폴더\":\"이 중에 1명, 여동생이 있다!\",\"DB출처\":\"Anissia\",\"DB작품ID\":\"57\",\"최종ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 26.smi\",\"원본파일명\":\"BECK 26.smi\",\"원본ZIP경로\":\"DB미연결_원본명/벡(BECK) 01~26/hhousebird__벡(BECK) 01~26/BECK 26.smi\",\"이번검수경로\":\"애니시아_DB_연결/이 중에 1명, 여동생이 있다!/본편/hhousebird__벡(BECK) 01~26/BECK 26.smi\",\"원본자료\":\"hhousebird_subtitles.7z\",\"검수묶음번호\":\"67\",\"분류\":\"본편\",\"SHA256\":\"4494840a18c942ac36645d6414b50b933e0d2afc37eea1835fda648bc617dd28\",\"바이트\":\"45473\",\"확장자복원\":\"아니요\",\"파일명충돌개명\":\"아니요\",\"세부ID상태\":\"기존검수 기준\",\"신규ZIP경로\":\"이 중에 1명, 여동생이 있다!/BECK 26.smi\",\"Anikoto_최종확정ID\":\"\",\"AniList_최종추천ID\":\"\",\"ReAnime_최종추천ID\":\"\",\"Anikoto검수판정\":\"기존분류유지\",\"검수근거\":\"원본 DB 작품명 폴더 및 자막 SHA256 보존\",\"파일분리여부\":\"아니요\"},\"review_reason\":\"BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.\",\"recommended_anilist_id\":null,\"recommended_reanime_id\":null,\"reanime_work_candidates\":[\"nakaimo-my-little-sister-is-among-them-r7be25\"],\"original_source_reference\":[\"Anissia\",\"57\"],\"classification_preserved\":true,\"episode_mapping_changed\":false,\"mapping_scope\":\"본편\",\"existing_confirmed_targets\":[],\"reviewed_work_title_ko\":\"BECK\",\"other_work_20261014\":{\"old_target\":[\"Anissia\",\"57\"],\"evidence\":\"Original BECK folder and complete BECK 01-26 filenames; exact catalog identity\",\"urls\":[\"https://anilist.co/anime/57\",\"https://onnada.com/anime/1253\"]}}"
+        },
+        "pin": [
+          "target_source",
+          "target_id",
+          "reanime_id",
+          "review_status",
+          "work_confirmed",
+          "automatic_episode_assignment"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      },
+      {
+        "table": "subsubsub_file_targets_v1",
+        "key": {
+          "pid": "subsubsub_20261009:4494840a18c942ac36645d6414b50b933e0d2afc37eea1835fda648bc617dd28",
+          "target_order": 2
+        },
+        "before": {
+          "target_source": "Anissia"
+        },
+        "after": {
+          "target_source": "AniList"
+        },
+        "pin": [
+          "target_source"
+        ],
+        "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존.",
+        "urls": [
+          "https://anilist.co/anime/57",
+          "https://onnada.com/anime/1253"
+        ]
+      }
+    ]
+  },
+  "excluded_cases": [
+    {
+      "audit_number": 11,
+      "decision": "preserve_body_review",
+      "reason": "Stored body evidence and 20261011 full-body review identify Harem episode 8 despite the CUE filename."
+    },
+    {
+      "audit_numbers": [
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "decision": "candidate_queue_only",
+      "reason": "Wrong suggested candidates are not equivalent to an applied work association; no runtime correction in this batch."
+    }
+  ]
+}
