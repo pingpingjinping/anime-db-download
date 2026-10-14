@@ -1,0 +1,55 @@
+name: Other-work matching corrections 20261014
+on:
+  pull_request:
+    paths: ['data/matching/other-work-20261014.json', 'scripts/*other_work*20261014.py', '.github/workflows/other-work-20261014.yml']
+  push:
+    branches: [main]
+    paths: ['data/matching/other-work-20261014.json', 'scripts/build_other_work_release_20261014.py', '.github/workflows/other-work-20261014.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: db-v1-reviewed-correction-publish
+  cancel-in-progress: false
+jobs:
+  verify-and-publish:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: audit_test
+          POSTGRES_DB: other_work_test
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download exact reviewed baseline
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          mkdir other-work-input
+          gh release download db-v1 --repo "$GITHUB_REPOSITORY" --pattern anime_four_sources_multilingual_prepared.zip --pattern anime_reviewed_subtitle_registry_v1.zip --dir other-work-input
+      - name: Build and verify corrected copies
+        run: |
+          python scripts/build_other_work_release_20261014.py --input other-work-input --output other-work-output
+          python - <<'PY'
+          import json,pathlib
+          expected=json.loads(pathlib.Path('data/matching/reviewed-corrections-20261011.json').read_text())
+          actual=json.loads(pathlib.Path('other-work-output/reviewed-corrections-20261011.json').read_text())
+          assert expected==actual,'Committed review ledger differs from generated corrected DB'
+          PY
+          python -m unittest discover -s scripts -p 'test_other_work_release_20261014.py' -v
+      - name: Verify supplemental PostgreSQL delta
+        env: {PGHOST: localhost, PGUSER: postgres, PGPASSWORD: audit_test, PGDATABASE: other_work_test}
+        run: |
+          python scripts/test_other_work_postgres_20261014.py
+          python scripts/other_work_postgres_20261014.py other-work-output/other-work-20261014.sql
+      - uses: actions/upload-artifact@v4
+        with:
+          name: other-work-correction-validation
+          path: other-work-output/other-work-validation-20261014.json
+          retention-days: 7
+      - name: Publish only after merge or explicit dispatch
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: python scripts/publish_other_work_release_20261014.py

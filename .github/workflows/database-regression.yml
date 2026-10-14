@@ -48,6 +48,21 @@ jobs:
               --output "$RUNNER_TEMP/split" \
               | tee "$RUNNER_TEMP/release-layout.json"
           fi
+      - name: Apply pending other-work correction to validation copies
+        run: |
+          if [[ -f data/matching/other-work-20261014.json ]]; then
+            python - <<'PY'
+          import json,os,pathlib,subprocess
+          from importlib.machinery import SourceFileLoader
+          split=SourceFileLoader('split_release','scripts/split_db_v1_release.py').load_module()
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])
+          plan=json.loads(pathlib.Path('data/matching/other-work-20261014.json').read_text())
+          if all(split.sha256(root/'current'/name)==digest for name,digest in plan['expected_assets'].items()):
+              subprocess.run(['python','scripts/build_other_work_release_20261014.py','--input',str(root/'current'),'--output',str(root/'other-work-validated')],check=True)
+              import shutil
+              for name in plan['expected_assets']: shutil.copyfile(root/'other-work-validated'/name,root/'current'/name)
+          PY
+          fi
       - name: Verify October reviewed mappings and 36 held episode decisions
         run: |
           python scripts/reviewed_matching_guard.py \

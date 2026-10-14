@@ -1772,6 +1772,126 @@
               "previous_reanime_id": "the-moment-you-fall-in-love-cje3cy",
               "review_bucket": "exact_title_same_year"
             }
+          },
+          {
+            "key": {
+              "anime_no": 827
+            },
+            "expected": {
+              "previous_anilist_id": "21293",
+              "previous_combined_status": "strong_exact",
+              "previous_reanime_id": "cute-high-earth-defense-club-love-love-y747k3",
+              "review_bucket": "other-work-20261014",
+              "same_year_match_status": "reviewed_work_correction"
+            },
+            "reason": "2016 방위부 TV 2기를 2004 LOVE LOVE와 구분. 기존 Onnada 3381 검수 및 AniList 21293 제목·연도·포맷이 일치."
+          },
+          {
+            "key": {
+              "anime_no": 1097
+            },
+            "expected": {
+              "previous_anilist_id": "98599",
+              "previous_combined_status": "strong_exact",
+              "previous_reanime_id": "cute-high-earth-defense-club-love-love-love-qn7q2p",
+              "review_bucket": "other-work-20261014",
+              "review_label": "검토된 사항",
+              "same_year_match_status": "reviewed_work_correction"
+            },
+            "reason": "2017 방위부 OVA를 2004 LOVE LOVE와 구분. AniList 98599 및 ReAnime의 제목·연도·OVA 포맷 일치."
+          },
+          {
+            "key": {
+              "anime_no": 3170
+            },
+            "expected": {
+              "previous_anilist_id": "",
+              "previous_combined_status": "strong_exact",
+              "previous_reanime_id": "ringing-fate-47styg",
+              "review_bucket": "other-work-20261014",
+              "review_label": "검토된 사항",
+              "same_year_match_status": "reviewed_work_correction"
+            },
+            "reason": "RINGING FATE와 1978 Ringing Bell은 다른 작품. 기존 정확한 ReAnime Ringing Fate 레코드로 교정. 로컬에 없는 AniList 행은 생성하지 않음."
+          },
+          {
+            "key": {
+              "anime_no": 2961
+            },
+            "expected": {
+              "previous_anilist_id": "",
+              "previous_combined_status": "strong_exact",
+              "previous_reanime_id": "killtube-g4fay4",
+              "review_bucket": "other-work-20261014",
+              "review_label": "검토된 사항",
+              "same_year_match_status": "reviewed_work_correction"
+            },
+            "reason": "KILLTUBE와 Kill Ao는 다른 작품. 기존 KILLTUBE Movie 레코드로 교정. 로컬에 없는 AniList 행은 생성하지 않음."
+          },
+          {
+            "key": {
+              "anime_no": 3592
+            },
+            "expected": {
+              "previous_anilist_id": "",
+              "previous_combined_status": "strong_exact",
+              "previous_reanime_id": "arafou-kenja-no-isekai-seikatsu-nikki-62swwc",
+              "review_bucket": "other-work-20261014",
+              "review_label": "검토된 사항",
+              "same_year_match_status": "reviewed_work_correction"
+            },
+            "reason": "아라포 현자 생활 일기와 아라포 남자 통판은 다른 작품. 정확한 일본어 제목의 기존 ReAnime 레코드로 교정."
+          },
+          {
+            "key": {
+              "anime_no": 2468
+            },
+            "expected": {
+              "previous_anilist_id": "",
+              "previous_reanime_id": "",
+              "review_bucket": "other-work-20261014",
+              "review_label": "미매칭",
+              "same_year_match_status": "reviewed_work_hold"
+            },
+            "reason": "Plantopia와 planetarian의 오연결 제거. 동명 음악 MV를 예정 작품과 임의 통합하지 않고 미매칭 유지."
+          },
+          {
+            "key": {
+              "anime_no": 3195
+            },
+            "expected": {
+              "previous_anilist_id": "",
+              "previous_reanime_id": "",
+              "review_bucket": "other-work-20261014",
+              "review_label": "미매칭",
+              "same_year_match_status": "reviewed_work_hold"
+            },
+            "reason": "Ninja Skooler와 Ninjala는 다른 작품. 잘못된 기존 연결 제거, 신규 연결은 보류."
+          },
+          {
+            "key": {
+              "anime_no": 1437
+            },
+            "expected": {
+              "previous_anilist_id": "104750",
+              "previous_combined_status": "strong_exact",
+              "review_bucket": "other-work-20261014",
+              "same_year_match_status": "reviewed_work_correction"
+            },
+            "reason": "Dimension High School의 연결에서 다른 작품 Dimension W 21256만 제거."
+          },
+          {
+            "key": {
+              "anime_no": 2780
+            },
+            "expected": {
+              "previous_anilist_id": "165159",
+              "previous_combined_status": "strong_exact",
+              "previous_reanime_id": "beyblade-x-x7fzzg",
+              "review_bucket": "other-work-20261014",
+              "same_year_match_status": "reviewed_work_correction"
+            },
+            "reason": "Beyblade X의 연결에서 이전 시리즈 Beyblade Burst 21236 및 해당 ReAnime ID 제거."
           }
         ]
       },
@@ -4462,6 +4582,226 @@
               }
             },
             "reason": "Explicit original-body review body-audit-20261011"
+          },
+          {
+            "key": {
+              "source": "Anissia",
+              "source_record_id": "827"
+            },
+            "expected": {
+              "cross_source_ids_json": {
+                "anilist_ids": [
+                  "21293"
+                ],
+                "reanime_ids": [
+                  "cute-high-earth-defense-club-love-love-y747k3"
+                ],
+                "onnada_ids": [
+                  "3381"
+                ]
+              },
+              "existing_match_status": "strong_exact"
+            },
+            "reason": "2016 방위부 TV 2기를 2004 LOVE LOVE와 구분. 기존 Onnada 3381 검수 및 AniList 21293 제목·연도·포맷이 일치."
+          },
+          {
+            "key": {
+              "source": "Anissia",
+              "source_record_id": "1097"
+            },
+            "expected": {
+              "cross_source_ids_json": {
+                "anilist_ids": [
+                  "98599"
+                ],
+                "reanime_ids": [
+                  "cute-high-earth-defense-club-love-love-love-qn7q2p"
+                ],
+                "onnada_ids": []
+              },
+              "existing_match_status": "strong_exact"
+            },
+            "reason": "2017 방위부 OVA를 2004 LOVE LOVE와 구분. AniList 98599 및 ReAnime의 제목·연도·OVA 포맷 일치."
+          },
+          {
+            "key": {
+              "source": "Anissia",
+              "source_record_id": "3170"
+            },
+            "expected": {
+              "cross_source_ids_json": {
+                "anilist_ids": [],
+                "reanime_ids": [
+                  "ringing-fate-47styg"
+                ],
+                "onnada_ids": []
+              },
+              "existing_match_status": "strong_exact"
+            },
+            "reason": "RINGING FATE와 1978 Ringing Bell은 다른 작품. 기존 정확한 ReAnime Ringing Fate 레코드로 교정. 로컬에 없는 AniList 행은 생성하지 않음."
+          },
+          {
+            "key": {
+              "source": "Anissia",
+              "source_record_id": "2961"
+            },
+            "expected": {
+              "cross_source_ids_json": {
+                "anilist_ids": [],
+                "reanime_ids": [
+                  "killtube-g4fay4"
+                ],
+                "onnada_ids": []
+              },
+              "existing_match_status": "strong_exact"
+            },
+            "reason": "KILLTUBE와 Kill Ao는 다른 작품. 기존 KILLTUBE Movie 레코드로 교정. 로컬에 없는 AniList 행은 생성하지 않음."
+          },
+          {
+            "key": {
+              "source": "Anissia",
+              "source_record_id": "3592"
+            },
+            "expected": {
+              "cross_source_ids_json": {
+                "anilist_ids": [],
+                "reanime_ids": [
+                  "arafou-kenja-no-isekai-seikatsu-nikki-62swwc"
+                ],
+                "onnada_ids": []
+              },
+              "existing_match_status": "strong_exact"
+            },
+            "reason": "아라포 현자 생활 일기와 아라포 남자 통판은 다른 작품. 정확한 일본어 제목의 기존 ReAnime 레코드로 교정."
+          },
+          {
+            "key": {
+              "source": "Anissia",
+              "source_record_id": "2468"
+            },
+            "expected": {
+              "cross_source_ids_json": {
+                "anilist_ids": [],
+                "reanime_ids": [],
+                "onnada_ids": []
+              },
+              "existing_match_status": "unmatched"
+            },
+            "reason": "Plantopia와 planetarian의 오연결 제거. 동명 음악 MV를 예정 작품과 임의 통합하지 않고 미매칭 유지."
+          },
+          {
+            "key": {
+              "source": "Anissia",
+              "source_record_id": "3195"
+            },
+            "expected": {
+              "cross_source_ids_json": {
+                "anilist_ids": [],
+                "reanime_ids": [],
+                "onnada_ids": []
+              },
+              "existing_match_status": "unmatched"
+            },
+            "reason": "Ninja Skooler와 Ninjala는 다른 작품. 잘못된 기존 연결 제거, 신규 연결은 보류."
+          },
+          {
+            "key": {
+              "source": "Anissia",
+              "source_record_id": "1437"
+            },
+            "expected": {
+              "cross_source_ids_json": {
+                "anilist_ids": [
+                  "104750"
+                ],
+                "reanime_ids": [
+                  "dimension-high-school-kyqbes"
+                ],
+                "onnada_ids": [
+                  "4080"
+                ]
+              },
+              "existing_match_status": "strong_exact"
+            },
+            "reason": "Dimension High School의 연결에서 다른 작품 Dimension W 21256만 제거."
+          },
+          {
+            "key": {
+              "source": "Anissia",
+              "source_record_id": "2780"
+            },
+            "expected": {
+              "cross_source_ids_json": {
+                "anilist_ids": [
+                  "165159"
+                ],
+                "reanime_ids": [
+                  "beyblade-x-x7fzzg"
+                ],
+                "onnada_ids": [
+                  "5864"
+                ]
+              },
+              "existing_match_status": "strong_exact"
+            },
+            "reason": "Beyblade X의 연결에서 이전 시리즈 Beyblade Burst 21236 및 해당 ReAnime ID 제거."
+          }
+        ]
+      },
+      "anikoto_work_links": {
+        "primary_key": [
+          "anikoto_id"
+        ],
+        "rows": [
+          {
+            "key": {
+              "anikoto_id": "case-closed-movie-4-captured-in-her-eyes-k6rcw"
+            },
+            "expected": {
+              "status": "reviewed",
+              "target_id": "1363",
+              "target_source": "AniList"
+            },
+            "reason": "코난 극장판 4기 2000 Movie는 AniList 1363. 1362는 1994 Street Fighter II Movie로 수동 ID 오기입."
+          }
+        ]
+      },
+      "anikoto_work_link_targets": {
+        "primary_key": [
+          "anikoto_id",
+          "target_order"
+        ],
+        "rows": [
+          {
+            "key": {
+              "anikoto_id": "case-closed-movie-4-captured-in-her-eyes-k6rcw",
+              "target_order": 1
+            },
+            "expected": {
+              "anikoto_episode_end": null,
+              "anikoto_episode_start": null,
+              "link_status": "reviewed",
+              "mapping_kind": "whole",
+              "target_episode_end": null,
+              "target_episode_start": null,
+              "target_id": "1363",
+              "target_source": "AniList"
+            },
+            "reason": "코난 극장판 4기 2000 Movie는 AniList 1363. 1362는 1994 Street Fighter II Movie로 수동 ID 오기입."
+          }
+        ]
+      },
+      "anikoto_catalog": {
+        "primary_key": [
+          "source_record_id"
+        ],
+        "rows": [
+          {
+            "key": {
+              "source_record_id": "case-closed-movie-4-captured-in-her-eyes-k6rcw"
+            },
+            "expected": {},
+            "reason": "코난 극장판 4기 2000 Movie는 AniList 1363. 1362는 1994 Street Fighter II Movie로 수동 ID 오기입."
           }
         ]
       }
@@ -15805,6 +16145,370 @@
               }
             },
             "reason": "Explicit original-body review body-audit-20261011"
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:6fcccde33a005c9530470935e3e7b201b497cb744fe13a4a91ae16e7ca58716b"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:753574d3b4e7380e04840eba9ac569abb74807e038f7e23c03a08a7df8a964e1"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:63e6a290cf201f2b93dc013e7238433810c7a3b87161543f1a123aa7be787730"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:a80facb12fb817c108a8c68d6cca567a5a8d1eecaaa93c5bdc3209b85e871b38"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:929298343e6a3ffa5bb09cdb9626e6f4971aae75722f04df12ae70de07210a1f"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:34d06785af89c5a6b4438ab52d62976c92eb42badfc848e92d7ce1e05d6df242"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:dfadd1e2a86ad9880754ebda118201304cd317369e384024bea9375d57cea9b1"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:2e7f0e12f7e5d72d93678660b867a6b73de9233fdf501eec2f1485abca6f90d5"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:7ec1e0d6b43a35d84802bbc9af3f13ca9ea4a773145a9afa7bc0b8158d55323e"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:c62f89f1244fa7441e1af4c99c3bc217db4ca611fdf8a532a4904a9991113baa"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:e6aa2dd74eb849e3dc89cb82359bc70cf0e35860f2247a7835bffc4b92515ae3"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:981a432fcf6352bbb3e638311428e24b4c2eabca90db37a50107e93ed871dc63"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:bb434a171d5fb47c66be8072bbf0da05ed99f1de36ecbf4c64e6cdd5b6284b50"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:767dd6e666aaa89c131503e2e247b121e066ab6f3d249ca115fa66b28aff863a"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:cc4ed78373f9b7ed54c944c6f588e71f1817d9ed018cbd13758d9b557495ee01"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:a08b698fc134b85426f57a15c64b36d7c5d121f4cdc6b0b4d8326757a36cb37e"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:1b5d12a0498b1361e8c1274312f297b2293cbe9f98863ae31fd2ceec73308f17"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:019b1a2d8f0e5110e575309cdaa9301208297412d52c41ca2c8eba22c94b5e15"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:48808b945572d1e426386c19960cb7ea5d58dc8a8eb1b3ee8fb3abd64fdae104"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:9f998bbfe745a116f4e78b391d9a2a6369eb5664a19b17b37e5746fff1a3311c"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:9785f3b9b0929e959225e196929679473d855de83a290ea339309d6311306da9"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:cf31fcd6e5ddc099f2552383f0c068185ec04b4ffa1366316a37ad60fe2d3ce0"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:5491d0908969ce5dca21ccfed512b7142ac52e0051e2403b28b8319bc8f7c4be"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:887b040dc9be32dd2e59549ce4080513ff529be89b6e0a2a7b21a168edb6989e"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:a8d3eac2e0f97643c6b65fdbbbfbf56aaa14874449f07589a1150fc3dc6ea621"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:4494840a18c942ac36645d6414b50b933e0d2afc37eea1835fda648bc617dd28"
+            },
+            "expected": {
+              "automatic_episode_assignment": 0,
+              "reanime_id": "beck-mongolian-chop-squad-9dk6zs",
+              "review_status": "other_work_reviewed_20261014",
+              "target_id": "57",
+              "target_source": "AniList",
+              "work_confirmed": 1
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
           }
         ]
       },
@@ -17720,6 +18424,266 @@
               }
             },
             "reason": "Explicit original-body review body-audit-20261011"
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:6fcccde33a005c9530470935e3e7b201b497cb744fe13a4a91ae16e7ca58716b",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:753574d3b4e7380e04840eba9ac569abb74807e038f7e23c03a08a7df8a964e1",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:63e6a290cf201f2b93dc013e7238433810c7a3b87161543f1a123aa7be787730",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:a80facb12fb817c108a8c68d6cca567a5a8d1eecaaa93c5bdc3209b85e871b38",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:929298343e6a3ffa5bb09cdb9626e6f4971aae75722f04df12ae70de07210a1f",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:34d06785af89c5a6b4438ab52d62976c92eb42badfc848e92d7ce1e05d6df242",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:dfadd1e2a86ad9880754ebda118201304cd317369e384024bea9375d57cea9b1",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:2e7f0e12f7e5d72d93678660b867a6b73de9233fdf501eec2f1485abca6f90d5",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:7ec1e0d6b43a35d84802bbc9af3f13ca9ea4a773145a9afa7bc0b8158d55323e",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:c62f89f1244fa7441e1af4c99c3bc217db4ca611fdf8a532a4904a9991113baa",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:e6aa2dd74eb849e3dc89cb82359bc70cf0e35860f2247a7835bffc4b92515ae3",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:981a432fcf6352bbb3e638311428e24b4c2eabca90db37a50107e93ed871dc63",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:bb434a171d5fb47c66be8072bbf0da05ed99f1de36ecbf4c64e6cdd5b6284b50",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:767dd6e666aaa89c131503e2e247b121e066ab6f3d249ca115fa66b28aff863a",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:cc4ed78373f9b7ed54c944c6f588e71f1817d9ed018cbd13758d9b557495ee01",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:a08b698fc134b85426f57a15c64b36d7c5d121f4cdc6b0b4d8326757a36cb37e",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:1b5d12a0498b1361e8c1274312f297b2293cbe9f98863ae31fd2ceec73308f17",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:019b1a2d8f0e5110e575309cdaa9301208297412d52c41ca2c8eba22c94b5e15",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:48808b945572d1e426386c19960cb7ea5d58dc8a8eb1b3ee8fb3abd64fdae104",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:9f998bbfe745a116f4e78b391d9a2a6369eb5664a19b17b37e5746fff1a3311c",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:9785f3b9b0929e959225e196929679473d855de83a290ea339309d6311306da9",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:cf31fcd6e5ddc099f2552383f0c068185ec04b4ffa1366316a37ad60fe2d3ce0",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:5491d0908969ce5dca21ccfed512b7142ac52e0051e2403b28b8319bc8f7c4be",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:887b040dc9be32dd2e59549ce4080513ff529be89b6e0a2a7b21a168edb6989e",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:a8d3eac2e0f97643c6b65fdbbbfbf56aaa14874449f07589a1150fc3dc6ea621",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
+          },
+          {
+            "key": {
+              "pid": "subsubsub_20261009:4494840a18c942ac36645d6414b50b933e0d2afc37eea1835fda648bc617dd28",
+              "target_order": 2
+            },
+            "expected": {
+              "target_source": "AniList"
+            },
+            "reason": "BECK 01~26 원본 폴더·파일명이 일관되며 기존 타깃 Anissia 57은 나카이모. BECK AniList 57/Onnada 1253/ReAnime 9dk6zs로 작품 교정. 원본 경로·SHA·회차 설정 보존."
           }
         ]
       },
@@ -21911,5 +22875,6 @@
     }
   },
   "manual_episode_assignments": 60,
-  "body_audit_batch": "body-audit-20261011"
+  "body_audit_batch": "body-audit-20261011",
+  "other_work_batch": "other-work-20261014"
 }
