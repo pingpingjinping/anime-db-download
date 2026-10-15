@@ -41,6 +41,7 @@ from subtitle_queue_metadata import (
     classify_waiting_reason,
     history_title_matches as strict_history_title_matches,
     normalize_work_identity,
+    read_episode_evidence,
     reason_counts,
     queue_cache_cleanup,
 )
@@ -174,6 +175,7 @@ def load_state(path: Path) -> dict:
             "erulabo_pending": {},
             "retired": {},
             "backfill_done": {},
+            "drive_folders": {},
         }
     state = json.loads(path.read_text(encoding="utf-8"))
     if state.get("version") != 1:
@@ -186,6 +188,7 @@ def load_state(path: Path) -> dict:
     state.setdefault("erulabo_pending", {})
     state.setdefault("retired", {})
     state.setdefault("backfill_done", {})
+    state.setdefault("drive_folders", {})
     return state
 
 
@@ -798,10 +801,160 @@ def maybe_backfill_history(session: requests.Session, state: dict, state_path: P
     )
 
 
+
+def google_drive_folder_id(url: str) -> str | None:
+    """Recognize folder URLs separately from single-file and uc?id= URLs."""
+    parsed = urlparse(unescape(url or ""))
+    if (parsed.hostname or "").lower() != "drive.google.com":
+        return None
+    match = re.fullmatch(r"/drive/folders/([A-Za-z0-9_-]{10,})/?", parsed.path)
+    return match.group(1) if match else None
+
+
+def list_google_drive_folder(session: requests.Session, folder_id: str) -> list[tuple[str, str]]:
+    """List public shared files, including small nested folders, without Drive credentials.
+
+    The embedded view only exposes a limited set of children. Refuse listings
+    with 50+ children rather than silently declaring an incomplete sync done.
+    """
+    seen_folders: set[str] = set()
+    seen_files: set[str] = set()
+    files: list[tuple[str, str]] = []
+
+    def visit(current_id: str, depth: int) -> None:
+        if current_id in seen_folders:
+            return
+        if depth > 4:
+            raise RuntimeError("Google Drive folder nesting exceeds 4 levels")
+        seen_folders.add(current_id)
+        url = f"https://drive.google.com/embeddedfolderview?id={quote(current_id)}"
+        response = request(session, url)
+        try:
+            soup = BeautifulSoup(response.text, "html.parser")
+        finally:
+            response.close()
+        children: list[tuple[str, str, str]] = []
+        seen_children: set[tuple[str, str]] = set()
+        for anchor in soup.find_all("a", href=True):
+            link = urljoin("https://drive.google.com", unescape(anchor["href"]))
+            name = anchor.get_text(" ", strip=True)
+            file_id = google_drive_file_id(link)
+            subfolder_id = google_drive_folder_id(link)
+            kind, child_id = ("file", file_id) if file_id else ("folder", subfolder_id)
+            if not child_id or not name or (kind, child_id) in seen_children:
+                continue
+            seen_children.add((kind, child_id))
+            children.append((kind, child_id, name))
+        if not children:
+            raise RuntimeError(
+                "Google Drive folder has no visible entries; check anyone-with-link access "
+                f"and embedded listing: {current_id}"
+            )
+        if len(children) >= 50:
+            raise RuntimeError(
+                f"Google Drive folder {current_id} lists at least 50 entries; "
+                "embedded view may be incomplete"
+            )
+        for kind, child_id, name in children:
+            if kind == "folder":
+                visit(child_id, depth + 1)
+            elif child_id not in seen_files:
+                seen_files.add(child_id)
+                files.append((child_id, name))
+                if len(files) > 250:
+                    raise RuntimeError("Google Drive folder exceeds 250 files")
+
+    visit(folder_id, 0)
+    return files
+
+
+def drive_folder_episode(name: str, fallback: str) -> str:
+    """Use explicit file evidence; leave ambiguous episodes in the post folder."""
+    stem = Path(name).stem
+    if re.search(r"(?<![A-Za-z])(?:OVA|OAD)(?![A-Za-z])", stem, flags=re.I):
+        return "OVA"
+    evidence = read_episode_evidence(name, filename=True)
+    episodes = evidence.get("episodes", [])
+    if len(episodes) == 1 and not evidence.get("ranges"):
+        return str(episodes[0])
+    # Common BD names: "Series Name - 05 (BD 1280x720).smi".
+    if not episodes and not evidence.get("ranges"):
+        match = re.search(r"\s[-–—]\s+0*(\d{1,3})(?=\s*(?:\(|\[|$))", stem)
+        if match and 0 < int(match.group(1)) < 1000:
+            return str(int(match.group(1)))
+    return str(fallback or "0")
+
+
+def download_anissia_drive_folder(session: requests.Session, item: dict, target: Path,
+                                  state: dict, state_path: Path) -> list[Path]:
+    folder_id = google_drive_folder_id(source_url(item))
+    if not folder_id:
+        raise ValueError("Not a Google Drive folder")
+    entries = list_google_drive_folder(session, folder_id)
+    records = state.setdefault("drive_folders", {}).setdefault(item["id"], {})
+    if records.get("folder_id") != folder_id:
+        records.clear()
+        records["folder_id"] = folder_id
+    known = records.setdefault("files", {})
+    root = work_directory(item, target)
+    creator = safe_name(item.get("creator") or "unknown")
+    files: list[Path] = []
+    errors: list[str] = []
+    supported = 0
+    for file_id, original_name in entries:
+        name = safe_name(original_name, 180)
+        if Path(name).suffix.lower() not in ALLOWED_EXTENSIONS:
+            continue
+        supported += 1
+        previous = known.get(file_id) or {}
+        relative = str(previous.get("path") or "")
+        parts = Path(relative).parts
+        file_path = target / relative
+        if (previous.get("name") == original_name
+                and len(parts) > 2 and parts[0] == "anissia_subtitles"
+                and ".." not in parts and file_path.is_file()
+                and not file_path.is_symlink()
+                and hashlib.sha256(file_path.read_bytes()).hexdigest() == previous.get("sha256")):
+            files.append(file_path)
+            continue
+
+        episode = drive_folder_episode(name, str(item.get("episode") or "0"))
+        destination = root / ("OVA" if episode == "OVA" else safe_name(f"{episode}화")) / creator
+        if destination.is_symlink() or destination.parent.is_symlink():
+            raise RuntimeError("Google Drive subtitle destination cannot be a symlink")
+        try:
+            downloaded = download_google_drive(
+                session, f"https://drive.google.com/file/d/{file_id}/view",
+                destination, suggested_name=name,
+            )
+            file_item = dict(item)
+            file_item["episode"] = episode
+            register_sources(file_item, [downloaded], target)
+            known[file_id] = {
+                "name": original_name,
+                "path": downloaded.relative_to(target).as_posix(),
+                "sha256": hashlib.sha256(downloaded.read_bytes()).hexdigest(),
+            }
+            save_state(state_path, state)  # Commit each good file before the next transfer.
+            files.append(downloaded)
+        except Exception as exc:
+            errors.append(f"{name} ({file_id}): {exc}")
+    if not supported:
+        raise RuntimeError("Google Drive folder contains no supported subtitle files")
+    if errors:
+        raise RuntimeError(
+            f"Google Drive folder incomplete ({len(files)}/{supported} files): "
+            + " | ".join(errors[:5])
+        )
+    return files
+
+
 def google_drive_file_id(url: str) -> str | None:
     parsed = urlparse(unescape(url or ""))
     host = (parsed.hostname or "").lower()
     if host not in {"drive.google.com", "docs.google.com", "drive.usercontent.google.com"}:
+        return None
+    if google_drive_folder_id(url):
         return None
     match = re.search(r"/file/d/([^/]+)", parsed.path)
     if match:
@@ -1424,6 +1577,8 @@ def download_source_page(session: requests.Session, source_url: str, destination
         raise RuntimeError("Subtitle source URL is empty")
 
     parsed = urlparse(source_url)
+    if google_drive_folder_id(source_url):
+        raise RuntimeError("Google Drive folder needs Anissia folder sync context")
     if Path(unquote(parsed.path)).suffix.lower() in ALLOWED_EXTENSIONS or google_drive_file_id(source_url):
         return [download_file(session, source_url, destination)]
 
@@ -1474,7 +1629,8 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
     item_id = str(item.get("id") or "")
     if not item_id:
         return False
-    if item_id in state["success"]:
+    is_drive_folder = item.get("source") == "anissia" and bool(google_drive_folder_id(source_url(item)))
+    if item_id in state["success"] and not is_drive_folder:
         state["retry"].pop(item_id, None)
         remove_matching_waiting(state, item)
         state["erulabo_pending"].pop(item_id, None)
@@ -1498,9 +1654,11 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
         save_state(state_path, state)
         print(f"[=] {item_id}: source URL appeared; cleared {len(removed_waiting)} waiting item(s)")
 
-    if item_id in state["retired"]:
+    if item_id in state["retired"] and not is_drive_folder:
         state["retry"].pop(item_id, None)
         return False
+    if is_drive_folder:
+        state["retired"].pop(item_id, None)  # Previously failed folder URLs get a fresh chance.
 
     if item.get("source") == "anissia" and is_erulabo_url(source_url(item)):
         move_to_erulabo_pending(state, item_id, item)
@@ -1513,9 +1671,17 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
         if source == "aniall":
             files = download_aniall(session, item, target)
         elif source == "anissia":
-            files = download_anissia(session, item, target)
+            files = (download_anissia_drive_folder(session, item, target, state, state_path)
+                     if is_drive_folder else download_anissia(session, item, target))
         else:
             raise RuntimeError(f"Unknown subtitle source: {source}")
+
+        relative_files = [path.relative_to(target).as_posix() for path in files]
+        if is_drive_folder and item_id in state["success"] and sorted(relative_files) == sorted(state["success"][item_id].get("files", [])):
+            state["retry"].pop(item_id, None)
+            save_state(state_path, state)
+            print(f"[=] {item_id}: Google Drive folder unchanged ({len(files)} files)")
+            return True
 
         if source == "anissia":
             try:
@@ -1526,7 +1692,8 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
                 # Leaving backfill_done unset lets a future run try again.
                 print(f"[-] backfill search {item_id}: {backfill_exc}")
 
-        register_sources(item, files, target)
+        if not is_drive_folder:
+            register_sources(item, files, target)
         metadata = build_download_metadata(item, files, target)
         queue_cache_cleanup(item, files, target)
         state["success"][item_id] = {
@@ -1672,6 +1839,16 @@ def main() -> None:
             continue
         attempted.add(item_id)
         process_item(session, state, args.state, item, args.target)
+
+    # A previously successful Drive folder may gain more files without a new
+    # Anissia post/URL or GitHub queue release. Recheck once per weekly run.
+    for item_id, completed in list(state["success"].items()):
+        if item_id in attempted:
+            continue
+        item = completed.get("item") or {}
+        if item.get("source") == "anissia" and google_drive_folder_id(source_url(item)):
+            attempted.add(item_id)
+            process_item(session, state, args.state, item, args.target)
 
     print(json.dumps({
         "success": len(state["success"]),
