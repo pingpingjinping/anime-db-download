@@ -36,7 +36,10 @@ class WeeklyScopeTests(unittest.TestCase):
             {"animeNo": 4, "status": "END"},
         ]
         state = {"discovered": {"anissia": {}}, "retry": {"anissia_api": {"1": {}}},
-                 "bootstrap_cutoff_kst": "2026-09-25T23:59:59+09:00"}
+                 "bootstrap_cutoff_kst": "2026-09-25T23:59:59+09:00",
+                 # A recently checked historical work should stay skipped,
+                 # even when an unrelated legacy API retry is present.
+                 "anissia_historical_checked": {"1": "2026-10-07"}}
         def response(_session, url):
             if "/list/" in url:
                 return Mock(json=lambda: {"data": {"totalPages": 1, "content": works}})
@@ -46,7 +49,8 @@ class WeeklyScopeTests(unittest.TestCase):
             scope = discover_anissia(Mock(), state, queue, [], dt.datetime(2026, 10, 1, tzinfo=KST), 0, today=self.today)
         self.assertEqual([row["anime_no"] for row in queue], ["2", "3", "4"])
         self.assertFalse(any("animeNo/1" in call.args[1] for call in request.call_args_list))
-        self.assertEqual(scope, {"anissia_scanned_works": 3, "anissia_skipped_historical": 1})
+        self.assertEqual(scope, {"anissia_scanned_works": 3, "anissia_scanned_historical": 0,
+                                 "anissia_skipped_historical": 1})
 
     def test_item_identity_matches_existing_historical_backfill(self):
         caption = {"episode": "1", "name": "제작자", "updDt": "2020-01-01", "website": ""}
