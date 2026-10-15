@@ -152,5 +152,28 @@ class DriveFolderTests(unittest.TestCase):
         self.assertEqual(calls, ["1" * 26, "2" * 26])
 
 
+    def test_successful_post_can_be_reprocessed_when_folder_gains_files(self):
+        current = [("1" * 26, subtitle_name(1))]
+        calls, download = self.fake_download()
+        def listing(session, folder_id):
+            return list(current)
+        with patch.object(downloader, "list_google_drive_folder", side_effect=listing), \
+             patch.object(downloader, "download_google_drive", side_effect=download), \
+             patch.object(downloader, "maybe_backfill_history"):
+            self.assertTrue(downloader.process_item(
+                Mock(), self.state, self.state_path, self.work, self.target,
+            ))
+            self.assertEqual(len(self.state["success"][self.work["id"]]["files"]), 1)
+            current.append(("2" * 26, subtitle_name(2)))
+            self.assertTrue(downloader.process_item(
+                Mock(), self.state, self.state_path, self.work, self.target,
+            ))
+            self.assertEqual(len(self.state["success"][self.work["id"]]["files"]), 2)
+            self.assertTrue(downloader.process_item(
+                Mock(), self.state, self.state_path, self.work, self.target,
+            ))
+        self.assertEqual(calls, ["1" * 26, "2" * 26])
+
+
 if __name__ == "__main__":
     unittest.main()
