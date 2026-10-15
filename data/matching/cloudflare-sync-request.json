@@ -1,9 +1,9 @@
 {
   "schema": 1,
   "release_tag": "db-v1",
-  "reason": "Apply 2026-10-15 verified multiwork corrections to Cloudflare D1 search",
+  "reason": "Apply latest 2026-10-15 13:23 KST six-work corrections; preserve newer user edits",
   "expected_sha256": {
-    "anime_four_sources_multilingual_prepared.zip": "ef8a39f4ec45808b037e9859196888c6245e6e8c27f2d62294186e9674bf5e43",
-    "anime_reviewed_subtitle_registry_v1.zip": "f45473d2be3535abd8aff323fa4a35fd5bfb474b7956e1d7ca6fa804c5123b71"
+    "anime_four_sources_multilingual_prepared.zip": "d3d2fa3e01effcc1a32ff7977e220aa55a055e2055114756fce929dd03deecc7",
+    "anime_reviewed_subtitle_registry_v1.zip": "ff258ea23eef478a7d15999edbb6713d17bcf9a787f44d3216ec25804c5c4360"
   }
 }
