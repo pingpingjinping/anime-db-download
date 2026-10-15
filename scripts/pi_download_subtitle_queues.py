@@ -896,8 +896,9 @@ def download_anissia_drive_folder(session: requests.Session, item: dict, target:
         records.clear()
         records["folder_id"] = folder_id
     known = records.setdefault("files", {})
+    # A shared Google Drive folder belongs to one Anissia work folder.
+    # Keep all episodes, specials and OVA together, with their original filenames.
     root = work_directory(item, target)
-    creator = safe_name(item.get("creator") or "unknown")
     files: list[Path] = []
     errors: list[str] = []
     supported = 0
@@ -919,8 +920,8 @@ def download_anissia_drive_folder(session: requests.Session, item: dict, target:
             continue
 
         episode = drive_folder_episode(name, str(item.get("episode") or "0"))
-        destination = root / ("OVA" if episode == "OVA" else safe_name(f"{episode}화")) / creator
-        if destination.is_symlink() or destination.parent.is_symlink():
+        destination = root
+        if destination.is_symlink():
             raise RuntimeError("Google Drive subtitle destination cannot be a symlink")
         try:
             downloaded = download_google_drive(
