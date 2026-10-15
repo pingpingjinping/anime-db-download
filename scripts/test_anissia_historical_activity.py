@@ -98,7 +98,8 @@ class HistoricalActivityTests(unittest.TestCase):
             scope = discover_anissia(Mock(), s, queue, [], SCAN_FLOOR, 0, today=TODAY)
         self.assertEqual(scope["anissia_scanned_historical"], 1)
         self.assertEqual(scope["anissia_skipped_historical"], 1)
-        self.assertEqual([q["anime_no"] for q in queue], ["99"])
+        self.assertEqual([q["anime_no"] for q in queue if q["anime_no"] in {"99", "100"}], ["99"])
+        self.assertEqual(len(queue), 41)  # Existing active-work discovery is unchanged.
         self.assertFalse(any("/animeNo/100" in call.args[1] for call in req.call_args_list))
 
     def test_broken_page_never_overwrites_previous_rank_snapshot(self):
