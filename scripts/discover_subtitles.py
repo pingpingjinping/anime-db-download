@@ -32,6 +32,12 @@ ANIALL_BASE = "https://aniall.tistory.com"
 ANIALL_CATEGORY = ANIALL_BASE + "/category/" + quote("자막자료실")
 ANISSIA_LIST = "https://api.anissia.net/anime/list/{page}?q="
 OVERLAP = dt.timedelta(days=3)
+# Recent activity can promote even old works. Limit older-work caption requests,
+# but continue collecting *all* pages for the existing active-work policy.
+HISTORICAL_HEAD_PAGES = 3
+HISTORICAL_PROMOTION_PAGES = 8
+HISTORICAL_PROMOTION_MIN_RANKS = 10
+HISTORICAL_RECHECK_DAYS = 7
 
 
 def parse_datetime(value: str | None) -> dt.datetime | None:
@@ -74,6 +80,9 @@ def load_state(path: Path) -> dict:
     state.setdefault("discovered", {}).setdefault("aniall", {})
     state.setdefault("discovered", {}).setdefault("anissia", {})
     state.setdefault("retry", {}).setdefault("anissia_api", {})
+    state.setdefault("anissia_list_positions", {})
+    state.setdefault("anissia_historical_checked", {})
+    state.setdefault("anissia_historical_retry", {})
     cutoff = parse_datetime(state.get("bootstrap_cutoff_kst"))
     watermark = parse_datetime(state.get("watermark_kst"))
     if not cutoff or not watermark:
@@ -241,11 +250,51 @@ def anissia_payload(response: requests.Response):
     return payload.get("data") if isinstance(payload, dict) and "data" in payload else payload
 
 
+
+def historical_list_activity(anime: dict, *, anime_no: str, page: int, position: int,
+                             previous_positions: dict, previous_checks: dict,
+                             historical_retry: dict, scan_floor: dt.datetime,
+                             today: dt.date) -> bool:
+    """Only inspect historical captions if current list activity warrants it.
+
+    The list API is not guaranteed to be sorted by caption time: NEVER use a
+    page-boundary early stop, and preserve the active/upcoming scan everywhere.
+    Work-list position changes are only a hint; individual caption updDt is
+    the authoritative download filter.
+    """
+    if anime_no in historical_retry:
+        return True
+    for field in ("updDt", "updatedAt", "updateDate", "modifiedAt", "modifiedDate"):
+        changed = parse_datetime(str(anime.get(field) or ""))
+        if changed and changed >= scan_floor:
+            return True
+
+    previous = previous_positions.get(anime_no)
+    if (page < HISTORICAL_PROMOTION_PAGES and isinstance(previous, int)
+            and previous - position >= HISTORICAL_PROMOTION_MIN_RANKS):
+        return True
+
+    if page >= HISTORICAL_HEAD_PAGES:
+        return False
+    # Probe the top few pages once per week even if ordering does not change,
+    # including on the first run after migrating an existing v1 state.
+    last = previous_checks.get(anime_no)
+    try:
+        check_date = dt.date.fromisoformat(str(last or ""))
+    except ValueError:
+        check_date = None
+    return check_date is None or (today - check_date).days >= HISTORICAL_RECHECK_DAYS
+
+
 def discover_anissia(session: requests.Session, state: dict, queue: list[dict],
                      failures: list[dict], scan_floor: dt.datetime, delay: float,
                      today: dt.date | None = None) -> dict:
     discovered = state["discovered"]["anissia"]
     api_retry = state["retry"]["anissia_api"]
+    previous_positions = state.setdefault("anissia_list_positions", {})
+    historical_checked = state.setdefault("anissia_historical_checked", {})
+    historical_retry = state.setdefault("anissia_historical_retry", {})
+    positions: dict[str, int] = {}
     bootstrap = parse_datetime(state["bootstrap_cutoff_kst"])
     assert bootstrap
 
@@ -259,6 +308,7 @@ def discover_anissia(session: requests.Session, state: dict, queue: list[dict],
 
     today = today or dt.datetime.now(KST).date()
     scanned = 0
+    historical_probed = 0
     skipped_historical = 0
     for page in range(pages):
         payload = first if page == 0 else request(session, ANISSIA_LIST.format(page=page)).json()
@@ -270,11 +320,21 @@ def discover_anissia(session: requests.Session, state: dict, queue: list[dict],
             anime_no = str(anime.get("animeNo") or "")
             if not anime_no:
                 continue
-            if is_historical_anime(anime, today):
+            # Full list pagination is retained; only caption requests are selective.
+            position = len(positions)
+            positions[anime_no] = position
+            historical = is_historical_anime(anime, today)
+            if historical and not historical_list_activity(
+                anime, anime_no=anime_no, page=page, position=position,
+                previous_positions=previous_positions, previous_checks=historical_checked,
+                historical_retry=historical_retry, scan_floor=scan_floor, today=today,
+            ):
                 skipped_historical += 1
                 continue
             title = str(anime.get("subject") or anime_no)
             scanned += 1
+            if historical:
+                historical_probed += 1
             try:
                 captions = anissia_payload(request(session, ANISSIA_CAPTION.format(anime_no=anime_no)))
                 if not isinstance(captions, list):
@@ -294,6 +354,9 @@ def discover_anissia(session: requests.Session, state: dict, queue: list[dict],
                     discovered[key] = item
                     print(f"[+] queue Anissia {anime_no} {item['episode']}화 {item['creator']}")
                 api_retry.pop(anime_no, None)
+                if historical:
+                    historical_checked[anime_no] = today.isoformat()
+                    historical_retry.pop(anime_no, None)
             except Exception as exc:
                 failure = {
                     "anime_no": anime_no,
@@ -303,13 +366,25 @@ def discover_anissia(session: requests.Session, state: dict, queue: list[dict],
                 }
                 failures.append(failure)
                 api_retry[anime_no] = failure
+                if historical:
+                    historical_retry[anime_no] = failure
                 print(f"[-] Anissia API {anime_no}: {exc}")
             if delay:
                 time.sleep(delay)
             if scanned % 100 == 0:
                 print(f"[=] Anissia API scanned {scanned:,} works")
-    print(f"[=] Anissia API scan complete: {scanned:,} works; skipped {skipped_historical:,} historical works")
-    return {"anissia_scanned_works": scanned, "anissia_skipped_historical": skipped_historical}
+    # Commit a complete list snapshot only after every page has been validated.
+    # This protects movement detection from broken/partial API pagination.
+    state["anissia_list_positions"] = positions
+    print(
+        f"[=] Anissia API scan complete: {scanned:,} works; "
+        f"{historical_probed:,} historical probes; {skipped_historical:,} historical skipped"
+    )
+    return {
+        "anissia_scanned_works": scanned,
+        "anissia_scanned_historical": historical_probed,
+        "anissia_skipped_historical": skipped_historical,
+    }
 
 
 def main() -> None:
