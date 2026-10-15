@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "batch": "reanime-source-correction-20261015",
+  "base_catalog_sha256": "ef8a39f4ec45808b037e9859196888c6245e6e8c27f2d62294186e9674bf5e43",
+  "base_registry_sha256": "f45473d2be3535abd8aff323fa4a35fd5bfb474b7956e1d7ca6fa804c5123b71",
+  "expected_review_ledger_rows": 236,
+  "changes": [
+    {
+      "source": "Onnada",
+      "id": "384",
+      "original_anilist_ids": [
+        "4208"
+      ],
+      "field": "reanime_ids",
+      "before": [
+        "gigantor-wej8nj",
+        "tetsujin-28-gou-2-xeseve"
+      ],
+      "after": [],
+      "why": "1980 Tetsujin 28 is not 1963 Gigantor or the 1965 edition"
+    },
+    {
+      "source": "Anissia",
+      "id": "2695",
+      "original_anilist_ids": [
+        "163140"
+      ],
+      "field": "reanime_ids",
+      "before": [
+        "hypnosismic-division-rap-battle-rhyme-anima-z7a77n"
+      ],
+      "after": [
+        "hypnosismic-division-rap-battle-rhyme-anima-plus-qtrm2y"
+      ],
+      "why": "2023 Rhyme Anima PLUS is not 2020 Rhyme Anima"
+    }
+  ],
+  "protect": {
+    "review_ledger": "multiwork_review_decisions_20261015",
+    "new_episode_assignments": 0,
+    "registry_unchanged": true
+  }
+}
