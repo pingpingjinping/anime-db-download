@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "release_tag": "db-v1",
+  "reason": "Apply 2026-10-15 verified multiwork corrections to Cloudflare D1 search",
+  "expected_sha256": {
+    "anime_four_sources_multilingual_prepared.zip": "ef8a39f4ec45808b037e9859196888c6245e6e8c27f2d62294186e9674bf5e43",
+    "anime_reviewed_subtitle_registry_v1.zip": "f45473d2be3535abd8aff323fa4a35fd5bfb474b7956e1d7ca6fa804c5123b71"
+  }
+}
