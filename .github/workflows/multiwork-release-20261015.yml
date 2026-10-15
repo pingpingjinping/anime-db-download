@@ -1,0 +1,64 @@
+name: Publish reviewed multiwork catalog 20261015
+on:
+  pull_request:
+    paths:
+      - 'data/matching/multiwork-*.csv'
+      - 'data/matching/multiwork-release-patch-20261015.json'
+      - 'scripts/*multiwork*20261015.py'
+      - '.github/workflows/multiwork-release-20261015.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'data/matching/multiwork-release-patch-20261015.json'
+      - 'scripts/*multiwork*20261015.py'
+      - '.github/workflows/multiwork-release-20261015.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: db-v1-reviewed-correction-publish
+  cancel-in-progress: false
+
+jobs:
+  verify-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify reviewed-source decisions and fail-closed patch invariants
+        run: python -m unittest -v scripts/test_multiwork_release_20261015.py
+      - name: Download current db-v1 release assets (never read Pi working DB)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p multiwork-20261015-input
+          gh release download db-v1 --repo "$GITHUB_REPOSITORY" \
+            --pattern anime_four_sources_multilingual_prepared.zip \
+            --pattern anime_reviewed_subtitle_registry_v1.zip \
+            --dir multiwork-20261015-input
+      - name: Verify protected rows and build corrected release copy
+        run: |
+          python scripts/build_multiwork_release_20261015.py \
+            --input multiwork-20261015-input \
+            --output multiwork-20261015-output
+      - name: Recheck protected release registry and catalog
+        run: |
+          python scripts/split_db_v1_release.py validate \
+            --catalog multiwork-20261015-output/anime_four_sources_multilingual_prepared.zip \
+            --registry multiwork-20261015-output/anime_reviewed_subtitle_registry_v1.zip
+          python scripts/reviewed_matching_guard.py \
+            --catalog multiwork-20261015-output/anime_four_sources_multilingual_prepared.zip \
+            --registry multiwork-20261015-output/anime_reviewed_subtitle_registry_v1.zip
+      - name: Save validation manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: multiwork-db-v1-validation-20261015
+          path: multiwork-20261015-output/multiwork-validation-20261015.json
+          retention-days: 14
+      - name: Publish on merged main only, after every check succeeds
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/publish_multiwork_release_20261015.py
