@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "batch": "multiwork-20261015",
+  "reference": "data/matching/multiwork-reviewed-20261015.csv",
+  "decisions": "data/matching/multiwork-decisions-20261015.csv",
+  "expected_assets": {
+    "anime_four_sources_multilingual_prepared.zip": "2e36f86ac6f4026b03d8ff9e15d04039957bb328a439c96fc7de22b6cbd9b908",
+    "anime_reviewed_subtitle_registry_v1.zip": "f45473d2be3535abd8aff323fa4a35fd5bfb474b7956e1d7ca6fa804c5123b71"
+  },
+  "targeted": [
+    {
+      "origin": "Onnada:384",
+      "source": "Onnada",
+      "id": "384",
+      "field": "anilist_ids",
+      "remove": [
+        "2686",
+        "145563"
+      ],
+      "keep": [
+        "4208"
+      ],
+      "reason": "1980 Tetsujin 28-gou distinct from 1963/1965"
+    },
+    {
+      "origin": "Onnada:6169",
+      "source": "Onnada",
+      "id": "6169",
+      "field": "reanime_ids",
+      "remove": [
+        "attack-on-titan-the-last-attack-vdtdb4"
+      ],
+      "keep": [
+        "attack-on-titan-the-last-attack-np7je8"
+      ],
+      "reason": "Keep verified playable The Last Attack ReAnime link"
+    },
+    {
+      "origin": "ReAnime:hamelin-no-violin-hiki-jxynbq",
+      "source": "ReAnime",
+      "id": "hamelin-no-violin-hiki-jxynbq",
+      "field": "anilist_ids",
+      "remove": [
+        "1325"
+      ],
+      "keep": [
+        "2207"
+      ],
+      "reason": "Movie, not 1996 TV"
+    },
+    {
+      "origin": "Anissia:2695",
+      "source": "Anissia",
+      "id": "2695",
+      "field": "anilist_ids",
+      "remove": [
+        "113652"
+      ],
+      "keep": [
+        "163140"
+      ],
+      "reason": "Hypnosis Mic Rhyme Anima+ S2"
+    },
+    {
+      "origin": "Anissia:3160",
+      "source": "Anissia",
+      "id": "3160",
+      "field": "anilist_ids",
+      "remove": [
+        "175868"
+      ],
+      "keep": [
+        "184280"
+      ],
+      "reason": "Sakuna Kokorowa separate 2-episode special"
+    }
+  ],
+  "protect": {
+    "dont_touch": [
+      "subtitle_confirmed_episodes",
+      "packaged_files_v6",
+      "subtitle_work_reanime_links",
+      "anikoto_work_link_targets",
+      "pi_manual_work_match_overrides",
+      "pi_manual_anikoto_work_overrides"
+    ],
+    "status_hold": [
+      "전체보류",
+      "부분보류",
+      "공개대기"
+    ],
+    "new_episode_assignments": 0
+  }
+}
