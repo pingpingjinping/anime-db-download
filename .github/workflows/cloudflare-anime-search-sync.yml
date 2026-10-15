@@ -11,6 +11,11 @@ on:
   # 2nd of every month at 11:30 KST (02:30 UTC).
   schedule:
     - cron: '30 2 2 * *'
+  # An explicit pinned Release reconciliation request; new catalog ZIPs alone
+  # do not trigger this workflow through GitHub's release asset API.
+  push:
+    branches: [main]
+    paths: ['data/matching/cloudflare-sync-request.json']
   workflow_dispatch:
     inputs:
       mode:
@@ -53,6 +58,23 @@ jobs:
             --dir "$RUNNER_TEMP/cloudflare-search" --clobber
           test -s "$RUNNER_TEMP/cloudflare-search/anime_four_sources_multilingual_prepared.zip"
           test -s "$RUNNER_TEMP/cloudflare-search/anime_reviewed_subtitle_registry_v1.zip"
+      - name: Verify explicitly requested db-v1 asset hashes
+        if: github.event_name == 'push'
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib
+          req=json.loads(pathlib.Path("data/matching/cloudflare-sync-request.json").read_text())
+          assert req["schema"]==1 and req["release_tag"]=="db-v1"
+          base=pathlib.Path(os.environ["RUNNER_TEMP"])/"cloudflare-search"
+          for name, expected in req["expected_sha256"].items():
+              if name not in (
+                  "anime_four_sources_multilingual_prepared.zip",
+                  "anime_reviewed_subtitle_registry_v1.zip",
+              ): raise ValueError("Unexpected release asset name: "+name)
+              actual=hashlib.sha256((base/name).read_bytes()).hexdigest()
+              if actual != expected: raise ValueError("db-v1 Release changed: "+name)
+              print(name,"SHA256 verified:",actual)
+          PY
       - name: Extract and validate SQLite assets
         run: |
           set -euo pipefail
