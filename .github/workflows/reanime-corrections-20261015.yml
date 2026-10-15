@@ -1,0 +1,90 @@
+name: ReAnime source identity correction 20261015
+on:
+  pull_request:
+    paths:
+      - 'data/matching/reanime-corrections-20261015.json'
+      - 'scripts/*reanime*corrections*20261015.py'
+      - '.github/workflows/reanime-corrections-20261015.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'data/matching/reanime-corrections-20261015.json'
+      - 'scripts/*reanime*corrections*20261015.py'
+      - '.github/workflows/reanime-corrections-20261015.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: db-v1-reviewed-correction-publish
+  cancel-in-progress: false
+
+jobs:
+  verify-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify correction plan unit tests
+        run: python -m unittest -v scripts/test_reanime_corrections_20261015.py
+      - name: Download pinned current db-v1 baseline, not local Pi DB
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p reanime-corrections-20261015-input
+          gh release download db-v1 --repo "$GITHUB_REPOSITORY" \
+            --pattern anime_four_sources_multilingual_prepared.zip \
+            --pattern anime_reviewed_subtitle_registry_v1.zip \
+            --dir reanime-corrections-20261015-input
+      - name: Build exact correction and protect unrelated DB state
+        run: |
+          python scripts/build_reanime_corrections_20261015.py \
+            --input reanime-corrections-20261015-input \
+            --output reanime-corrections-20261015-output
+      - name: Verify previous reviewed ledger and registry again
+        run: |
+          python scripts/split_db_v1_release.py validate \
+            --catalog reanime-corrections-20261015-output/anime_four_sources_multilingual_prepared.zip \
+            --registry reanime-corrections-20261015-output/anime_reviewed_subtitle_registry_v1.zip
+          python scripts/reviewed_matching_guard.py \
+            --catalog reanime-corrections-20261015-output/anime_four_sources_multilingual_prepared.zip \
+            --registry reanime-corrections-20261015-output/anime_reviewed_subtitle_registry_v1.zip
+      - uses: actions/checkout@v4
+        with:
+          repository: pingpingjinping/streaming-project
+          path: streaming-project
+      - name: Simulate Pi catalog importer candidate expansion
+        run: |
+          python - <<'PY'
+          import pathlib,sys,sqlite3
+          sys.path.insert(0,str(pathlib.Path("streaming-project/scripts").resolve()))
+          from catalog_core import build_catalog,build_reanime_matches
+          db_path=pathlib.Path("reanime-corrections-20261015-output/corrected-catalog.db")
+          with sqlite3.connect(db_path) as db:
+              catalog,_=build_catalog(db)
+              by={(row["source"],row["sourceId"]):row for row in catalog}
+              a=by[("Anissia","2695")]
+              o=by[("Onnada","384")]
+              expected="hypnosismic-division-rap-battle-rhyme-anima-plus-qtrm2y"
+              if a["reanimeId"]!=expected:
+                  raise ValueError("Pi import would use wrong HYPNOSISMIC 2nd season: "+str(a))
+              if o["reanimeId"] not in ("",None):
+                  raise ValueError("Pi import would still use 1963/1965 Tetsujin: "+str(o))
+              matches=build_reanime_matches(db,catalog)
+              wrong="hypnosismic-division-rap-battle-rhyme-anima-z7a77n"
+              bad=[r for r in matches if r.get("reanimeId")==wrong and r.get("anissiaNo")==2695]
+              if bad:
+                  raise ValueError("Pi importer reintroduced 2020 HYPNOSISMIC mapping: "+str(bad))
+              print("Pi importer projection confirmed:",a["reanimeId"],o["reanimeId"])
+          PY
+      - name: Save validation proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: reanime-source-link-validation-20261015
+          path: reanime-corrections-20261015-output/reanime-corrections-validation-20261015.json
+          retention-days: 14
+      - name: Publish current db-v1 only after merged main verified
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/publish_reanime_corrections_20261015.py
