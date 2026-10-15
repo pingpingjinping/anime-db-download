@@ -912,8 +912,9 @@ def download_anissia_drive_folder(session: requests.Session, item: dict, target:
         parts = Path(relative).parts
         file_path = target / relative
         if (previous.get("name") == original_name
-                and len(parts) > 2 and parts[0] == "anissia_subtitles"
-                and ".." not in parts and file_path.is_file()
+                and len(parts) >= 3 and parts[0] == "anissia_subtitles"
+                and ".." not in parts and file_path.parent.resolve() == root.resolve()
+                and file_path.is_file()
                 and not file_path.is_symlink()
                 and hashlib.sha256(file_path.read_bytes()).hexdigest() == previous.get("sha256")):
             files.append(file_path)
@@ -1781,7 +1782,10 @@ def main() -> None:
     retired_count = 0
     for item_id, retry in list(state["retry"].items()):
         first_month = first_failed_month(retry)
-        if month_distance(first_month, current_month) >= RETRY_MONTHS:
+        retry_item = retry.get("item") or {}
+        is_folder_retry = (retry_item.get("source") == "anissia"
+                           and bool(google_drive_folder_id(source_url(retry_item))))
+        if month_distance(first_month, current_month) >= RETRY_MONTHS and not is_folder_retry:
             append_retired(
                 item_id,
                 retry,
