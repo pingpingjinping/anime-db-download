@@ -1,0 +1,55 @@
+name: Latest db-v1 six work mapping corrections 20261015
+on:
+  push:
+    branches: [codex/db-v1-six-mapping-20261015]
+    paths:
+      - 'scripts/*six*mapping*20261015.py'
+      - '.github/workflows/six-mapping-corrections-20261015.yml'
+permissions:
+  contents: write
+concurrency:
+  group: db-v1-reviewed-correction-publish
+  cancel-in-progress: false
+jobs:
+  verify-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify concurrent-edit rollback policy
+        run: python -m unittest -v scripts/test_six_mapping_publication_20261015.py
+      - name: Download latest db-v1 baseline
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p six-mapping-input
+          gh release download db-v1 --repo "$GITHUB_REPOSITORY" --dir six-mapping-input \
+            --pattern anime_four_sources_multilingual_prepared.zip \
+            --pattern anime_reviewed_subtitle_registry_v1.zip
+      - name: Correct only approved work keys and preserve all subtitle rows
+        run: python scripts/build_six_mapping_corrections_20261015.py --input six-mapping-input --output six-mapping-output
+      - name: Verify previous reviewed decisions
+        run: |
+          python scripts/reviewed_matching_guard.py \
+            --catalog six-mapping-output/anime_four_sources_multilingual_prepared.zip \
+            --registry six-mapping-output/anime_reviewed_subtitle_registry_v1.zip
+      - uses: actions/checkout@v4
+        with:
+          repository: pingpingjinping/streaming-project
+          ref: 66f1186bc76d676a52e46ad5d92673ae6b68a816
+          path: streaming-project
+      - name: Verify actual app importer and season isolation
+        run: |
+          python scripts/verify_six_mapping_import_20261015.py \
+            --catalog six-mapping-output/anime_four_sources_multilingual_prepared.db \
+            --app-scripts streaming-project/scripts
+      - name: Save validation and complete row audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: six-mapping-validation-20261015
+          path: six-mapping-output/six-mapping-corrections-20261015*.json
+          retention-days: 30
+      - name: Back up both current assets, compare latest hashes, replace, redownload verify
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/publish_six_mapping_corrections_20261015.py --output six-mapping-output
