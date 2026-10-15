@@ -10,6 +10,7 @@ on:
       - 'scripts/discover_subtitles.py'
       - 'scripts/anissia_caption_policy.py'
       - 'scripts/test_anissia_caption_policy.py'
+      - 'scripts/test_anissia_historical_activity.py'
       - 'scripts/pi_download_subtitle_queues.py'
       - 'scripts/subtitle_queue_metadata.py'
       - 'scripts/test_subtitle_queue_metadata.py'
@@ -48,6 +49,7 @@ jobs:
             scripts/pi_download_erulabo.py
           python scripts/test_subtitle_queue_metadata.py
           python -m unittest discover -s scripts -p 'test_anissia_caption_policy.py' -v
+          python -m unittest discover -s scripts -p 'test_anissia_historical_activity.py' -v
           bash -n scripts/pi_weekly_subtitle_sync.sh
 
   discover:
@@ -91,7 +93,7 @@ jobs:
           from pathlib import Path
           p = Path(os.environ["RUNNER_TEMP"]) / "subtitle-discovery" / "summary.json"
           summary = json.loads(p.read_text())
-          for key in ("queue_count", "aniall", "anissia", "api_failures", "anissia_scanned_works", "anissia_skipped_historical"):
+          for key in ("queue_count", "aniall", "anissia", "api_failures", "anissia_scanned_works", "anissia_scanned_historical", "anissia_skipped_historical"):
               print(f"{key}={int(summary.get(key, 0))}")
           print(f"should_release={str(int(summary.get('queue_count', 0)) > 0).lower()}")
           PY
@@ -165,7 +167,8 @@ jobs:
             echo "- Anissia: ${{ steps.summary.outputs.anissia || 'n/a' }}"
             echo "- API discovery failures: ${{ steps.summary.outputs.api_failures || 'n/a' }}"
             echo "- Anissia caption APIs checked: ${{ steps.summary.outputs.anissia_scanned_works || 'n/a' }}"
-            echo "- Historical caption APIs skipped: ${{ steps.summary.outputs.anissia_skipped_historical || 'n/a' }}"
+            echo "- Historical caption APIs checked for recent activity: ${{ steps.summary.outputs.anissia_scanned_historical || 'n/a' }}"
+          echo "- Historical caption APIs skipped: ${{ steps.summary.outputs.anissia_skipped_historical || 'n/a' }}"
             echo
             echo "No subtitle blog/file download happens on the GitHub runner."
           } >> "$GITHUB_STEP_SUMMARY"
