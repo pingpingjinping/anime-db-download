@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Fail-closed monthly reviewed-identity overlay patch for db-v1 catalog ZIP.
 
-Never edits source records or inferred match columns. Only a versioned overlay
-table is changed, with every member checked against the immutable source IDs.
+Reviewed identities and inferred match columns are preserved. Exact-ID manual
+Korean labels are also carried into source title_ko fields for catalog search.
 """
 import argparse
 import gzip
@@ -16,6 +16,7 @@ import sqlite3
 import tempfile
 import zipfile
 from apply_pi_manual_work_matches import checked_overrides, checked_anikoto, apply_overrides
+from pi_admin_work_titles import checked_titles, apply_titles
 
 ID = re.compile(r"^(?:ani_[1-9]\d*|re_[A-Za-z0-9_-]+|ak_[A-Za-z0-9_-]+|db_(?:AniList|Onnada)_[A-Za-z0-9_-]+)$")
 KINDS = {"main", "ova", "special", "movie", "preview", "drama", "unknown"}
@@ -44,6 +45,10 @@ def checked_manifest(payload, month):
             or len(ak) != payload["manual_anikoto_match_count"]):
         raise ValueError("Manual Anikoto match count mismatch")
     used = {}
+    titles=checked_titles(payload.get("manual_work_titles", []))
+    title_count=payload.get("manual_work_title_count", len(titles))
+    if type(title_count) is not int or title_count != len(titles):
+        raise ValueError("Manual Korean title count mismatch")
     for group in groups:
         if not isinstance(group,dict): raise ValueError("Invalid group")
         members = group.get("members")
@@ -137,6 +142,7 @@ def patch_archive(archive, manifest_path, month):
             with db:
                 result = apply_overlay(db,groups,month)
                 apply_overrides(db, manifest, month)
+                apply_titles(db, manifest.get("manual_work_titles", []))
             if db.execute("PRAGMA quick_check").fetchone()[0]!="ok":
                 raise ValueError("Reviewed catalog failed integrity check")
         finally:
@@ -167,3 +173,4 @@ def main():
 
 
 if __name__=="__main__": main()
+

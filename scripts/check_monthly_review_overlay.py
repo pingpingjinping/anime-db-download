@@ -8,6 +8,7 @@ import sys
 sys.path.insert(0,str(pathlib.Path(__file__).resolve().parents[1]))
 from scripts.split_db_v1_release import extract_database
 from scripts.apply_pi_manual_work_matches import assert_overlay
+from scripts.pi_admin_work_titles import assert_titles
 
 
 def check(archive, month, manifest=None):
@@ -25,6 +26,7 @@ def check(archive, month, manifest=None):
                 import json
                 payload=json.loads(pathlib.Path(manifest).read_text(encoding="utf-8"))
                 assert_overlay(db, payload, month)
+                assert_titles(db,payload.get("manual_work_titles",[]))
             print("Validated release reviewed group overlay for",month,"groups:",count)
             return count
 
@@ -39,3 +41,4 @@ def main():
 
 
 if __name__=="__main__": main()
+
