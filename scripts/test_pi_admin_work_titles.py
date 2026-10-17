@@ -24,9 +24,11 @@ class ManualKoreanTitlesTest(unittest.TestCase):
 
     def test_exact_identity_and_roundtrip(self):
         db=self.database()
-        rows=[{"anime_id":"re_s2","title":"새 한글 이름 2기"},{"anime_id":"ak_ak1","title":"독립 작품"}]
+        rows=[{"anime_id":"re_s2","canonical_id":"re_s2","title":"새 한글 이름 2기"},
+              {"anime_id":"ak_ak1","title":"독립 작품"}]
         with db: self.assertEqual(apply_titles(db,rows),2)
         assert_titles(db,rows)
+        self.assertEqual(db.execute("SELECT canonical_id FROM pi_admin_work_titles WHERE anime_id='re_s2'").fetchone()[0],'re_s2')
         self.assertEqual(db.execute("SELECT title_ko FROM entries WHERE source='ReAnime' AND source_record_id='s1'").fetchone()[0],"")
         # A source refresh can be followed by applying the durable overlay again.
         db.execute("UPDATE entries SET title_ko='upstream' WHERE source_record_id='s2'")
