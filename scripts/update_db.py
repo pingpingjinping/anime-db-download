@@ -577,6 +577,12 @@ def main():
             # Fail the entire snapshot before any ZIP is repacked if manual
             # work links, holds or episode allocations drifted.
             assert_reviewed_state(db, protected_before)
+            # Source refresh can replace labels; exact-ID Pi names remain authoritative.
+            if db.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='pi_admin_work_titles'").fetchone():
+                from pi_admin_work_titles import apply_titles
+                saved_titles=[{"anime_id":row[0],"title":row[1],"canonical_id":row[2]} for row in db.execute(
+                    "SELECT anime_id,title,canonical_id FROM pi_admin_work_titles ORDER BY anime_id")]
+                apply_titles(db,saved_titles)
             db.commit()
             assert db.execute("PRAGMA quick_check").fetchone()[0] == "ok"
             db.close()
@@ -591,4 +597,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

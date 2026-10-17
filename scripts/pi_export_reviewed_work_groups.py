@@ -105,6 +105,18 @@ def candidate_name(month):
     return "anime_four_sources_multilingual_prepared_pi_reviewed_" + month + ".zip"
 
 
+def export_manual_titles(streaming_repo):
+    script = streaming_repo / "scripts" / "export-admin-work-titles.py"
+    if not script.is_file():
+        return []  # Older streaming installations have no manual-name feature.
+    proc = subprocess.run([sys.executable, str(script)], cwd=streaming_repo,
+                          capture_output=True, text=True)
+    if proc.returncode:
+        raise RuntimeError("Pi manual Korean title export failed: " + proc.stderr[:240])
+    from pi_admin_work_titles import checked_titles
+    return checked_titles(json.loads(proc.stdout))
+
+
 def fetch_canonical_catalog(streaming_repo, token):
     """Use the existing Pi Release downloader and verify the GitHub digest."""
     import importlib.util
@@ -152,6 +164,8 @@ def prepare_snapshot(streaming_repo, month, directory, *, dry_run=False):
     manifest["manual_match_count"] = len(manual["reanime"])
     manifest["manual_anikoto_matches"] = manual["anikoto"]
     manifest["manual_anikoto_match_count"] = len(manual["anikoto"])
+    manifest["manual_work_titles"] = export_manual_titles(streaming_repo)
+    manifest["manual_work_title_count"] = len(manifest["manual_work_titles"])
     if dry_run:
         print("Validated", manifest["count"], "Pi reviewed groups for", month,
               "(no stage/download/upload)")
@@ -174,6 +188,8 @@ def prepare_snapshot(streaming_repo, month, directory, *, dry_run=False):
         checked_manifest(previous, month)
         if previous.get("groups") != manifest["groups"]:
             raise RuntimeError("Confirmed reviewed work IDs differ from the frozen 03:00 DB")
+        if previous.get("manual_work_titles", []) != manifest["manual_work_titles"]:
+            raise RuntimeError("Manual Korean names differ from the frozen 03:00 DB")
         if hashlib.sha256(target_db.read_bytes()).hexdigest()!=previous.get("candidate_sha256"):
             raise RuntimeError("Frozen Pi reviewed DB candidate checksum changed")
         print("Previously prepared Pi reviewed DB:", target_db)
@@ -348,3 +364,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

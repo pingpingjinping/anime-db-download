@@ -39,7 +39,7 @@ jobs:
           PYTHONPATH="$GITHUB_WORKSPACE:$GITHUB_WORKSPACE/scripts" python3 -m unittest -v \
             scripts.test_update_db scripts.test_match_new_sources \
             scripts.test_reviewed_subtitle_runtime scripts.test_apply_pi_reviewed_groups \
-            scripts.test_apply_pi_search_posters scripts.test_reviewed_matching_guard
+            scripts.test_apply_pi_search_posters scripts.test_reviewed_matching_guard scripts.test_pi_admin_work_titles
       - name: Download published catalog and Pi's 04:00 monthly review
         env:
           GH_TOKEN: ${{ github.token }}
@@ -118,6 +118,7 @@ jobs:
           import gzip,json,os,pathlib,sqlite3,tempfile,sys
           sys.path.insert(0,"scripts")
           from apply_pi_manual_work_matches import assert_overlay
+          from pi_admin_work_titles import assert_titles
           root=pathlib.Path(os.environ["RUNNER_TEMP"])
           manifest=json.loads((root/("pi-reviewed-work-groups-"+os.environ["MONTH"]+".json")).read_text())
           with tempfile.NamedTemporaryFile(suffix=".sqlite") as target:
@@ -125,6 +126,7 @@ jobs:
               target.flush()
               with sqlite3.connect(target.name) as db:
                   assert_overlay(db,manifest,os.environ["MONTH"])
+                  assert_titles(db,manifest.get("manual_work_titles",[]))
           PY
       - name: Repackage and validate completed monthly database
         env:
@@ -206,3 +208,4 @@ jobs:
           PY
           gh release upload db-v1 "$RUNNER_TEMP/monthly-db-refresh-$MONTH.json" \
             --repo "$GITHUB_REPOSITORY" --clobber
+
