@@ -24,7 +24,7 @@ saved URL without querying the API again. Empty URLs never enter the three-month
 download failure/retirement policy.
 
 Deployment needs only a pull of `anime-db-download` on the Pi. The existing
-Sunday weekly timer performs monthly URL checks; no additional timer or
+Tuesday weekly timer performs monthly URL checks; no additional timer or
 dependency is required. Existing version-1 state migrates automatically. Do not
 delete the Pi state or repeatedly run the all-history backfill. This policy
 tracks known missing URLs rather than rediscovering newly added captions on

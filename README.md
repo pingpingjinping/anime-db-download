@@ -109,7 +109,7 @@ Pi importer는 고정 행 수가 아닌 네 출처가 모두 있는지 확인하
 
 ### GitHub discovery
 
-**Weekly subtitle discovery** workflow는 매주 토요일 04:00 KST에 실행됩니다. Pi의 실제 자막 다운로드는 다음 날인 일요일 04:00 KST에 시작하므로 약 24시간의 여유를 둡니다.
+**Weekly subtitle discovery** workflow는 매주 월요일 04:00 KST에 실행됩니다. Pi의 실제 자막 다운로드는 다음 날인 화요일 04:00 KST에 시작하므로 약 24시간의 여유를 둡니다.
 
 - AniAll: 자막자료실 목록과 게시글 메타데이터만 확인합니다. 첨부파일은 다운로드하지 않습니다.
 - Anissia: 전체 작품의 caption API만 확인합니다. caption의 `website` 페이지에는 접속하지 않습니다.
@@ -137,7 +137,20 @@ queue 예시:
 Pi는 역할을 두 timer로 분리합니다.
 
 - 매월 3일 02:00 KST: 최신 `db-v1` Release를 받아 애니 DB를 반영하고 새 AniAll 매칭을 import
-- 매주 일요일 04:00 KST: 아직 처리하지 않은 `subs-queue-*` Release를 순서대로 받고 실제 자막 페이지/파일을 다운로드한 뒤 Erulabo pending도 이어서 처리
+- 매주 화요일 04:00 KST: 아직 처리하지 않은 `subs-queue-*` Release를 순서대로 받고 실제 자막 페이지/파일을 다운로드한 뒤 Erulabo pending도 이어서 처리
+
+주간 일정을 변경한 뒤에는 Pi에서 저장소를 업데이트하고 timer도 다시 설치해야 합니다.
+
+```bash
+cd ~/anime-db-download && git pull --ff-only
+sudo install -m 644 ops/systemd/anime-weekly-subtitles.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now anime-weekly-subtitles.timer
+sudo systemctl restart anime-weekly-subtitles.timer
+systemctl list-timers anime-weekly-subtitles.timer --no-pager
+```
+
+GitHub의 새 수집 일정은 기본 브랜치에 머지하면 적용됩니다. Pi 다운로드 일정을 바꾸기 위해 서비스를 수동 실행할 필요는 없습니다. 대시보드의 일정 표시는 다음 실행 결과가 기록될 때 갱신됩니다.
 
 주간 자막 다운로드에서는 queue에 들어 있는 소수의 실제 페이지에만 접속하고, 첨부 ZIP/ASS/SMI 등을 `~/streaming-project/subtitle-data`에 저장합니다. 실패 항목은 Pi 로컬 retry state에 남겨 다음 주 실행에서 먼저 재시도하며, 같은 URL/항목이 3개월 동안 계속 실패하면 4개월차부터 active retry에서 제거합니다.
 
