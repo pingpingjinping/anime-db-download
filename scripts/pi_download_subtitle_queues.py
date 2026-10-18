@@ -807,7 +807,7 @@ def google_drive_folder_id(url: str) -> str | None:
     parsed = urlparse(unescape(url or ""))
     if (parsed.hostname or "").lower() != "drive.google.com":
         return None
-    match = re.fullmatch(r"/drive/folders/([A-Za-z0-9_-]{10,})/?", parsed.path)
+    match = re.fullmatch(r"/drive/(?:u/\d+/)?folders/([A-Za-z0-9_-]{10,})/?", parsed.path)
     return match.group(1) if match else None
 
 
@@ -846,6 +846,17 @@ def list_google_drive_folder(session: requests.Session, folder_id: str) -> list[
             seen_children.add((kind, child_id))
             children.append((kind, child_id, name))
         if not children:
+            # Public embedded listings can contain genuinely empty subfolders
+            # (for example a reserved movie folder beside the TV subtitles).
+            # Only skip an explicitly empty listing below the requested root;
+            # login/error pages or unrecognized entries must still fail so we
+            # do not silently accept an incomplete sync.
+            listing = soup.find("div", class_="flip-entries")
+            if (depth > 0 and listing is not None
+                    and listing.find(True) is None
+                    and not listing.get_text(strip=True)):
+                print(f"[=] Google Drive empty subfolder skipped: {current_id}")
+                return
             raise RuntimeError(
                 "Google Drive folder has no visible entries; check anyone-with-link access "
                 f"and embedded listing: {current_id}"
