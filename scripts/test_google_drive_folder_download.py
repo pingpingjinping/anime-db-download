@@ -66,7 +66,13 @@ class DriveFolderTests(unittest.TestCase):
     def test_folder_and_file_detection(self):
         self.assertEqual(downloader.google_drive_folder_id(FOLDER_URL + "?usp=sharing"), FOLDER_ID)
         self.assertIsNone(downloader.google_drive_file_id(FOLDER_URL))
+        for account in (0, 1, 12):
+            url = f"https://drive.google.com/drive/u/{account}/folders/{FOLDER_ID}/?usp=sharing"
+            with self.subTest(account=account):
+                self.assertEqual(downloader.google_drive_folder_id(url), FOLDER_ID)
+                self.assertIsNone(downloader.google_drive_file_id(url))
         self.assertIsNone(downloader.google_drive_folder_id("https://evil.com/drive/folders/" + FOLDER_ID))
+        self.assertIsNone(downloader.google_drive_folder_id("https://drive.google.com.evil.com/drive/u/0/folders/" + FOLDER_ID))
         file_url = "https://drive.google.com/file/d/1GtLeKHBW1_PANMl488ICaKNNNJQ_GR1N/view"
         self.assertEqual(downloader.google_drive_file_id(file_url), "1GtLeKHBW1_PANMl488ICaKNNNJQ_GR1N")
         self.assertIsNone(downloader.google_drive_folder_id(file_url))
@@ -94,6 +100,53 @@ class DriveFolderTests(unittest.TestCase):
         with patch.object(downloader, "request", return_value=Mock(text=page)):
             with self.assertRaisesRegex(RuntimeError, "may be incomplete"):
                 downloader.list_google_drive_folder(Mock(), FOLDER_ID)
+
+    def test_empty_movie_subfolder_does_not_discard_tv_subtitles(self):
+        tv_id, movie_id = "1" * 26, "2" * 26
+        expected = [("3" * 26, "Meitantei Precure! - 37.ass")]
+        root = html_fixture([], [(tv_id, "TVA"), (movie_id, "극장판")])
+        tv = html_fixture(expected)
+        empty = '<html><head><title>극장판</title></head><body><div class="flip-entries"></div></body></html>'
+        for pages in ([root, tv, empty], [html_fixture([], [(movie_id, "극장판"), (tv_id, "TVA")]), empty, tv]):
+            with self.subTest(pages=pages), patch.object(
+                downloader, "request", side_effect=[Mock(text=page) for page in pages],
+            ):
+                self.assertEqual(downloader.list_google_drive_folder(Mock(), FOLDER_ID), expected)
+
+    def test_empty_root_or_unrecognized_nested_listing_still_fails(self):
+        empty = '<html><body><div class="flip-entries"></div></body></html>'
+        with patch.object(downloader, "request", return_value=Mock(text=empty)):
+            with self.assertRaisesRegex(RuntimeError, "no visible entries"):
+                downloader.list_google_drive_folder(Mock(), FOLDER_ID)
+        root = html_fixture([("3" * 26, subtitle_name(1))], [("2" * 26, "subfolder")])
+        for nested in (
+            "<html>Sign in</html>",
+            '<div class="flip-entries"><div class="flip-entry">unknown format</div></div>',
+            '<div class="flip-entries">Access denied</div>',
+        ):
+            with self.subTest(nested=nested), patch.object(
+                downloader, "request", side_effect=[Mock(text=root), Mock(text=nested)],
+            ):
+                with self.assertRaisesRegex(RuntimeError, "no visible entries"):
+                    downloader.list_google_drive_folder(Mock(), FOLDER_ID)
+
+    def test_account_folder_retry_uses_folder_sync_instead_of_website_parser(self):
+        self.work["source_url"] = f"https://drive.google.com/drive/u/0/folders/{FOLDER_ID}"
+        self.work["handler"] = "website"
+        self.state["retry"][self.work["id"]] = {"item": self.work, "reason": "parser"}
+        entries = [("1" * 26, subtitle_name(1))]
+        calls, download = self.fake_download()
+        with patch.object(downloader, "list_google_drive_folder", return_value=entries), \
+             patch.object(downloader, "download_google_drive", side_effect=download), \
+             patch.object(downloader, "download_anissia") as website, \
+             patch.object(downloader, "maybe_backfill_history"):
+            self.assertTrue(downloader.process_item(
+                Mock(), self.state, self.state_path, self.work, self.target,
+            ))
+        website.assert_not_called()
+        self.assertEqual(calls, ["1" * 26])
+        self.assertNotIn(self.work["id"], self.state["retry"])
+        self.assertIn(self.work["id"], self.state["success"])
 
     def test_downloads_12_and_ova_in_one_work_folder_and_reuses_files(self):
         entries = [(f"{n:026d}", subtitle_name(n)) for n in range(1, 13)]
