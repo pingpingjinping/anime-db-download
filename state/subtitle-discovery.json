@@ -1,7 +1,7 @@
 {
   "version": 1,
   "bootstrap_cutoff_kst": "2026-09-25T23:59:59+09:00",
-  "watermark_kst": "2026-10-17T06:48:00+09:00",
+  "watermark_kst": "2026-10-19T07:57:28+09:00",
   "discovered": {
     "aniall": {
       "5571": {
@@ -113,6 +113,16 @@
         "published_at": "2026-10-10T10:47:06+09:00",
         "title": "[Erai-raws] 리바이어던 - 01 ~ 12 [1080p NF WEB-DL AVC EAC3][MultiSub]_자막",
         "source_url": "https://aniall.tistory.com/5599"
+      },
+      "5615": {
+        "published_at": "2026-10-18T10:37:43+09:00",
+        "title": "나의 지구를 지켜줘-아리스로부터 링군에게 극장판 1995 DVDRip x264 AC3-Kamihikouki_자막",
+        "source_url": "https://aniall.tistory.com/5615"
+      },
+      "5613": {
+        "published_at": "2026-10-17T08:12:42+09:00",
+        "title": "모빌 슈츠 건담 SEED Destiny Special Edition IV The Cost of Freedom (2007) [hchcsen]_구글 번역기 자막",
+        "source_url": "https://aniall.tistory.com/5613"
       }
     },
     "anissia": {
@@ -1258,13 +1268,145 @@
         "updated_at": "2026-10-14T23:52:00+09:00",
         "source_url": "https://bluewater91.blogspot.com/2026/10/season2-2.html",
         "handler": "blogspot"
+      },
+      "2954f6009931c49be612ad5dbdbfa71a8b1d740806d78ad8d76ba4ae18e4521e": {
+        "id": "anissia:2954f6009931c49be612ad5dbdbfa71a8b1d740806d78ad8d76ba4ae18e4521e",
+        "source": "anissia",
+        "anime_no": "3594",
+        "anime_title": "낯가림 심한 미망인 설녀와 저주의 반지",
+        "episode": "2",
+        "creator": "fanic",
+        "updated_at": "2026-10-18T11:42:00+09:00",
+        "source_url": "https://han1sub.blogspot.com/2026/09/blog-post.html",
+        "handler": "blogspot"
+      },
+      "b5edaa21090b7a6b9cbec767d7225af29d481f4246d485978e22671ed731758b": {
+        "id": "anissia:b5edaa21090b7a6b9cbec767d7225af29d481f4246d485978e22671ed731758b",
+        "source": "anissia",
+        "anime_no": "3514",
+        "anime_title": "버텍스 포스",
+        "episode": "3",
+        "creator": "하느",
+        "updated_at": "2026-10-18T03:00:00+09:00",
+        "source_url": "https://harne1.tistory.com/768",
+        "handler": "tistory"
+      },
+      "46ef9d955bf0879852ed03ec110fba52809cc588de87c9283fbcd90230cdc626": {
+        "id": "anissia:46ef9d955bf0879852ed03ec110fba52809cc588de87c9283fbcd90230cdc626",
+        "source": "anissia",
+        "anime_no": "3464",
+        "anime_title": "#좀비를 찾습니다",
+        "episode": "3",
+        "creator": "C소라",
+        "updated_at": "2026-10-18T11:39:00+09:00",
+        "source_url": "https://csora556.blogspot.com/2026/10/blog-post.html",
+        "handler": "blogspot"
+      },
+      "2b406118139aaa0a62933785e2db2d6da195e8934ac41540ab8b419db5faf17a": {
+        "id": "anissia:2b406118139aaa0a62933785e2db2d6da195e8934ac41540ab8b419db5faf17a",
+        "source": "anissia",
+        "anime_no": "3396",
+        "anime_title": "마법의 자매 룰루토 릴리",
+        "episode": "15",
+        "creator": "코코렛",
+        "updated_at": "2026-10-19T01:32:00+09:00",
+        "source_url": "https://felia.tistory.com/1195",
+        "handler": "tistory"
+      },
+      "e32105d6fac117ee423799c5429dbbd371df7e727b8c86556bdf6704ab85fcc4": {
+        "id": "anissia:e32105d6fac117ee423799c5429dbbd371df7e727b8c86556bdf6704ab85fcc4",
+        "source": "anissia",
+        "anime_no": "3379",
+        "anime_title": "명탐정 프리큐어!",
+        "episode": "38",
+        "creator": "하루하루",
+        "updated_at": "2026-10-18T15:53:00+09:00",
+        "source_url": "https://blog.naver.com/zerocard2/224445559707",
+        "handler": "naver"
+      },
+      "bf7fdfb11f225dd38ed419f20943abe528981ffa5e7ce688aeb64a196457bd3a": {
+        "id": "anissia:bf7fdfb11f225dd38ed419f20943abe528981ffa5e7ce688aeb64a196457bd3a",
+        "source": "anissia",
+        "anime_no": "3379",
+        "anime_title": "명탐정 프리큐어!",
+        "episode": "38",
+        "creator": "수퍼소닉EX",
+        "updated_at": "2026-10-18T11:55:00+09:00",
+        "source_url": "https://drive.google.com/drive/folders/1EeGLHoA3hl3HNBr8EriS6xfq7JnvywmJ",
+        "handler": "website"
+      },
+      "692a16a3a02db183fd0d74ebd94c97e5397571708bbfebfdb522f1310f33ae43": {
+        "id": "anissia:692a16a3a02db183fd0d74ebd94c97e5397571708bbfebfdb522f1310f33ae43",
+        "source": "anissia",
+        "anime_no": "3370",
+        "anime_title": "빌려준 마력은 【리볼빙】으로 강제징수",
+        "episode": "3",
+        "creator": "kanna",
+        "updated_at": "2026-10-18T03:32:00+09:00",
+        "source_url": "https://kannasub.tistory.com/entry/빌려준-마력은-리볼빙으로-강제-징수-3화-자막",
+        "handler": "tistory"
+      },
+      "4e20e9c81f6076a0cd00cbbb62f1e64509f9a2bed6144176837d4c56da9c73d6": {
+        "id": "anissia:4e20e9c81f6076a0cd00cbbb62f1e64509f9a2bed6144176837d4c56da9c73d6",
+        "source": "anissia",
+        "anime_no": "3340",
+        "anime_title": "귀환자의 마법은 특별해야 합니다 2기",
+        "episode": "2",
+        "creator": "fanic",
+        "updated_at": "2026-10-18T17:20:00+09:00",
+        "source_url": "https://han1sub.blogspot.com/2026/10/2.html",
+        "handler": "blogspot"
+      },
+      "eefaac70e49d9de97e61410460039f09de504f706ec3f48ab643ca548aeb2689": {
+        "id": "anissia:eefaac70e49d9de97e61410460039f09de504f706ec3f48ab643ca548aeb2689",
+        "source": "anissia",
+        "anime_no": "3261",
+        "anime_title": "학생회에도 구멍은 있다!",
+        "episode": "3",
+        "creator": "카이란",
+        "updated_at": "2026-10-18T23:08:00+09:00",
+        "source_url": "https://kairan03.blogspot.com/2026/10/3.html",
+        "handler": "blogspot"
+      },
+      "5faf9206af47ad317b0baeda9ed23e1f667942471ac8c0fd6cce556791bbfbab": {
+        "id": "anissia:5faf9206af47ad317b0baeda9ed23e1f667942471ac8c0fd6cce556791bbfbab",
+        "source": "anissia",
+        "anime_no": "3216",
+        "anime_title": "어떤 암부의 소녀공서",
+        "episode": "2",
+        "creator": "얀제로",
+        "updated_at": "2026-10-18T04:16:00+09:00",
+        "source_url": "https://yarnzero.tistory.com/90",
+        "handler": "tistory"
+      },
+      "c57f2747c905da726e8e4666cdcd5b1ace5fee0478a25571657098de2707faeb": {
+        "id": "anissia:c57f2747c905da726e8e4666cdcd5b1ace5fee0478a25571657098de2707faeb",
+        "source": "anissia",
+        "anime_no": "2791",
+        "anime_title": "매지컬★익스플로러",
+        "episode": "4",
+        "creator": "에루샤",
+        "updated_at": "2026-10-18T17:45:00+09:00",
+        "source_url": "https://erulabo.com/874",
+        "handler": "website"
+      },
+      "2df9c20ce1305bb42f12ffb54006e55b193c65c8eb33c64626e28a4953101e74": {
+        "id": "anissia:2df9c20ce1305bb42f12ffb54006e55b193c65c8eb33c64626e28a4953101e74",
+        "source": "anissia",
+        "anime_no": "2780",
+        "anime_title": "베이블레이드 X",
+        "episode": "136",
+        "creator": "이마이",
+        "updated_at": "2026-10-18T02:31:00+09:00",
+        "source_url": "https://beyimai.blogspot.com/2026/10/x-4.html",
+        "handler": "blogspot"
       }
     }
   },
   "retry": {
     "anissia_api": {}
   },
-  "last_run_at_utc": "2026-10-16T21:49:58+00:00",
+  "last_run_at_utc": "2026-10-18T22:58:54+00:00",
   "anissia_list_positions": {
     "3617": 0,
     "3616": 1,
@@ -4827,7 +4969,8 @@
   },
   "anissia_historical_checked": {
     "3610": "2026-10-17",
-    "3607": "2026-10-17"
+    "3607": "2026-10-17",
+    "3565": "2026-10-19"
   },
   "anissia_historical_retry": {}
 }
