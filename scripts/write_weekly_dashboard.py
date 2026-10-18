@@ -202,9 +202,9 @@ def main() -> None:
         "version": 1,
         "generatedAt": args.finished_at,
         "schedule": {
-            "label": "매주 일요일 04:00",
+            "label": "매주 화요일 04:00",
             "timezone": "Asia/Seoul",
-            "weekday": 0,
+            "weekday": 2,
             "hour": 4,
             "minute": 0,
         },

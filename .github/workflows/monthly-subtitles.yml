@@ -2,8 +2,8 @@ name: Weekly subtitle discovery
 
 on:
   schedule:
-    # Saturday 04:00 KST (Friday 19:00 UTC), one day ahead of the Pi Sunday 04:00 download.
-    - cron: '0 19 * * 5'
+    # Monday 04:00 KST (Sunday 19:00 UTC), one day ahead of the Pi Tuesday 04:00 download.
+    - cron: '0 19 * * 0'
   workflow_dispatch:
   pull_request:
     paths:

@@ -1,8 +1,8 @@
 [Unit]
-Description=Download subtitle queues every Sunday at 04:00 KST
+Description=Download subtitle queues every Tuesday at 04:00 KST
 
 [Timer]
-OnCalendar=Sun *-*-* 04:00:00 Asia/Seoul
+OnCalendar=Tue *-*-* 04:00:00 Asia/Seoul
 Persistent=true
 Unit=anime-weekly-subtitles.service
 
