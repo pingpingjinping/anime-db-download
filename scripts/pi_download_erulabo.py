@@ -32,7 +32,7 @@ DEFAULT_STAGING_DIR = Path("/tmp/erulabo-staging-downloads")
 DEFAULT_DISPLAY = ":99"
 DEFAULT_CDP_PORT = 9222
 WINDOW_SIZE = (1280, 900)
-DEFAULT_TIMEOUT_SECONDS = 60
+DEFAULT_TIMEOUT_SECONDS = 90
 
 
 def load_state(path: Path) -> dict:
@@ -227,7 +227,7 @@ def process_item(page, item_id: str, item: dict, staging_dir: Path, timeout_sec:
         print(f"[~] 네비게이션 경고: {exc}")
 
     # 페이지 기본 렌더링 대기
-    page.wait_for_timeout(3_000)
+    page.wait_for_timeout(5_000)
 
     try:
         button = page.locator("button[data-file-url]").first
@@ -245,9 +245,9 @@ def process_item(page, item_id: str, item: dict, staging_dir: Path, timeout_sec:
         })"""
     )
 
-    # 2. 정렬 후 10초 대기
-    print("    [*] 가운데 정렬 완료 -> 10초 대기 중...")
-    page.wait_for_timeout(10_000)
+    # 2. 정렬 후 12초 대기
+    print("    [*] 가운데 정렬 완료 -> 12초 대기 중...")
+    page.wait_for_timeout(12_000)
 
     box = button.bounding_box()
     if box is None:
@@ -260,11 +260,11 @@ def process_item(page, item_id: str, item: dict, staging_dir: Path, timeout_sec:
     print(f"    버튼 파일 속성: {button.get_attribute('data-file-url')}")
     print(f"    가상 마우스 목표 좌표: ({round(center_x)}, {round(center_y)})")
 
-    # 3. 커서 이동 후 5초 대기
+    # 3. 커서 이동 후 8초 대기
     print("    [*] 커서 이동 중...")
     page.mouse.move(center_x, center_y)
-    print("    [*] 커서 안착 완료 -> 클릭 대기 5초 중...")
-    page.wait_for_timeout(5_000)
+    print("    [*] 커서 안착 완료 -> 클릭 대기 8초 중...")
+    page.wait_for_timeout(8_000)
 
     # 4. 1회 클릭 및 임시 디렉토리로 다운로드 수신
     try:
@@ -354,7 +354,7 @@ def main() -> None:
                 print(f"[!] {item_id} 다운로드 실패: 큐에 그대로 보존합니다.")
 
             # 다음 항목으로 넘어가기 전 안전 쿨타임
-            page.wait_for_timeout(2000)
+            page.wait_for_timeout(5000)
 
     print("\n모든 대기열 처리가 완료되었습니다.")
 
