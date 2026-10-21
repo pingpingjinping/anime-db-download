@@ -1,5 +1,5 @@
 """Exact-baseline catalog patch. All validation completes before release publishing."""
-import argparse,base64,gzip,hashlib,json,shutil,sqlite3,zipfile,collections
+import argparse,base64,gzip,hashlib,json,shutil,sqlite3,zipfile,collections,copy
 from pathlib import Path
 
 CAT='anime_four_sources_multilingual_prepared.zip'
@@ -63,14 +63,31 @@ def sql_script(plan,reverse=False):
 def run(input_dir,output,plan_path,rules):
     input_dir,output=Path(input_dir),Path(output);output.mkdir(parents=True,exist_ok=True)
     plan=json.loads(gzip.decompress(base64.b64decode(Path(plan_path).read_bytes())))
-    assert sha(input_dir/CAT)==plan['baseline_catalog_zip_sha256'] and sha(input_dir/REG)==plan['baseline_registry_zip_sha256']
+    actual_zip=sha(input_dir/CAT)
+    accepted=[{'catalog_sha256':plan['baseline_catalog_zip_sha256'],'database_sha256':plan['baseline_database_sha256']},*plan.get('accepted_rebases',[])]
+    baseline_match=next((r for r in accepted if r['catalog_sha256']==actual_zip),None)
+    assert baseline_match and sha(input_dir/REG)==plan['baseline_registry_zip_sha256'],'Unreviewed release baseline'
     baseline=output/'baseline.db';candidate=output/'anime_four_sources_multilingual_prepared.db';registry=output/'registry.db'
     for archive,path in [(input_dir/CAT,baseline),(input_dir/REG,registry)]:
         with zipfile.ZipFile(archive) as z:
             files=[n for n in z.namelist() if n.endswith(('.db','.sqlite','.sqlite3'))];assert len(files)==1
             path.write_bytes(z.read(files[0]))
-    assert sha(baseline)==plan['baseline_database_sha256'];shutil.copyfile(baseline,candidate)
-    c=connect(candidate);before=state(c);apply(c,plan);after=state(c)
+    assert sha(baseline)==baseline_match['database_sha256'];shutil.copyfile(baseline,candidate)
+    c=connect(candidate);before=state(c);plan=copy.deepcopy(plan)
+    # A known matcher repack can change JSON whitespace/key order. Preserve its
+    # exact representation only after checking the reviewed JSON meaning.
+    for op in plan['operations']:
+        if op['before'] is None or op['table'] in plan['new_tables']:continue
+        actual=row_for(c,op)
+        if actual is None:raise ValueError('Reviewed old row absent after repack')
+        for key,wanted in op['before'].items():
+            if actual[key]==wanted:continue
+            if (key.endswith('_json') or op['table'] in ['metadata','anikoto_match_metadata'] and key=='value') and isinstance(actual[key],str) and isinstance(wanted,str):
+                try:same=json.loads(actual[key])==json.loads(wanted)
+                except ValueError:same=False
+                if same:op['before'][key]=actual[key];continue
+            raise ValueError('Reviewed value changed in repack: '+op['table']+str(op['key'])+' '+key)
+    apply(c,plan);after=state(c)
     import reviewed_matching_guard as guard
     checked=guard.verify_role(c,'catalog',guard.read_rules(rules))
     probe=connect(':memory:');c.backup(probe);apply(probe,plan,True);assert state(probe)==before;apply(probe,plan);assert state(probe)==after
@@ -105,7 +122,7 @@ def run(input_dir,output,plan_path,rules):
     archive=output/CAT
     with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED,compresslevel=8) as z:
         info=zipfile.ZipInfo('anime_four_sources_multilingual_prepared.db',(2026,10,21,0,0,0));info.compress_type=zipfile.ZIP_DEFLATED;z.writestr(info,candidate.read_bytes())
-    report={'batch':plan['batch'],'summary':plan['summary'],'base_catalog_sha256':plan['baseline_catalog_zip_sha256'],'base_registry_sha256':plan['baseline_registry_zip_sha256'],'catalog_sha256':sha(archive),'database_sha256':sha(candidate),'guard_rows':checked,'operations':len(plan['operations']),'rollback_and_reapply_verified':True,'sql_forward_and_rollback_verified':True,'search':{'works_before':len(oldworks),'works_after':len(works),'aliases_before':len(oldaliases),'aliases_after':len(aliases),'old_cards_preserved':True,'subtitle_counts_preserved':True,'all_881_korean_labels_tested':True,'sql_sha256':sha(output/'search-import.sql')},'live_playback_tested':False,'production_published':False}
+    report={'batch':plan['batch'],'summary':plan['summary'],'base_catalog_sha256':actual_zip,'base_database_sha256':baseline_match['database_sha256'],'rebase_provenance':baseline_match.get('provenance'),'base_registry_sha256':plan['baseline_registry_zip_sha256'],'catalog_sha256':sha(archive),'database_sha256':sha(candidate),'guard_rows':checked,'operations':len(plan['operations']),'rollback_and_reapply_verified':True,'sql_forward_and_rollback_verified':True,'search':{'works_before':len(oldworks),'works_after':len(works),'aliases_before':len(oldaliases),'aliases_after':len(aliases),'old_cards_preserved':True,'subtitle_counts_preserved':True,'all_881_korean_labels_tested':True,'sql_sha256':sha(output/'search-import.sql')},'live_playback_tested':False,'production_published':False}
     (output/'multimatch-20261021-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
     (output/'korean-search-checks.json').write_text(json.dumps(checks,ensure_ascii=False,indent=2),encoding='utf-8')
     print(json.dumps(report,ensure_ascii=False,indent=2));return report

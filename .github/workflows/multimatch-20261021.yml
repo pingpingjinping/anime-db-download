@@ -6,7 +6,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: db-v1-reviewed-correction-publish
+  group: anime-db-refresh
   cancel-in-progress: false
 jobs:
   verify-and-publish:
