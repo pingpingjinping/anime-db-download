@@ -280,7 +280,7 @@ def create_matched_database(baseline, catalog, matches, destination, corrections
                 status TEXT NOT NULL,payload_json TEXT NOT NULL)''')
             db.execute('CREATE TABLE IF NOT EXISTS anikoto_match_metadata (key TEXT PRIMARY KEY,value TEXT NOT NULL)')
             # Reviewed/rejected links already present in the baseline survive new automatic scans.
-            preserved = {row[0] for row in db.execute("SELECT anikoto_id FROM anikoto_work_links WHERE status IN ('reviewed','rejected')")}
+            preserved = {row[0] for row in db.execute("SELECT anikoto_id FROM anikoto_work_links WHERE status IN ('reviewed','rejected','multi')")}
             db.execute("DELETE FROM anikoto_work_links WHERE status NOT IN ('reviewed','rejected')")
             current_run = expected['crawl_run_id']
             new_links = {link['anikoto_id']:link for link in payload['links']}
@@ -395,4 +395,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

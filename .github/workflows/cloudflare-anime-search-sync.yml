@@ -4,7 +4,7 @@ on:
   # Runs after the downstream writer of the final reviewed db-v1 catalog.
   # Monthly anime DB refresh -> Anikoto reviewed catalog matching -> D1.
   workflow_run:
-    workflows: ["Anikoto reviewed catalog matching", "ReAnime source identity correction 20261015"]
+    workflows: ["Anikoto reviewed catalog matching", "ReAnime source identity correction 20261015", "Multimatch DB apply 20261021"]
     types: [completed]
     branches: [main]
   # Reconciliation in case the downstream workflow was skipped or failed.

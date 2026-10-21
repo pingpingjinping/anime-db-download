@@ -335,6 +335,8 @@ def build(catalog_db, registry_db):
             poster = next(iter(images)) if len(images) == 1 else ""
         works.append((work_id, title, number(row.get("year")) or None,
                       " · ".join(sorted(providers)), caption_count, detail, poster))
+    from reviewed_multimatch_search import extend_projection
+    works, aliases = extend_projection(catalog_db, works, aliases, normalized_title)
     if len(works) < 1000 or len(aliases) < len(works):
         raise ValueError(f"Suspiciously small export: {len(works)} works / {len(aliases)} aliases")
     return works, sorted(aliases), dict(counts), len(confirmed)
@@ -387,5 +389,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 

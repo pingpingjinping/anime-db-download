@@ -8,6 +8,8 @@ the *input* manual decisions so later user edits remain authoritative.
 from __future__ import annotations
 
 import argparse
+import base64
+import hashlib
 import gzip
 import json
 from pathlib import Path
@@ -31,6 +33,13 @@ MANUAL_TABLES = (
 
 def read_rules(path=DEFAULT_RULES):
     rules = json.loads(Path(path).read_text(encoding="utf-8"))
+    amendment = ROOT / 'data/matching/reviewed-corrections-multimatch-20261021.json.gz.b64'
+    if Path(path).resolve() == DEFAULT_RULES.resolve() and amendment.exists():
+        revised = json.loads(gzip.decompress(base64.b64decode(amendment.read_bytes())))
+        original_hash=hashlib.sha256(json.dumps(rules,ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+        if revised.get('base_guard_semantic_sha256')!=original_hash or revised.get('amendments_multimatch_20261021',{}).get('batch')!='multimatch-20261021':
+            raise ValueError('Reviewed ledger changed; reconcile the multimatch amendment before refreshing')
+        rules=revised
     if (rules.get("schema"), rules.get("batch"), rules.get("new_episode_assignments")) != (
         1, "matching-20261011", 0
     ):
@@ -197,3 +206,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

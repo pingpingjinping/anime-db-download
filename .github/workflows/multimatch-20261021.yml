@@ -1,0 +1,52 @@
+name: Multimatch DB apply 20261021
+on:
+  push:
+    branches: [main]
+    paths: ['data/matching/multimatch-20261021.json.gz.b64']
+permissions:
+  contents: write
+concurrency:
+  group: db-v1-reviewed-correction-publish
+  cancel-in-progress: false
+jobs:
+  verify-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify patch guards and separate season search
+        run: python -m unittest discover -s scripts -p test_multimatch_20261021.py -v
+      - name: Download exact current baseline
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p multimatch-input
+          gh release download db-v1 --repo "$GITHUB_REPOSITORY" --dir multimatch-input --pattern anime_four_sources_multilingual_prepared.zip --pattern anime_reviewed_subtitle_registry_v1.zip
+      - name: Apply, reverse, reapply and verify all reviewed names and mappings
+        run: python scripts/apply_multimatch_20261021.py --input multimatch-input --output multimatch-output --plan data/matching/multimatch-20261021.json.gz.b64 --rules data/matching/reviewed-corrections-20261011.json
+      - name: Verify monthly replay keeps corrected source ranges
+        run: python scripts/verify_multimatch_refresh_20261021.py --catalog multimatch-output/anime_four_sources_multilingual_prepared.db --output multimatch-output --rules data/matching/reviewed-corrections-20261011.json
+      - uses: actions/checkout@v4
+        with:
+          repository: pingpingjinping/streaming-project
+          ref: e501b08ebba52908534bb99387f7875534c2efea
+          path: streaming-project
+      - name: Verify actual app importer without connecting to live Postgres
+        run: python scripts/verify_multimatch_import_20261021.py --catalog multimatch-output/anime_four_sources_multilingual_prepared.db --app-scripts streaming-project/scripts --output multimatch-output/import-check.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: multimatch-validation-20261021
+          path: |
+            multimatch-output/*report.json
+            multimatch-output/import-check.json
+            multimatch-output/korean-search-checks.json
+            multimatch-output/apply.sql
+            multimatch-output/rollback.sql
+          retention-days: 30
+      - name: Back up current catalog, publish and redownload verify
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/publish_multimatch_20261021.py --input multimatch-input --output multimatch-output

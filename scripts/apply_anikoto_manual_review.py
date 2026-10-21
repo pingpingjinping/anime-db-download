@@ -121,14 +121,14 @@ def records_from_runtime(db):
              'targets':grouped.get(row['anikoto_id'],[])} for row in states]
 
 
-def validate_records(records):
+def validate_records(records, expected_counts=None):
     if len(records)!=4427: raise ValueError('Expected 4,427 manual-review rows')
     if [r['order'] for r in records]!=list(range(1,4428)):
         raise ValueError('Manual review must preserve order 1..4427')
     if len({r['anikoto_id'] for r in records})!=4427:
         raise ValueError('Manual review contains duplicate Anikoto IDs')
     counts=Counter(r['status'] for r in records)
-    if counts!=Counter({'single':4245,'multi':91,'hold':91}):
+    if counts!=Counter(expected_counts or {'single':4245,'multi':91,'hold':91}):
         raise ValueError('Unexpected final review counts: '+str(dict(counts)))
     for rec in records:
         n=len(rec.get('targets') or [])
@@ -155,7 +155,13 @@ def apply(database, catalog, decision_asset, review_queue, report):
         if records is None:
             records=records_from_initial_queue(review_queue,decision_asset)
             source='initial_decision_vector'
-        validate_records(records)
+        audited = None
+        if db.execute("SELECT 1 FROM metadata WHERE key='multimatch_review_20261021'").fetchone():
+            audited=json.loads(db.execute("SELECT value FROM metadata WHERE key='multimatch_review_20261021'").fetchone()[0])
+            if audited.get('batch')!='multimatch-20261021' or audited.get('manual_review_counts')!={'single':4246,'multi':90,'hold':91}:
+                raise ValueError('Unexpected versioned multimatch review state')
+        counts=validate_records(records, audited['manual_review_counts'] if audited else None)
+        expected_multi_rows=audited['multi_target_rows'] if audited else 253
         missing=[r['anikoto_id'] for r in records if r['anikoto_id'] not in listings]
         if missing: raise ValueError('Manual-review ID missing from catalog: '+missing[0])
         for rec in records:
@@ -166,6 +172,7 @@ def apply(database, catalog, decision_asset, review_queue, report):
 
         db.execute('CREATE TEMP TABLE manual_review_ids(anikoto_id TEXT PRIMARY KEY)')
         db.executemany('INSERT INTO manual_review_ids VALUES (?)',[(r['anikoto_id'],) for r in records])
+        extra_reviewed=[dict(r) for r in db.execute("SELECT * FROM anikoto_work_link_targets WHERE link_status IN ('reviewed','multi_reviewed') AND anikoto_id NOT IN (SELECT anikoto_id FROM manual_review_ids) ORDER BY anikoto_id,target_order")]
         db.execute("DELETE FROM anikoto_work_links WHERE anikoto_id IN (SELECT anikoto_id FROM manual_review_ids)")
 
         db.executescript('''
@@ -197,6 +204,15 @@ def apply(database, catalog, decision_asset, review_queue, report):
             db.execute('INSERT INTO anikoto_work_link_targets VALUES (?,?,?,?,?,?,?,?,?,?,?)',
                        (row['anikoto_id'],1,row['target_source'],row['target_id'],'automatic','whole',None,None,None,None,row['payload_json']))
 
+        extra_ids={r['anikoto_id'] for r in extra_reviewed}
+        for slug in extra_ids:
+            db.execute('DELETE FROM anikoto_work_link_targets WHERE anikoto_id=?',(slug,))
+            if not db.execute('SELECT 1 FROM anikoto_catalog WHERE source_record_id=?',(slug,)).fetchone():
+                if slug not in listings: raise ValueError('Additional reviewed source absent from saved catalog: '+slug)
+                value=compact_catalog(listings[slug],slug)
+                db.execute('INSERT INTO anikoto_catalog VALUES(?,?)',(slug,json.dumps(value,ensure_ascii=False,separators=(',',':'))))
+        for row in extra_reviewed:
+            db.execute('INSERT INTO anikoto_work_link_targets VALUES('+','.join('?' for _ in row)+')',tuple(row.values()))
         for rec in records:
             db.execute('INSERT INTO anikoto_review_state VALUES (?,?,?,?)',
                        (rec['anikoto_id'],rec['order'],rec['status'],'{}'))
@@ -227,6 +243,7 @@ def apply(database, catalog, decision_asset, review_queue, report):
 
         db.execute('''DELETE FROM anikoto_catalog WHERE source_record_id NOT IN
                    (SELECT DISTINCT anikoto_id FROM anikoto_work_link_targets)''')
+        extra_nonlegacy=db.execute("SELECT count(DISTINCT t.anikoto_id) FROM anikoto_work_link_targets t WHERE t.anikoto_id NOT IN (SELECT anikoto_id FROM manual_review_ids) AND t.anikoto_id NOT IN (SELECT anikoto_id FROM anikoto_work_links WHERE status IN ('automatic','reviewed'))").fetchone()[0]
         auto_count=db.execute("SELECT count(*) FROM anikoto_work_links WHERE status='automatic'").fetchone()[0]
         reviewed_count=db.execute("SELECT count(*) FROM anikoto_work_links WHERE status='reviewed'").fetchone()[0]
         runtime_works=db.execute('SELECT count(*) FROM anikoto_catalog').fetchone()[0]
@@ -235,31 +252,31 @@ def apply(database, catalog, decision_asset, review_queue, report):
         if report_data.get('records')==8949:
             needs_review=unmatched=0
         else:
-            unresolved=max(0,int(report_data.get('records') or 0)-auto_count-reviewed_count-91-91-int(report_data.get('rejected') or 0))
+            unresolved=max(0,int(report_data.get('records') or 0)-auto_count-reviewed_count-counts['multi']-counts['hold']-int(report_data.get('rejected') or 0))
             needs_review,unmatched=unresolved,0
         report_data.update({
-          'automatic':auto_count,'reviewed':reviewed_count,'multi_reviewed':91,'manual_hold':91,
+          'automatic':auto_count,'reviewed':reviewed_count,'multi_reviewed':counts['multi'],'manual_hold':counts['hold'],
           'needs_review':needs_review,'unmatched':unmatched,
           'manual_review_format_version':1,'manual_review_records':4427,'manual_review_source':source,
           'runtime_works':runtime_works,'legacy_single_links':auto_count+reviewed_count,
-          'multi_target_source_records':91,'work_link_target_rows':target_rows,'multi_target_rows':multi_rows,
+          'multi_target_source_records':counts['multi'],'work_link_target_rows':target_rows,'multi_target_rows':multi_rows,
           'manual_review_decision_sha256':EXPECTED_DECISION_SHA256,
         })
         db.execute('INSERT OR REPLACE INTO anikoto_match_metadata VALUES (?,?)',
                    ('latest_match_report',json.dumps(report_data,ensure_ascii=False)))
         db.execute('INSERT OR REPLACE INTO anikoto_match_metadata VALUES (?,?)',('manual_review_format_version','1'))
         db.execute('INSERT OR REPLACE INTO anikoto_match_metadata VALUES (?,?)',
-                   ('manual_review_summary',json.dumps({'single':4245,'multi':91,'hold':91,'records':4427,
+                   ('manual_review_summary',json.dumps({**dict(counts),'records':4427,
                     'decision_sha256':EXPECTED_DECISION_SHA256},separators=(',',':'))))
         db.commit()
         if db.execute('PRAGMA quick_check').fetchone()[0]!='ok':
             raise ValueError('Runtime database failed quick_check after manual review')
-        assert reviewed_count==4245
-        assert runtime_works==auto_count+4245+91
+        assert reviewed_count==counts['single']
+        assert runtime_works==auto_count+counts['single']+counts['multi']+extra_nonlegacy
         assert db.execute('SELECT count(*) FROM anikoto_review_state').fetchone()[0]==4427
-        assert db.execute("SELECT count(*) FROM anikoto_review_state WHERE status='multi'").fetchone()[0]==91
-        assert db.execute("SELECT count(*) FROM anikoto_review_state WHERE status='hold'").fetchone()[0]==91
-        assert multi_rows==253
+        assert db.execute("SELECT count(*) FROM anikoto_review_state WHERE status='multi'").fetchone()[0]==counts['multi']
+        assert db.execute("SELECT count(*) FROM anikoto_review_state WHERE status='hold'").fetchone()[0]==counts['hold']
+        assert multi_rows==expected_multi_rows
         assert not db.execute('''SELECT t.anikoto_id FROM anikoto_work_link_targets t LEFT JOIN entries e
               ON e.source=t.target_source AND e.source_record_id=t.target_id WHERE e.source IS NULL LIMIT 1''').fetchall()
         assert not db.execute('''SELECT source_record_id FROM anikoto_catalog EXCEPT
