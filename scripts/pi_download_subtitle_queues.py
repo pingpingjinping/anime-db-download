@@ -29,6 +29,7 @@ from zoneinfo import ZoneInfo
 import requests
 from bs4 import BeautifulSoup
 from anissia_caption_policy import ANISSIA_CAPTION, caption_item
+from anissia_zip_storage import prepare_anissia_files
 
 from subtitle_work_storage import safe_name, work_directory, register_sources, preserve_download, track_download_writes
 from winpng_decode import decode_winpng_bytes
@@ -763,12 +764,14 @@ def maybe_backfill_history(session: requests.Session, state: dict, state_path: P
     for row in sorted(rows, key=lambda value: episode_number(value.get("episode")) or 0):
         destination = historical_destination(item, target, str(row.get("episode") or ""))
         try:
-            files = download_source_page(
-                session,
-                str(row.get("url") or ""),
-                destination,
-                classify_source_url(str(row.get("url") or "")),
-            )
+            with track_download_writes() as writes:
+                files = download_source_page(
+                    session,
+                    str(row.get("url") or ""),
+                    destination,
+                    classify_source_url(str(row.get("url") or "")),
+                )
+                files = prepare_anissia_files(files, writes)
             register_sources({**item, "episode": row.get("episode"), "source_url": row.get("url")}, files, target)
             downloaded += len(files)
             print(
@@ -919,16 +922,21 @@ def download_anissia_drive_folder(session: requests.Session, item: dict, target:
             continue
         supported += 1
         previous = known.get(file_id) or {}
-        relative = str(previous.get("path") or "")
-        parts = Path(relative).parts
-        file_path = target / relative
-        if (previous.get("name") == original_name
-                and len(parts) >= 3 and parts[0] == "anissia_subtitles"
-                and ".." not in parts and file_path.resolve().is_relative_to(root.resolve())
-                and file_path.is_file()
-                and not file_path.is_symlink()
-                and hashlib.sha256(file_path.read_bytes()).hexdigest() == previous.get("sha256")):
-            files.append(file_path)
+        cached = previous.get("files")
+        if not isinstance(cached, list):
+            cached = [{"path": previous.get("path"), "sha256": previous.get("sha256")}]
+        cached_paths = []
+        for record in cached:
+            relative = str(record.get("path") or "")
+            parts = Path(relative).parts
+            file_path = target / relative
+            if (len(parts) >= 3 and parts[0] == "anissia_subtitles" and ".." not in parts
+                    and file_path.resolve().is_relative_to(root.resolve())
+                    and file_path.is_file() and not file_path.is_symlink()
+                    and hashlib.sha256(file_path.read_bytes()).hexdigest() == record.get("sha256")):
+                cached_paths.append(file_path)
+        if previous.get("name") == original_name and cached_paths and len(cached_paths) == len(cached):
+            files.extend(cached_paths)
             continue
 
         episode = drive_folder_episode(name, str(item.get("episode") or "0"))
@@ -936,20 +944,25 @@ def download_anissia_drive_folder(session: requests.Session, item: dict, target:
         if destination.is_symlink():
             raise RuntimeError("Google Drive subtitle destination cannot be a symlink")
         try:
-            downloaded = download_google_drive(
-                session, f"https://drive.google.com/file/d/{file_id}/view",
-                destination, suggested_name=name,
-            )
+            with track_download_writes() as writes:
+                downloaded = download_google_drive(
+                    session, f"https://drive.google.com/file/d/{file_id}/view",
+                    destination, suggested_name=name,
+                )
+                prepared = prepare_anissia_files([downloaded], writes)
             file_item = dict(item)
             file_item["episode"] = episode
-            register_sources(file_item, [downloaded], target)
+            register_sources(file_item, prepared, target)
+            file_records = [{"path": path.relative_to(target).as_posix(),
+                             "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+                            for path in prepared]
             known[file_id] = {
                 "name": original_name,
-                "path": downloaded.relative_to(target).as_posix(),
-                "sha256": hashlib.sha256(downloaded.read_bytes()).hexdigest(),
+                **file_records[0],  # Preserve the legacy single-file cache fields.
+                "files": file_records,
             }
             save_state(state_path, state)  # Commit each good file before the next transfer.
-            files.append(downloaded)
+            files.extend(prepared)
         except Exception as exc:
             errors.append(f"{name} ({file_id}): {exc}")
     if not supported:
@@ -1689,6 +1702,8 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
                          if is_drive_folder else download_anissia(session, item, target))
             else:
                 raise RuntimeError(f"Unknown subtitle source: {source}")
+            if source == "anissia" and not is_drive_folder:
+                files = prepare_anissia_files(files, writes)
         files = list(dict.fromkeys(files))
 
         relative_files = [path.relative_to(target).as_posix() for path in files]

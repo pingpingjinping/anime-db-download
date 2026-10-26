@@ -26,11 +26,15 @@ class DownloadWrites:
 @contextmanager
 def track_download_writes():
     writes = DownloadWrites()
+    parent = _download_writes.get()
     token = _download_writes.set(writes)
     try:
         yield writes
     finally:
         _download_writes.reset(token)
+        if parent is not None:
+            parent.created.update(writes.created)
+            parent.reused.update(writes.reused)
 
 
 def _record_download(path, *, created):

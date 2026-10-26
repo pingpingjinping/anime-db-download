@@ -16,6 +16,8 @@ on:
       - 'scripts/test_erulabo_retry.py'
       - 'scripts/subtitle_work_storage.py'
       - 'scripts/test_anissia_hash_dedup.py'
+      - 'scripts/anissia_zip_storage.py'
+      - 'scripts/test_anissia_zip_storage.py'
       - 'scripts/test_subtitle_work_storage.py'
       - 'scripts/write_weekly_dashboard.py'
       - 'scripts/test_write_weekly_dashboard.py'
@@ -57,6 +59,7 @@ jobs:
           python scripts/test_subtitle_queue_metadata.py
           python -m unittest discover -s scripts -p 'test_erulabo_retry.py' -v
           python -m unittest discover -s scripts -p 'test_anissia_hash_dedup.py' -v
+          python -m unittest discover -s scripts -p 'test_anissia_zip_storage.py' -v
           python -m unittest discover -s scripts -p 'test_subtitle_work_storage.py' -v
           python -m unittest discover -s scripts -p 'test_write_weekly_dashboard.py' -v
           python -m unittest discover -s scripts -p 'test_anissia_caption_policy.py' -v

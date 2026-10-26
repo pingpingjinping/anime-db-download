@@ -26,6 +26,7 @@ import subprocess
 from pi_download_subtitle_queues import append_failure, safe_name, save_state
 from subtitle_queue_metadata import build_download_metadata, queue_cache_cleanup
 from subtitle_work_storage import work_directory, register_sources, preserve_download, track_download_writes
+from anissia_zip_storage import prepare_anissia_files
 
 STATE_FILE = Path.home() / ".local/state/anime-db-download/subtitle-queue-state.json"
 PROFILE_DIR = Path.home() / ".local/share/anime-db-download/erulabo-browser-profile"
@@ -243,21 +244,22 @@ def finalize_erulabo_download(
     # Reuse an existing hash anywhere in this work, removing only the new copy.
     with track_download_writes() as writes:
         final_path = preserve_download(downloaded_file, destination / downloaded_file.name)
+        files = prepare_anissia_files([final_path], writes)
 
     # 2. 메타데이터 구성 및 success 기록
     metadata = build_download_metadata(
         item,
-        [final_path],
+        files,
         target,
     )
-    register_sources(item, [final_path], target)
-    queue_cache_cleanup(item, [final_path], target)
+    register_sources(item, files, target)
+    queue_cache_cleanup(item, files, target)
     state.setdefault("success", {})[item_id] = {
         **metadata,
         "source": item.get("source"),
         "source_url": item.get("source_url"),
         "item": item,
-        "new_files": [path.relative_to(target).as_posix() for path in writes.created],
+        "new_files": [path.relative_to(target).as_posix() for path in files if path in writes.created],
         "completed_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
     }
 
@@ -265,7 +267,7 @@ def finalize_erulabo_download(
     state.get("erulabo_pending", {}).pop(item_id, None)
     save_state(state_path, state)
 
-    return final_path
+    return files[0]
 
 
 def process_item(page, item_id: str, item: dict, staging_dir: Path, timeout_sec: int) -> Path | None:
