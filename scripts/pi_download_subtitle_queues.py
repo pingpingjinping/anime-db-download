@@ -31,7 +31,7 @@ from bs4 import BeautifulSoup
 from anissia_caption_policy import ANISSIA_CAPTION, caption_item
 from anissia_zip_storage import prepare_anissia_files
 
-from subtitle_work_storage import safe_name, work_directory, register_sources, preserve_download, track_download_writes
+from subtitle_work_storage import safe_name, work_directory, register_sources, preserve_download, track_download_writes, stored_file_sha256
 from winpng_decode import decode_winpng_bytes
 from tistory_winpng_jamaker import convert_tistory_jmks
 
@@ -933,7 +933,7 @@ def download_anissia_drive_folder(session: requests.Session, item: dict, target:
             if (len(parts) >= 3 and parts[0] == "anissia_subtitles" and ".." not in parts
                     and file_path.resolve().is_relative_to(root.resolve())
                     and file_path.is_file() and not file_path.is_symlink()
-                    and hashlib.sha256(file_path.read_bytes()).hexdigest() == record.get("sha256")):
+                    and stored_file_sha256(file_path) == record.get("sha256")):
                 cached_paths.append(file_path)
         if previous.get("name") == original_name and cached_paths and len(cached_paths) == len(cached):
             files.extend(cached_paths)
@@ -954,7 +954,7 @@ def download_anissia_drive_folder(session: requests.Session, item: dict, target:
             file_item["episode"] = episode
             register_sources(file_item, prepared, target)
             file_records = [{"path": path.relative_to(target).as_posix(),
-                             "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+                             "sha256": stored_file_sha256(path)}
                             for path in prepared]
             known[file_id] = {
                 "name": original_name,

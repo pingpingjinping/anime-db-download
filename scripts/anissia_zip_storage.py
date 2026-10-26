@@ -1,15 +1,12 @@
 """Unpack only incoming Anissia ZIPs; compare older ZIP members read-only."""
-import os
-import hashlib
 import re
 import stat
 import tempfile
 import zipfile
 from pathlib import Path
 
-from subtitle_work_storage import _anissia_work_root, file_sha256, preserve_download, safe_name
+from subtitle_work_storage import _anissia_work_root, preserve_download, safe_name, work_hash_index
 
-SUBTITLES = {'.ass', '.ssa', '.smi', '.srt', '.vtt'}
 MAX_MEMBERS = 5000
 MAX_OUTPUT_FILES = 500
 MAX_EXPANDED_BYTES = 256 * 1024 * 1024
@@ -79,47 +76,12 @@ def stage_archive(archive_path, staging, budget, prefix=Path(), depth=0):
 class ExistingZipIndex:
     """A duplicate may keep referring to an older ZIP without moving that ZIP."""
     def __init__(self, root, excluded):
-        self.archives = []
-        self.hashes = {}
-        for directory, folders, names in os.walk(root, followlinks=False):
-            folders[:] = sorted(name for name in folders if not Path(directory, name).is_symlink())
-            for name in sorted(names):
-                path = Path(directory, name)
-                if path.suffix.lower() == '.zip' and path not in excluded and not path.is_symlink():
-                    self.archives.append(path)
+        self.root = root
+        self.excluded = excluded
 
     def match(self, path):
-        if path.suffix.lower() not in SUBTITLES:
-            return None
-        size = path.stat().st_size
-        digest = None
-        for archive_path in self.archives:
-            try:
-                signature = archive_path.stat()
-                with zipfile.ZipFile(archive_path) as archive:
-                    infos = archive.infolist()
-                    if len(infos) > MAX_MEMBERS:
-                        continue
-                    for info in infos:
-                        if info.is_dir() or info.file_size != size or info.flag_bits & 1:
-                            continue
-                        if member_path(info).suffix.lower() not in SUBTITLES:
-                            continue
-                        key = (archive_path, signature.st_mtime_ns, signature.st_size, info.header_offset)
-                        if key not in self.hashes:
-                            # Same byte length as an incoming, already bounded file.
-                            value = hashlib.sha256()
-                            with archive.open(info) as source:
-                                for chunk in iter(lambda: source.read(256 * 1024), b''):
-                                    value.update(chunk)
-                            self.hashes[key] = value.hexdigest()
-                        digest = digest or file_sha256(path)
-                        if self.hashes[key] == digest:
-                            return archive_path
-            except (OSError, ValueError, RuntimeError, zipfile.BadZipFile, NotImplementedError):
-                # An unreadable historical archive remains unchanged.
-                continue
-        return None
+        with work_hash_index(self.root) as index:
+            return index.match_zip_member(path, self.excluded)
 
 
 def _keep_file(temporary, destination, index, writes):

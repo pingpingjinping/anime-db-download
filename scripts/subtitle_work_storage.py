@@ -1,7 +1,6 @@
 """Title folders with exact, per-file source identities; never rename originals."""
 import fcntl
 import errno
-import hashlib
 import json
 import os
 import re
@@ -11,6 +10,7 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass, field
 from pathlib import Path
+from subtitle_hash_index import WorkHashIndex, sha256_file
 
 MANIFEST = '.weekly-subtitle-sources.json'
 LOCAL_INDEX_CHANGES = '.local-subtitle-search-updates.jsonl'
@@ -21,12 +21,15 @@ _download_writes = ContextVar('subtitle_download_writes', default=None)
 class DownloadWrites:
     created: set[Path] = field(default_factory=set)
     reused: set[Path] = field(default_factory=set)
+    indexes: dict = field(default_factory=dict)
 
 
 @contextmanager
 def track_download_writes():
     writes = DownloadWrites()
     parent = _download_writes.get()
+    if parent is not None:
+        writes.indexes = parent.indexes
     token = _download_writes.set(writes)
     try:
         yield writes
@@ -35,6 +38,32 @@ def track_download_writes():
         if parent is not None:
             parent.created.update(writes.created)
             parent.reused.update(writes.reused)
+        else:
+            for index in writes.indexes.values():
+                _save_hash_index(index)
+
+
+def _save_hash_index(index):
+    try:
+        index.save()
+    except (OSError, ValueError) as exc:
+        # This cache is disposable; a cache write error must not undo downloads.
+        print(f'Warning: subtitle hash index save deferred: {exc}')
+
+
+@contextmanager
+def work_hash_index(root):
+    writes = _download_writes.get()
+    if writes is not None:
+        if root not in writes.indexes:
+            writes.indexes[root] = WorkHashIndex(root)
+        yield writes.indexes[root]
+    else:
+        index = WorkHashIndex(root)
+        try:
+            yield index
+        finally:
+            _save_hash_index(index)
 
 
 def _record_download(path, *, created):
@@ -45,11 +74,15 @@ def _record_download(path, *, created):
 
 
 def file_sha256(path):
-    digest = hashlib.sha256()
-    with path.open('rb') as handle:
-        for chunk in iter(lambda: handle.read(256 * 1024), b''):
-            digest.update(chunk)
-    return digest.hexdigest()
+    return sha256_file(path)
+
+
+def stored_file_sha256(path):
+    root = _anissia_work_root(path)
+    if root is None:
+        return file_sha256(path)
+    with work_hash_index(root) as index:
+        return index.digest(path)
 
 
 def _anissia_work_root(destination):
@@ -62,27 +95,6 @@ def _anissia_work_root(destination):
                 if ancestor == parent.parent:
                     break
             return parent
-    return None
-
-
-def _identical_in_work(temporary, destination, digest):
-    root = _anissia_work_root(destination)
-    # Jamaker conversion inputs have their own temporary-file cleanup lifecycle.
-    if root is None or destination.suffix.lower() == '.jmk':
-        return None
-    size = temporary.stat().st_size
-    for directory, folders, names in os.walk(root, followlinks=False):
-        folders[:] = sorted(name for name in folders
-                            if not Path(directory, name).is_symlink())
-        for name in sorted(names):
-            candidate = Path(directory, name)
-            # In-progress transfers and internal metadata are not usable subtitles.
-            if (candidate == temporary or name.startswith('.winpng-') or name.endswith(('.part', '.tmp'))
-                    or candidate.suffix.lower() == '.jmk'
-                    or candidate.is_symlink() or not candidate.is_file()):
-                continue
-            if candidate.stat().st_size == size and file_sha256(candidate) == digest:
-                return candidate
     return None
 
 
@@ -142,7 +154,7 @@ def work_directory(item, target):
 
 
 def register_sources(item, files, target):
-    with (target / ".weekly-subtitle-sources.lock").open("a") as lock:
+    with track_download_writes(), (target / ".weekly-subtitle-sources.lock").open("a") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         return _register_sources(item, files, target)
 
@@ -154,7 +166,7 @@ def _register_sources(item, files, target):
         relative = file.relative_to(target).as_posix()
         if not relative.startswith(source + '_subtitles/') or '..' in Path(relative).parts:
             raise ValueError('Invalid downloaded source path')
-        digest = hashlib.sha256(file.read_bytes()).hexdigest()
+        digest = stored_file_sha256(file)
         record = manifest['files'].get(relative, {})
         if record and record.get('sha256') != digest:
             raise ValueError('An existing registered subtitle was changed')
@@ -187,18 +199,29 @@ def preserve_download(temporary, destination):
     deleted, renamed or consolidated. ZIPs are compared as complete raw files.
     """
     digest = file_sha256(temporary)
-    identical = _identical_in_work(temporary, destination, digest)
-    if identical is not None:
-        temporary.unlink()
-        print(f'[=] SHA-256 duplicate: {destination} -> reuse {identical}')
-        return _record_download(identical, created=False)
+    root = _anissia_work_root(destination)
+    if root is not None and destination.suffix.lower() != '.jmk':
+        with work_hash_index(root) as index:
+            identical = index.find_identical(temporary, digest)
+            if identical is not None:
+                temporary.unlink()
+                print(f'[=] SHA-256 duplicate: {destination} -> reuse {identical}')
+                return _record_download(identical, created=False)
+            saved = _preserve_filename(temporary, destination, digest, index)
+            index.remember(saved, digest)
+            return saved
+    return _preserve_filename(temporary, destination, digest)
+
+
+def _preserve_filename(temporary, destination, digest, index=None):
+    existing_digest = index.digest if index is not None else file_sha256
     if destination.exists():
-        if file_sha256(destination) == digest:
+        if existing_digest(destination) == digest:
             temporary.unlink()
             return _record_download(destination, created=False)
         destination = destination.with_name(f'{destination.stem} [{digest[:16]}]{destination.suffix}')
         if destination.exists():
-            if file_sha256(destination) != digest:
+            if existing_digest(destination) != digest:
                 raise ValueError('Subtitle filename digest collision')
             temporary.unlink()
             return _record_download(destination, created=False)
