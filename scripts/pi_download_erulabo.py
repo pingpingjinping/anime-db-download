@@ -8,6 +8,7 @@ Workflow:
 4. Moves the file into the canonical Anissia folder structure.
 5. Records metadata under state['success'] and removes it from state['erulabo_pending'].
 6. Saves state.json.
+7. After the first pass, restarts Chromium once and retries only failed items.
 """
 from __future__ import annotations
 
@@ -15,6 +16,7 @@ import argparse
 import json
 import os
 import shutil
+import signal
 import time
 import urllib.request
 from pathlib import Path
@@ -140,6 +142,50 @@ def ensure_chromium(display: str, profile: Path, cdp_port: int) -> None:
         env=env,
     )
     wait_until(lambda: cdp_ready(cdp_port), 60, "Chromium CDP")
+
+
+def chromium_pids(profile: Path, cdp_port: int) -> list[int]:
+    """Find only the main Chromium process using this exact profile and port."""
+    required = {
+        f"--user-data-dir={profile}",
+        f"--remote-debugging-port={cdp_port}",
+    }
+    pids = []
+    for entry in Path("/proc").iterdir():
+        if not entry.name.isdigit():
+            continue
+        try:
+            arguments = entry.joinpath("cmdline").read_bytes().decode().split("\0")
+        except (OSError, UnicodeError):
+            continue
+        if required.issubset(arguments) and not any(arg.startswith("--type=") for arg in arguments):
+            pids.append(int(entry.name))
+    return pids
+
+
+def stop_chromium(profile: Path, cdp_port: int) -> None:
+    pids = chromium_pids(profile, cdp_port)
+    if not pids and cdp_ready(cdp_port):
+        raise RuntimeError("CDP 포트의 크롬이 지정한 자막 프로필과 일치하지 않습니다.")
+
+    def stopped() -> bool:
+        return not chromium_pids(profile, cdp_port) and not cdp_ready(cdp_port)
+
+    for pid in pids:
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+    try:
+        wait_until(stopped, 10, "Erulabo Chromium 종료")
+    except RuntimeError:
+        # Re-read exact process arguments before escalating; never kill by name.
+        for pid in chromium_pids(profile, cdp_port):
+            try:
+                os.kill(pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+        wait_until(stopped, 5, "Erulabo Chromium 강제 종료")
 
 
 def get_pending_list(state: dict) -> list[tuple[str, dict]]:
@@ -289,6 +335,82 @@ def process_item(page, item_id: str, item: dict, staging_dir: Path, timeout_sec:
         return None
 
 
+def download_pass(page, items: list[tuple[str, dict]], state: dict, args) -> list[tuple[str, dict]]:
+    failed = []
+    for idx, (item_id, item) in enumerate(items, 1):
+        print(f"\n==================== [{idx}/{len(items)}] ====================")
+        try:
+            downloaded_temp_file = process_item(
+                page=page,
+                item_id=item_id,
+                item=item,
+                staging_dir=args.staging_dir,
+                timeout_sec=args.timeout,
+            )
+        except Exception as exc:
+            # A closed page or another browser error must not skip later items.
+            print(f"[!] {item_id}: 브라우저 처리 오류: {exc}")
+            downloaded_temp_file = None
+
+        if downloaded_temp_file:
+            # Finalization errors propagate: a moved file must not be downloaded again.
+            final_path = finalize_erulabo_download(
+                state=state,
+                state_path=args.state,
+                item_id=item_id,
+                item=item,
+                downloaded_file=downloaded_temp_file,
+                target=args.target,
+            )
+            print("[+] [성공] Erulabo 자막 반영 완료")
+            print(f"    파일: {final_path}")
+            print("    상태: success 기록 + erulabo_pending 삭제")
+        else:
+            failed.append((item_id, item))
+            print(f"[!] {item_id} 다운로드 실패: 큐에 그대로 보존합니다.")
+
+        # Keep the cooldown working even when the page/browser disconnected.
+        time.sleep(5)
+    return failed
+
+
+def record_final_failures(
+    items: list[tuple[str, dict]],
+    error: str = "Erulabo download failed after browser restart retry",
+) -> None:
+    for _, item in items:
+        append_failure(
+            item,
+            error,
+            "erulabo_download_failed",
+        )
+
+
+def download_pending(playwright, state: dict, args, pending_items: list[tuple[str, dict]]) -> None:
+    browser = playwright.chromium.connect_over_cdp(f"http://127.0.0.1:{args.cdp_port}")
+    context = browser.contexts[0]
+    page = context.pages[0] if context.pages else context.new_page()
+    print("\n=== Erulabo 첫 순회 ===")
+    failed = download_pass(page, pending_items, state, args)
+    if not failed:
+        return
+
+    print(f"\n=== 첫 순회 완료: 실패 {len(failed)}개, 크롬 재시작 후 1회 재시도 ===")
+    try:
+        stop_chromium(args.profile, args.cdp_port)
+        ensure_chromium(args.display, args.profile, args.cdp_port)
+        browser = playwright.chromium.connect_over_cdp(f"http://127.0.0.1:{args.cdp_port}")
+        # Use a fresh tab even if Chromium restores the previous session's tabs.
+        page = browser.contexts[0].new_page()
+    except Exception as exc:
+        record_final_failures(failed, f"Erulabo browser restart failed: {exc}")
+        raise
+
+    remaining = download_pass(page, failed, state, args)
+    record_final_failures(remaining)
+    print(f"\n재시도 결과: 성공 {len(failed) - len(remaining)}개, 대기 유지 {len(remaining)}개")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--state", type=Path, default=STATE_FILE)
@@ -318,43 +440,7 @@ def main() -> None:
         raise RuntimeError("Playwright가 설치되어 있지 않습니다.") from exc
 
     with sync_playwright() as playwright:
-        browser = playwright.chromium.connect_over_cdp(f"http://127.0.0.1:{args.cdp_port}")
-        context = browser.contexts[0]
-        page = context.pages[0] if context.pages else context.new_page()
-
-        for idx, (item_id, item) in enumerate(pending_items, 1):
-            print(f"\n==================== [{idx}/{len(pending_items)}] ====================")
-            downloaded_temp_file = process_item(
-                page=page,
-                item_id=item_id,
-                item=item,
-                staging_dir=args.staging_dir,
-                timeout_sec=args.timeout,
-            )
-
-            if downloaded_temp_file:
-                # 파일 이동 -> success 기록 -> pending 제거 -> state.json 저장
-                final_path = finalize_erulabo_download(
-                    state=state,
-                    state_path=args.state,
-                    item_id=item_id,
-                    item=item,
-                    downloaded_file=downloaded_temp_file,
-                    target=args.target,
-                )
-                print(f"[+] [성공] Erulabo 자막 반영 완료")
-                print(f"    파일: {final_path}")
-                print(f"    상태: success 기록 + erulabo_pending 삭제")
-            else:
-                append_failure(
-                    item,
-                    "Erulabo download failed or timed out",
-                    "erulabo_download_failed",
-                )
-                print(f"[!] {item_id} 다운로드 실패: 큐에 그대로 보존합니다.")
-
-            # 다음 항목으로 넘어가기 전 안전 쿨타임
-            page.wait_for_timeout(5000)
+        download_pending(playwright, state, args, pending_items)
 
     print("\n모든 대기열 처리가 완료되었습니다.")
 
