@@ -25,7 +25,7 @@ import subprocess
 # 기존 프로젝트 모듈 import
 from pi_download_subtitle_queues import append_failure, safe_name, save_state
 from subtitle_queue_metadata import build_download_metadata, queue_cache_cleanup
-from subtitle_work_storage import work_directory, register_sources
+from subtitle_work_storage import work_directory, register_sources, preserve_download, track_download_writes
 
 STATE_FILE = Path.home() / ".local/state/anime-db-download/subtitle-queue-state.json"
 PROFILE_DIR = Path.home() / ".local/share/anime-db-download/erulabo-browser-profile"
@@ -240,10 +240,9 @@ def finalize_erulabo_download(
 
     destination = erulabo_destination(item, target)
     destination.mkdir(parents=True, exist_ok=True)
-    final_path = collision_safe_path(destination / downloaded_file.name)
-
-    # 1. 파일 이동 (이동 실패 시 에러가 나면서 pending이 보존됨)
-    shutil.move(str(downloaded_file), str(final_path))
+    # Reuse an existing hash anywhere in this work, removing only the new copy.
+    with track_download_writes() as writes:
+        final_path = preserve_download(downloaded_file, destination / downloaded_file.name)
 
     # 2. 메타데이터 구성 및 success 기록
     metadata = build_download_metadata(
@@ -253,7 +252,14 @@ def finalize_erulabo_download(
     )
     register_sources(item, [final_path], target)
     queue_cache_cleanup(item, [final_path], target)
-    state.setdefault("success", {})[item_id] = metadata
+    state.setdefault("success", {})[item_id] = {
+        **metadata,
+        "source": item.get("source"),
+        "source_url": item.get("source_url"),
+        "item": item,
+        "new_files": [path.relative_to(target).as_posix() for path in writes.created],
+        "completed_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+    }
 
     # 3. 마지막으로 pending 삭제 및 상태 디스크 동기화
     state.get("erulabo_pending", {}).pop(item_id, None)

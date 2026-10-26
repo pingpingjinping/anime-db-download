@@ -14,6 +14,11 @@ on:
       - 'scripts/pi_download_subtitle_queues.py'
       - 'scripts/pi_download_erulabo.py'
       - 'scripts/test_erulabo_retry.py'
+      - 'scripts/subtitle_work_storage.py'
+      - 'scripts/test_anissia_hash_dedup.py'
+      - 'scripts/test_subtitle_work_storage.py'
+      - 'scripts/write_weekly_dashboard.py'
+      - 'scripts/test_write_weekly_dashboard.py'
       - 'scripts/subtitle_queue_metadata.py'
       - 'scripts/test_subtitle_queue_metadata.py'
       - 'scripts/pi_weekly_subtitle_sync.sh'
@@ -51,6 +56,9 @@ jobs:
             scripts/pi_download_erulabo.py
           python scripts/test_subtitle_queue_metadata.py
           python -m unittest discover -s scripts -p 'test_erulabo_retry.py' -v
+          python -m unittest discover -s scripts -p 'test_anissia_hash_dedup.py' -v
+          python -m unittest discover -s scripts -p 'test_subtitle_work_storage.py' -v
+          python -m unittest discover -s scripts -p 'test_write_weekly_dashboard.py' -v
           python -m unittest discover -s scripts -p 'test_anissia_caption_policy.py' -v
           python -m unittest discover -s scripts -p 'test_anissia_historical_activity.py' -v
           bash -n scripts/pi_weekly_subtitle_sync.sh

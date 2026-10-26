@@ -1,14 +1,85 @@
 """Title folders with exact, per-file source identities; never rename originals."""
 import fcntl
+import errno
 import hashlib
 import json
 import os
 import re
+import shutil
 import unicodedata
+from contextlib import contextmanager
+from contextvars import ContextVar
+from dataclasses import dataclass, field
 from pathlib import Path
 
 MANIFEST = '.weekly-subtitle-sources.json'
 LOCAL_INDEX_CHANGES = '.local-subtitle-search-updates.jsonl'
+_download_writes = ContextVar('subtitle_download_writes', default=None)
+
+
+@dataclass
+class DownloadWrites:
+    created: set[Path] = field(default_factory=set)
+    reused: set[Path] = field(default_factory=set)
+
+
+@contextmanager
+def track_download_writes():
+    writes = DownloadWrites()
+    token = _download_writes.set(writes)
+    try:
+        yield writes
+    finally:
+        _download_writes.reset(token)
+
+
+def _record_download(path, *, created):
+    writes = _download_writes.get()
+    if writes is not None:
+        (writes.created if created else writes.reused).add(path)
+    return path
+
+
+def file_sha256(path):
+    digest = hashlib.sha256()
+    with path.open('rb') as handle:
+        for chunk in iter(lambda: handle.read(256 * 1024), b''):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _anissia_work_root(destination):
+    for parent in destination.parents:
+        if parent.parent.name == 'anissia_subtitles':
+            # Never follow a nested folder link outside the work's own tree.
+            for ancestor in destination.parents:
+                if ancestor.is_symlink():
+                    raise ValueError('Subtitle work path cannot contain a symlink')
+                if ancestor == parent.parent:
+                    break
+            return parent
+    return None
+
+
+def _identical_in_work(temporary, destination, digest):
+    root = _anissia_work_root(destination)
+    # Jamaker conversion inputs have their own temporary-file cleanup lifecycle.
+    if root is None or destination.suffix.lower() == '.jmk':
+        return None
+    size = temporary.stat().st_size
+    for directory, folders, names in os.walk(root, followlinks=False):
+        folders[:] = sorted(name for name in folders
+                            if not Path(directory, name).is_symlink())
+        for name in sorted(names):
+            candidate = Path(directory, name)
+            # In-progress transfers and internal metadata are not usable subtitles.
+            if (candidate == temporary or name.startswith('.winpng-') or name.endswith(('.part', '.tmp'))
+                    or candidate.suffix.lower() == '.jmk'
+                    or candidate.is_symlink() or not candidate.is_file()):
+                continue
+            if candidate.stat().st_size == size and file_sha256(candidate) == digest:
+                return candidate
+    return None
 
 
 def safe_name(value: str, limit: int = 160) -> str:
@@ -106,17 +177,32 @@ def _register_sources(item, files, target):
 
 
 def preserve_download(temporary, destination):
-    """Reuse identical bytes; keep different same-name variants without overwriting."""
-    digest = hashlib.sha256(temporary.read_bytes()).hexdigest()
+    """Reuse identical bytes within one Anissia work, regardless of filename.
+
+    Only the incoming temporary copy is removed. Existing files/paths are never
+    deleted, renamed or consolidated. ZIPs are compared as complete raw files.
+    """
+    digest = file_sha256(temporary)
+    identical = _identical_in_work(temporary, destination, digest)
+    if identical is not None:
+        temporary.unlink()
+        print(f'[=] SHA-256 duplicate: {destination} -> reuse {identical}')
+        return _record_download(identical, created=False)
     if destination.exists():
-        if hashlib.sha256(destination.read_bytes()).hexdigest() == digest:
+        if file_sha256(destination) == digest:
             temporary.unlink()
-            return destination
+            return _record_download(destination, created=False)
         destination = destination.with_name(f'{destination.stem} [{digest[:16]}]{destination.suffix}')
         if destination.exists():
-            if hashlib.sha256(destination.read_bytes()).hexdigest() != digest:
+            if file_sha256(destination) != digest:
                 raise ValueError('Subtitle filename digest collision')
             temporary.unlink()
-            return destination
-    temporary.replace(destination)
-    return destination
+            return _record_download(destination, created=False)
+    try:
+        temporary.replace(destination)
+    except OSError as exc:
+        if exc.errno != errno.EXDEV:
+            raise
+        # Erulabo stages in /tmp, which may be a separate filesystem on the Pi.
+        shutil.move(str(temporary), str(destination))
+    return _record_download(destination, created=True)

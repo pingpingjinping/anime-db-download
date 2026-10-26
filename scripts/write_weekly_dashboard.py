@@ -55,7 +55,9 @@ def item_lookup(*states: dict) -> dict[str, dict]:
 
 
 def files_from_success(row: dict) -> list[str]:
-    raw = row.get("files")
+    # State keeps canonical references to reused files; only newly kept bytes
+    # belong in this run's download list. Legacy records still use `files`.
+    raw = row.get("new_files", row.get("files"))
     if not isinstance(raw, list):
         return []
     out: list[str] = []
@@ -152,7 +154,7 @@ def main() -> None:
         download_record(str(item_id), row, lookup.get(str(item_id), {}), args.finished_at)
         for item_id in new_ids
         for row in [after_success.get(item_id)]
-        if isinstance(row, dict)
+        if isinstance(row, dict) and ("new_files" not in row or files_from_success(row))
     ]
     downloads.sort(key=lambda row: (row.get("completedAt") or "", row.get("title") or ""), reverse=True)
 

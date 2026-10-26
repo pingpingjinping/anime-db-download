@@ -30,7 +30,7 @@ import requests
 from bs4 import BeautifulSoup
 from anissia_caption_policy import ANISSIA_CAPTION, caption_item
 
-from subtitle_work_storage import safe_name, work_directory, register_sources, preserve_download
+from subtitle_work_storage import safe_name, work_directory, register_sources, preserve_download, track_download_writes
 from winpng_decode import decode_winpng_bytes
 from tistory_winpng_jamaker import convert_tistory_jmks
 
@@ -924,7 +924,7 @@ def download_anissia_drive_folder(session: requests.Session, item: dict, target:
         file_path = target / relative
         if (previous.get("name") == original_name
                 and len(parts) >= 3 and parts[0] == "anissia_subtitles"
-                and ".." not in parts and file_path.parent.resolve() == root.resolve()
+                and ".." not in parts and file_path.resolve().is_relative_to(root.resolve())
                 and file_path.is_file()
                 and not file_path.is_symlink()
                 and hashlib.sha256(file_path.read_bytes()).hexdigest() == previous.get("sha256")):
@@ -1681,13 +1681,15 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
 
     try:
         source = item.get("source")
-        if source == "aniall":
-            files = download_aniall(session, item, target)
-        elif source == "anissia":
-            files = (download_anissia_drive_folder(session, item, target, state, state_path)
-                     if is_drive_folder else download_anissia(session, item, target))
-        else:
-            raise RuntimeError(f"Unknown subtitle source: {source}")
+        with track_download_writes() as writes:
+            if source == "aniall":
+                files = download_aniall(session, item, target)
+            elif source == "anissia":
+                files = (download_anissia_drive_folder(session, item, target, state, state_path)
+                         if is_drive_folder else download_anissia(session, item, target))
+            else:
+                raise RuntimeError(f"Unknown subtitle source: {source}")
+        files = list(dict.fromkeys(files))
 
         relative_files = [path.relative_to(target).as_posix() for path in files]
         if is_drive_folder and item_id in state["success"] and sorted(relative_files) == sorted(state["success"][item_id].get("files", [])):
@@ -1719,11 +1721,19 @@ def process_item(session: requests.Session, state: dict, state_path: Path,
             "verification": metadata["verification"],
             "completed_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
         }
+        if writes.created or writes.reused:
+            state["success"][item_id]["new_files"] = [
+                path.relative_to(target).as_posix() for path in files if path in writes.created
+            ]
         state["retry"].pop(item_id, None)
         state["waiting_url"].pop(item_id, None)
         state["erulabo_pending"].pop(item_id, None)
         save_state(state_path, state)
-        print(f"[+] {item_id}: {len(files)} file(s)")
+        if writes.created or writes.reused:
+            print(f"[+] {item_id}: {len(state['success'][item_id]['new_files'])} new file(s), "
+                  f"{len(files) - len(state['success'][item_id]['new_files'])} reused")
+        else:
+            print(f"[+] {item_id}: {len(files)} file(s)")
         return True
     except Exception as exc:
         previous = state["retry"].get(item_id) or {}
@@ -1882,4 +1892,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
