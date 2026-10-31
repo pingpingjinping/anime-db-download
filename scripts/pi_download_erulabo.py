@@ -13,6 +13,8 @@ Workflow:
 from __future__ import annotations
 
 import argparse
+import fcntl
+from contextlib import contextmanager
 import json
 import os
 import shutil
@@ -270,10 +272,25 @@ def finalize_erulabo_download(
     return files[0]
 
 
-def process_item(page, item_id: str, item: dict, staging_dir: Path, timeout_sec: int) -> Path | None:
+@contextmanager
+def browser_lock(profile: Path):
+    """The weekly CLI, web worker and weekly cleanup share this browser lock."""
+    profile.parent.mkdir(parents=True, exist_ok=True)
+    with Path(str(profile) + ".lock").open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(lock, fcntl.LOCK_UN)
+
+
+def process_item(page, item_id: str, item: dict, staging_dir: Path, timeout_sec: int,
+                 progress=None) -> Path | None:
     url = str(item.get("source_url") or "").strip()
     print(f"\n[>] 처리 시작: {item_id}")
     print(f"    URL: {url}")
+    if progress:
+        progress("opening")
 
     try:
         page.goto(url, wait_until="domcontentloaded", timeout=60_000)
@@ -291,6 +308,8 @@ def process_item(page, item_id: str, item: dict, staging_dir: Path, timeout_sec:
         return None
 
     # 1. 가운데 정렬 이동
+    if progress:
+        progress("preparing")
     button.evaluate(
         """el => el.scrollIntoView({
             behavior: "instant",
@@ -322,6 +341,8 @@ def process_item(page, item_id: str, item: dict, staging_dir: Path, timeout_sec:
 
     # 4. 1회 클릭 및 임시 디렉토리로 다운로드 수신
     try:
+        if progress:
+            progress("downloading")
         print(f"    [*] 마우스 1회 클릭 및 다운로드 대기 중 (최대 {timeout_sec}초)...")
         with page.expect_download(timeout=timeout_sec * 1000) as download_info:
             page.mouse.click(center_x, center_y)
@@ -439,16 +460,16 @@ def main() -> None:
     print(f"총 대기 항목 수: {len(pending_items)}개")
     print(f"최종 자막 데이터 폴더: {args.target}")
 
-    ensure_xvfb(args.display)
-    ensure_chromium(args.display, args.profile, args.cdp_port)
-
     try:
         from playwright.sync_api import sync_playwright
     except ImportError as exc:
         raise RuntimeError("Playwright가 설치되어 있지 않습니다.") from exc
 
-    with sync_playwright() as playwright:
-        download_pending(playwright, state, args, pending_items)
+    with browser_lock(args.profile):
+        ensure_xvfb(args.display)
+        ensure_chromium(args.display, args.profile, args.cdp_port)
+        with sync_playwright() as playwright:
+            download_pending(playwright, state, args, pending_items)
 
     print("\n모든 대기열 처리가 완료되었습니다.")
 
