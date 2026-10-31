@@ -80,9 +80,16 @@ close_erulabo_chromium_after_grace() {
   echo "Erulabo Chromium is still running; closing it in $ERULABO_BROWSER_GRACE_SECONDS second(s)."
   sleep "$ERULABO_BROWSER_GRACE_SECONDS"
 
+  # A requested web download may be using this persistent browser. Wait for
+  # its critical section before closing it; the next job can start it again.
+  mkdir -p "$(dirname "$ERULABO_PROFILE")"
+  exec 9>"${ERULABO_PROFILE}.lock"
+  flock 9
+
   mapfile -t pids < <(erulabo_chromium_pids)
   if (( ${#pids[@]} == 0 )); then
     echo "Erulabo Chromium already exited."
+    exec 9>&-
     return
   fi
 
@@ -94,6 +101,7 @@ close_erulabo_chromium_after_grace() {
     kill -KILL "${pids[@]}" 2>/dev/null || true
   fi
   echo "Erulabo Chromium closed."
+  exec 9>&-
 }
 
 refresh_subtitle_name_index() {

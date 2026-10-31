@@ -1,0 +1,19 @@
+[Unit]
+Description=Receive requested Erulabo subtitles for the anime web player
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/anime-db-download
+EnvironmentFile=-/home/pi/.config/streaming-project/anime-db.env
+UMask=0022
+ExecStart=/home/pi/.local/share/anime-db-download/venv/bin/python /home/pi/anime-db-download/scripts/pi_erulabo_web_worker.py
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+
+[Install]
+WantedBy=multi-user.target
